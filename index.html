@@ -2,9 +2,11 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
 <title>Lock Screen</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
@@ -13,18 +15,14 @@
   --ui-bottom: env(safe-area-inset-bottom, 0px);
   --ui-left: env(safe-area-inset-left, 0px);
   --ui-right: env(safe-area-inset-right, 0px);
+  --icon-opacity: 1;
 }
-html,body { width:100%; height:100vh; height:100dvh; overflow:hidden; font-family:-apple-system,'SF Pro Display',sans-serif; background:#000; }
-
-#device { position:relative; width:100%; height:100vh; height:100dvh; margin:0 auto; overflow:hidden; background:#000; }
-#device.preset { box-shadow:0 0 0 100vmax #000; }
-
+html,body { width:100%; height:100%; min-height:100vh; min-height:100dvh; overflow:hidden; font-family:-apple-system,'SF Pro Display',sans-serif; background:#000; position:fixed; inset:0; }
+#device { position:fixed; inset:0; width:100vw; height:100vh; height:100dvh; margin:0 auto; overflow:hidden; background:#000; }
 .wallpaper { position:absolute; inset:0; background:#000; background-size:cover; background-position:center; z-index:0; transition:background 0.4s ease; }
 #bgInput { display:none; }
-
 .lock-screen { position:relative; width:100%; height:100%; z-index:2; display:flex; flex-direction:column; align-items:center; padding-top:var(--ui-top); }
 body.unlocked .lock-screen { display:none; }
-
 .top-label { margin-top:22%; text-align:center; color:white; font-size:16px; font-weight:400; line-height:1.5; text-shadow:0 1px 6px rgba(0,0,0,0.5); padding:0 40px; }
 .dots-container { display:flex; gap:18px; margin-top:18px; height:14px; align-items:center; }
 .dot { width:13px; height:13px; border-radius:50%; border:1.5px solid rgba(255,255,255,0.85); background:transparent; transition:all 0.15s ease; }
@@ -32,10 +30,8 @@ body.unlocked .lock-screen { display:none; }
 @keyframes dotPop { 0%{transform:scale(0.8);} 50%{transform:scale(1.2);} 100%{transform:scale(1);} }
 .wrong-animation { animation:wrongShake 0.5s ease; }
 @keyframes wrongShake { 0%,100%{transform:translateX(0);} 15%{transform:translateX(-10px);} 30%{transform:translateX(10px);} 45%{transform:translateX(-8px);} 60%{transform:translateX(8px);} 75%{transform:translateX(-4px);} 90%{transform:translateX(4px);} }
-
 .passcode-section { position:absolute; bottom:0; width:100%; display:flex; flex-direction:column; align-items:center; transform:translateY(var(--pin-block-y,0px)); transition:transform 0.2s ease; }
 .keyboard { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; width:92%; max-width:340px; justify-items:center; }
-
 .key, .key-zero { display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; aspect-ratio:1; border-radius:50%; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); color:white; cursor:pointer; position:relative; overflow:hidden; max-width:var(--key-size,96px); max-height:var(--key-size,96px); margin:0 auto; text-align:center; transform:translate(var(--kx,0px), var(--ky,0px)); transition:background 0.1s ease, transform 0.12s ease; }
 .key.pressed, .key-zero.pressed { animation:keyPop 0.2s ease; }
 @keyframes keyPop { 0%{background:rgba(255,255,255,0.45);} 40%{transform:translate(var(--kx,0px), var(--ky,0px)) scale(0.9);background:rgba(255,255,255,0.5);} 100%{transform:translate(var(--kx,0px), var(--ky,0px)) scale(1);} }
@@ -46,11 +42,9 @@ body.unlocked .lock-screen { display:none; }
 .btn-sos, .btn-cancel { color:white; font-size:17px; font-weight:400; background:transparent; border:none; cursor:pointer; padding:10px 0; opacity:0.9; letter-spacing:0.2px; display:flex; align-items:center; justify-content:center; }
 .btn-sos:active, .btn-cancel:active { opacity:0.4; }
 .key-zero .key-number { font-size:calc(var(--key-size,96px)*0.33); font-weight:300; pointer-events:none; }
-
 .unlock-screen { position:absolute; inset:0; width:100%; height:100%; z-index:100; display:none; }
 .unlock-screen.show { display:block; animation:unlockAnim 0.5s ease forwards; }
 @keyframes unlockAnim { 0%{opacity:0;transform:scale(1.04);} 100%{opacity:1;transform:scale(1);} }
-
 .settings-overlay { position:absolute; inset:0; z-index:200; background:rgba(0,0,0,0.78); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); display:none; flex-direction:column; padding:calc(50px + var(--ui-top)) 22px calc(30px + var(--ui-bottom)); overflow-y:auto; }
 .settings-overlay.show { display:flex; animation:settingsAnim 0.3s ease forwards; }
 @keyframes settingsAnim { 0%{opacity:0;transform:translateY(20px);} 100%{opacity:1;transform:translateY(0);} }
@@ -80,23 +74,17 @@ body.style-android .key, body.style-android .key-zero { border-radius:50%; backg
 body.style-android .top-label { font-size:14px; opacity:0.85; }
 body.style-android .dot { width:11px; height:11px; }
 body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; text-transform:uppercase; letter-spacing:1px; }
-
-/* ===== РАБОЧИЙ СТОЛ ===== */
 #phone { position:relative; width:100%; height:100%; background:#000; overflow:hidden; color:#fff; display:flex; flex-direction:column; }
 #homeWallpaper { position:absolute; inset:0; background:#000; background-size:cover; background-position:center; z-index:0; transition:background 0.4s ease; }
 #phone > #pagesViewport, #phone > #pageDots, #phone > #search, #phone > #dock { position:relative; z-index:1; }
-
 #pagesViewport { flex:1; overflow:hidden; position:relative; }
-#pagesTrack { display:flex; height:100%; transition:transform 0.3s cubic-bezier(.22,.61,.36,1); transform:translate(var(--icon-x,0px), var(--icon-y,0px)) translateX(var(--page-shift,0px)); will-change:transform; }
+#pagesTrack { display:flex; height:100%; transition:transform 0.3s cubic-bezier(.22,.61,.36,1); transform:translateX(var(--page-shift,0px)); will-change:transform; }
 #pagesTrack.dragging { transition:none; }
-
 .page { flex:0 0 100%; width:100%; height:100%; padding:calc(24px + var(--ui-top)) calc(16px + var(--ui-right)) 0 calc(16px + var(--ui-left)); overflow-y:auto; overflow-x:hidden; }
-.grid { display:grid; grid-template-columns:repeat(var(--cols,4),1fr); grid-auto-rows:var(--slot-h,84px); gap:var(--slot-gap,10px); width:100%; }
-
+.grid { display:grid; grid-template-columns:repeat(var(--cols,4),1fr); grid-auto-rows:var(--slot-h,84px); gap:var(--slot-gap,10px); width:100%; transform:translate(var(--icon-x,0px), var(--icon-y,0px)); }
 .slot { position:relative; border-radius:15px; display:flex; align-items:center; justify-content:center; }
 #phone.edit .slot.empty { border:2px dashed rgba(255,255,255,0.28); }
 #phone.edit .slot.empty::after { content:'+'; font-size:26px; color:rgba(255,255,255,0.45); }
-
 .cell { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; width:100%; height:100%; }
 .cell .icon, .cell .folder { transition:opacity 0.2s ease; }
 .icon { width:60px; height:60px; border-radius:15px; display:flex; align-items:center; justify-content:center; font-size:30px; color:#fff; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.3); }
@@ -106,62 +94,35 @@ body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; te
 .folder .mini { border-radius:4px; font-size:8px; display:flex; align-items:center; justify-content:center; overflow:hidden; color:#fff; }
 .folder .mini img { width:100%; height:100%; object-fit:cover; }
 .label { margin-top:4px; font-size:12px; text-align:center; text-shadow:0 1px 3px rgba(0,0,0,0.6); max-width:90%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:opacity 0.2s ease; }
-
 #phone:not(.edit) .grid .cell .icon,
 #phone:not(.edit) .grid .cell .folder,
-#phone:not(.edit) .grid .cell .label { opacity:0; }
+#phone:not(.edit) .grid .cell .label,
+#phone:not(.edit) #dock .cell .icon,
+#phone:not(.edit) #dock .cell .folder { opacity:var(--icon-opacity,1); }
 #phone:not(.edit) .grid .cell { background:transparent; }
-
 #phone.edit .grid .cell { outline:2px solid #ff3b30; outline-offset:-2px; border-radius:15px; }
 #phone.edit .grid .cell.selected-merge { outline:2px solid #30d158; box-shadow:0 0 0 3px rgba(48,209,88,0.35); }
 #phone.edit .grid .cell { animation:wiggle 0.3s infinite alternate; }
 #phone.edit #folderBox .cell { animation:wiggle 0.3s infinite alternate; }
 @keyframes wiggle { from { transform:rotate(-1deg); } to { transform:rotate(1deg); } }
-
 body.hide-badges .badge { display:none !important; }
-
-.badge {
-  position:absolute; z-index:3;
-  background:#ff3b30; color:#fff; font-weight:700;
-  border:none;
-  display:flex; align-items:center; justify-content:center;
-  border-radius:12px; overflow:hidden; line-height:1;
-  left:50%; top:0;
-  transform:translate(calc(-50% + var(--bx,30px)), calc(-50% + var(--by,-2px)));
-  min-width:var(--bw,20px); height:var(--bh,20px);
-  padding:0 5px; font-size:var(--bfs,12px);
-}
+.badge { position:absolute; z-index:3; background:#ff3b30; color:#fff; font-weight:700; border:none; display:flex; align-items:center; justify-content:center; border-radius:12px; overflow:hidden; line-height:1; left:50%; top:0; transform:translate(calc(-50% + var(--bx,30px)), calc(-50% + var(--by,-2px))); min-width:var(--bw,20px); height:var(--bh,20px); padding:0 5px; font-size:var(--bfs,12px); }
 .attempt-badge { background:#ff3b30; display:flex !important; }
 #phone:not(.edit) .attempt-badge { opacity:1; }
-
 .del-corner { display:none; position:absolute; top:-8px; left:2px; width:22px; height:22px; border-radius:50%; background:#e0e0e0; color:#000; font-size:16px; font-weight:700; align-items:center; justify-content:center; z-index:6; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.4); }
 #phone.edit .grid .cell .del-corner { display:flex; }
-
 #phone.choosing-trigger .cell, #phone.choosing-attempt .cell, #phone.choosing-lock .cell { cursor:pointer; }
 #phone.choosing-trigger .grid .cell .icon, #phone.choosing-trigger .grid .cell .folder, #phone.choosing-trigger .grid .cell .label,
 #phone.choosing-attempt .grid .cell .icon, #phone.choosing-attempt .grid .cell .folder, #phone.choosing-attempt .grid .cell .label,
 #phone.choosing-lock .grid .cell .icon, #phone.choosing-lock .grid .cell .folder, #phone.choosing-lock .grid .cell .label { opacity:1; }
 #phone.choosing-trigger .grid .cell, #phone.choosing-attempt .grid .cell, #phone.choosing-lock .grid .cell { outline:2px solid #0a84ff; outline-offset:-2px; border-radius:15px; }
-#phone.choosing-trigger::after { content:'Нажмите на иконку для назначения'; position:absolute; top:calc(20px + var(--ui-top)); left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); padding:10px 18px; border-radius:14px; font-size:14px; z-index:60; white-space:nowrap; }
-#phone.choosing-attempt::after { content:'Выберите иконку для попытки'; position:absolute; top:calc(20px + var(--ui-top)); left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); padding:10px 18px; border-radius:14px; font-size:14px; z-index:60; white-space:nowrap; }
-#phone.choosing-lock::after { content:'Выберите иконку для блокировки'; position:absolute; top:calc(20px + var(--ui-top)); left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); padding:10px 18px; border-radius:14px; font-size:14px; z-index:60; white-space:nowrap; }
-
-#editBar { display:none; position:absolute; bottom:0; left:0; right:0; z-index:65; background:transparent; backdrop-filter:none; padding:12px 14px calc(12px + var(--ui-bottom)); flex-wrap:wrap; gap:8px; justify-content:center; pointer-events:none; }
+#editBar { display:none; position:absolute; bottom:0; left:0; right:0; z-index:65; background:transparent; padding:12px 14px calc(12px + var(--ui-bottom)); flex-wrap:wrap; gap:8px; justify-content:center; pointer-events:none; }
 #phone.edit #editBar { display:flex; }
 #editBar > * { pointer-events:auto; }
 #editBar button { background:rgba(20,20,20,0.78); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:12px; padding:10px 14px; font-size:13px; cursor:pointer; backdrop-filter:blur(8px); }
 #editBar button.primary { background:rgba(48,209,88,0.32); border-color:#30d158; color:#fff; }
-#editBar button.warn { background:rgba(255,159,10,0.32); border-color:#ff9f0a; color:#fff; }
-#editBar button.danger { background:rgba(255,59,48,0.32); border-color:#ff3b30; color:#fff; }
 #editBar button:active { transform:scale(0.96); }
 #editBar .eb-info { width:100%; text-align:center; font-size:12px; opacity:0.85; margin-bottom:2px; background:rgba(0,0,0,0.45); border-radius:8px; padding:4px 8px; }
-
-.widget { background:rgba(120,120,120,0.32); backdrop-filter:blur(14px); border-radius:24px; display:flex; flex-direction:column; padding:14px 18px; box-shadow:0 3px 12px rgba(0,0,0,0.3); width:100%; height:100%; }
-.widget .ring { width:54px; height:54px; position:relative; }
-.widget .ring .phone-ico { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:22px; }
-.widget .pct { font-size:34px; font-weight:700; margin-top:auto; }
-.widget .ttl { font-size:14px; opacity:0.85; margin-top:2px; }
-
 #pageDots { display:flex; justify-content:center; align-items:center; gap:8px; padding:6px 0 2px; min-height:20px; }
 #pageDots .pdot { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,0.35); transition:.2s; }
 #pageDots .pdot.active { background:#fff; transform:scale(1.15); }
@@ -169,17 +130,14 @@ body.hide-badges .badge { display:none !important; }
 #phone.edit #pageDots .padd { display:flex; }
 #pageDots .pdel { width:18px; height:18px; border-radius:50%; border:1px solid rgba(255,80,80,0.7); color:#ff6b6b; font-size:12px; display:none; align-items:center; justify-content:center; cursor:pointer; margin-left:4px; }
 #phone.edit #pageDots .pdel { display:flex; }
-
 #search { align-self:center; margin:6px 0 12px; background:rgba(120,120,120,0.3); backdrop-filter:blur(12px); padding:7px 18px; border-radius:18px; font-size:14px; display:flex; gap:6px; align-items:center; cursor:pointer; }
 #phone:not(.edit) #search { opacity:0; }
 #phone.edit #dock { margin-bottom:calc(96px + var(--ui-bottom)); }
 #dock { margin:0 calc(12px + var(--ui-right)) calc(16px + var(--ui-bottom)) calc(12px + var(--ui-left)); background:rgba(120,120,120,0.28); backdrop-filter:blur(20px); border-radius:32px; padding:12px 14px; display:grid; grid-template-columns:repeat(4,1fr); gap:14px; transition:margin .2s ease; }
 #phone:not(.edit) #dock { background:transparent; backdrop-filter:none; }
-#phone:not(.edit) #dock .cell .icon, #phone:not(.edit) #dock .cell .folder { opacity:0; }
 #phone.edit #dock .cell { outline:2px solid #ff3b30; outline-offset:-2px; border-radius:15px; }
 #dock .cell { height:60px; }
 #dock .label { display:none; }
-
 #folderView { position:absolute; inset:0; z-index:40; display:none; flex-direction:column; align-items:center; background:rgba(0,0,0,0.45); backdrop-filter:blur(22px); animation:fadeIn 0.25s ease; }
 #folderView.open { display:flex; }
 #folderTitle { font-size:30px; font-weight:700; margin:calc(60px + var(--ui-top)) 0 26px; align-self:flex-start; padding-left:40px; text-shadow:0 1px 6px rgba(0,0,0,0.6); }
@@ -187,7 +145,6 @@ body.hide-badges .badge { display:none !important; }
 #folderBox .cell { height:84px; }
 #folderBox .cell .icon { width:58px; height:58px; }
 #folderBox .cell .label, #folderBox .cell .icon, #folderBox .cell .folder { opacity:1 !important; }
-
 #iconMenu { position:absolute; inset:0; z-index:70; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); backdrop-filter:blur(6px); animation:fadeIn 0.2s ease; }
 #iconMenu.open { display:flex; }
 .im-card { width:300px; max-width:90%; background:#1c1c1e; border:1px solid rgba(255,255,255,0.12); border-radius:22px; padding:18px; box-shadow:0 12px 40px rgba(0,0,0,0.6); animation:imPop 0.2s ease; max-height:88%; overflow-y:auto; }
@@ -206,34 +163,30 @@ body.hide-badges .badge { display:none !important; }
 .im-close { width:100%; background:rgba(255,255,255,0.12); border:none; color:#fff; padding:12px; border-radius:12px; font-size:15px; cursor:pointer; margin-top:4px; }
 .im-close:active { transform:scale(0.97); }
 .im-sub { font-size:11px; opacity:0.5; margin:2px 2px 8px; }
-.badge-edit { background:rgba(255,255,255,0.05); border-radius:12px; padding:12px; margin-bottom:9px; }
-.badge-edit .be-slider-row { margin-bottom:10px; }
-.badge-edit .be-slider-row:last-child { margin-bottom:0; }
-.badge-edit .be-label { font-size:12px; opacity:0.75; display:flex; justify-content:space-between; margin-bottom:5px; }
-
 #hsSettings { position:absolute; inset:0; z-index:50; background:rgba(0,0,0,0.55); backdrop-filter:blur(18px); display:none; flex-direction:column; padding:calc(40px + var(--ui-top)) 22px calc(60px + var(--ui-bottom)); overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; animation:fadeIn 0.25s ease; transition:background .25s ease, backdrop-filter .25s ease; }
 #hsSettings.open { display:flex; }
-#hsSettings.transparent { background:transparent; backdrop-filter:none; pointer-events:none; }
-#hsSettings.transparent .set-group, #hsSettings.transparent h2, #hsSettings.transparent .subtitle, #hsSettings.transparent .set-section { opacity:0; pointer-events:none; }
-#hsSettings.transparent .transparent-panel { display:block; pointer-events:auto; opacity:1; }
-.transparent-panel { display:none; position:fixed; bottom:0; left:0; right:0; background:rgba(20,20,20,0.92); backdrop-filter:blur(14px); border-radius:18px 18px 0 0; padding:16px 16px calc(16px + var(--ui-bottom)); z-index:90; }
-.transparent-panel .tp-title { font-size:14px; font-weight:600; margin-bottom:12px; }
-.transparent-panel .tp-done { width:100%; margin-top:8px; background:rgba(48,209,88,0.25); border:1px solid #30d158; color:#fff; border-radius:12px; padding:12px; font-size:15px; cursor:pointer; }
+#hsSettings.tweak { background:rgba(0,0,0,0.05); backdrop-filter:none; -webkit-backdrop-filter:none; pointer-events:none; }
+#hsSettings.tweak h2,
+#hsSettings.tweak .subtitle,
+#hsSettings.tweak .set-section { opacity:0.12; pointer-events:none; transition:opacity .25s ease; }
+#hsSettings.tweak #closeSet { opacity:0.12; pointer-events:none; }
+#hsSettings.tweak .tweak-panel { display:block; pointer-events:auto; opacity:1; }
+.tweak-panel { display:none; position:fixed; bottom:0; left:0; right:0; background:rgba(20,20,20,0.94); backdrop-filter:blur(14px); border-radius:18px 18px 0 0; padding:16px 16px calc(16px + var(--ui-bottom)); z-index:300; box-shadow:0 -6px 30px rgba(0,0,0,0.5); }
+.tweak-panel .tp-title { font-size:14px; font-weight:600; margin-bottom:12px; }
+.tweak-panel .tp-done { width:100%; margin-top:8px; background:rgba(48,209,88,0.25); border:1px solid #30d158; color:#fff; border-radius:12px; padding:12px; font-size:15px; cursor:pointer; }
 #hsSettings::-webkit-scrollbar { width:6px; }
 #hsSettings::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.25); border-radius:3px; }
 @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 #hsSettings h2 { font-size:22px; font-weight:700; margin-bottom:4px; }
 #hsSettings .subtitle { font-size:13px; opacity:0.6; margin-bottom:22px; }
-
 .set-section { margin-bottom:14px; flex-shrink:0; }
 .set-section-head { display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.1); border-radius:14px; padding:14px 16px; cursor:pointer; font-size:15px; font-weight:600; }
 .set-section-head .sec-ic { margin-right:10px; }
 .set-section-head .sec-chevron { transition:transform .25s ease; opacity:0.6; font-size:16px; }
 .set-section.open .set-section-head .sec-chevron { transform:rotate(90deg); }
 .set-section-body { max-height:0; overflow:hidden; transition:max-height .3s ease; }
-.set-section.open .set-section-body { max-height:2000px; }
+.set-section.open .set-section-body { max-height:3000px; }
 .set-section-body-inner { padding-top:10px; }
-
 .set-group { background:rgba(255,255,255,0.08); border-radius:16px; overflow:hidden; margin-bottom:12px; }
 .set-row { display:flex; align-items:center; justify-content:space-between; padding:15px 16px; font-size:15px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.08); }
 .set-row:last-child { border-bottom:none; }
@@ -245,8 +198,6 @@ body.hide-badges .badge { display:none !important; }
 .toggle::after { content:''; position:absolute; top:2px; left:2px; width:24px; height:24px; border-radius:50%; background:#fff; transition:0.2s; }
 .toggle.on::after { left:22px; }
 .choose-btn { display:none; margin:0 16px 14px; padding:11px; background:rgba(48,209,88,0.2); border:1px solid #30d158; color:#30d158; border-radius:12px; font-size:14px; text-align:center; cursor:pointer; }
-#triggerGroup.show-choose .choose-btn { display:block; }
-#lockGroup.show-choose .choose-btn { display:block; }
 .config-inline { display:none; padding:14px 16px 16px; background:rgba(255,159,10,0.10); border-bottom:1px solid rgba(255,255,255,0.08); }
 .config-inline.show { display:block; }
 .config-inline .ci-label { font-size:13px; opacity:0.8; margin-bottom:8px; }
@@ -260,12 +211,10 @@ body.hide-badges .badge { display:none !important; }
 #closeSet:active { transform:scale(0.96); }
 #hsBgInput, #hsIconInput { display:none; }
 #attemptList { display:flex; flex-direction:column; gap:8px; }
-.attempt-row { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.06); border-radius:12px; padding:10px 12px; }
-.attempt-row .at-num { font-size:13px; opacity:0.7; min-width:90px; }
-.attempt-row .at-target { flex:1; font-size:13px; opacity:0.9; }
-.attempt-row .at-btn { background:rgba(48,209,88,0.2); border:1px solid #30d158; color:#30d158; border-radius:10px; padding:7px 12px; font-size:13px; cursor:pointer; white-space:nowrap; }
-.attempt-row .at-btn:active { transform:scale(0.96); }
 .group-inner-block { padding:14px 16px; }
+.tweak-launch { width:100%; margin-top:6px; color:#0a84ff; font-size:13px; background:rgba(10,132,255,0.12); border:1px solid rgba(10,132,255,0.5); padding:11px; border-radius:12px; cursor:pointer; }
+.tweak-launch:active { transform:scale(0.97); }
+.divider-label { font-size:12px; text-transform:uppercase; letter-spacing:.5px; opacity:0.5; margin:14px 2px 8px; }
 </style>
 </head>
 <body class="style-ios">
@@ -325,14 +274,6 @@ body.hide-badges .badge { display:none !important; }
       </div>
     </div>
     <div class="settings-block">
-      <div class="settings-block-title">Размер экрана (устройство)</div>
-      <div class="option-row">
-        <button class="option-btn active" data-screen="auto" onclick="setScreenPreset('auto', this)">Авто</button>
-        <button class="option-btn" data-screen="iphone11" onclick="setScreenPreset('iphone11', this)">iPhone 11</button>
-      </div>
-      <div class="settings-hint">iPhone 11 — 828×1792 (414×896 CSS px)</div>
-    </div>
-    <div class="settings-block">
       <div class="settings-block-title">Фон экрана блокировки</div>
       <button class="bg-pick-btn" onclick="document.getElementById('bgInput').click()">🖼 Выбрать из галереи</button>
       <button class="bg-pick-btn" style="margin-top:10px;" onclick="resetBg()">↺ Сбросить фон</button>
@@ -367,9 +308,6 @@ body.hide-badges .badge { display:none !important; }
       <div id="editBar">
         <div class="eb-info" id="ebInfo">Режим редактирования</div>
         <button class="primary" id="ebMerge">🔗 Объединить</button>
-        <button class="warn" id="ebSplit">✂️ Разделить</button>
-        <button id="ebAddPage">➕ Экран</button>
-        <button class="danger" id="ebDelPage">🗑 Экран</button>
         <button id="ebDone">✓ Готово</button>
       </div>
 
@@ -394,29 +332,6 @@ body.hide-badges .badge { display:none !important; }
             <input type="number" id="imBadge" min="0" max="99999" placeholder="0 = нет">
             <button class="im-ok" id="imBadgeOk">OK</button>
           </div>
-          <div class="im-sub">Настройка уведомления</div>
-          <div class="badge-edit">
-            <div class="be-slider-row">
-              <div class="be-label"><span>Положение по горизонтали</span><span id="beBxVal">30 px</span></div>
-              <input type="range" class="size-slider" id="beBx" min="-40" max="60" value="30">
-            </div>
-            <div class="be-slider-row">
-              <div class="be-label"><span>Положение по вертикали</span><span id="beByVal">-2 px</span></div>
-              <input type="range" class="size-slider" id="beBy" min="-30" max="60" value="-2">
-            </div>
-            <div class="be-slider-row">
-              <div class="be-label"><span>Ширина (мин.)</span><span id="beBwVal">20 px</span></div>
-              <input type="range" class="size-slider" id="beBw" min="10" max="60" value="20">
-            </div>
-            <div class="be-slider-row">
-              <div class="be-label"><span>Высота</span><span id="beBhVal">20 px</span></div>
-              <input type="range" class="size-slider" id="beBh" min="10" max="50" value="20">
-            </div>
-            <div class="be-slider-row">
-              <div class="be-label"><span>Размер шрифта</span><span id="beBfsVal">12 px</span></div>
-              <input type="range" class="size-slider" id="beBfs" min="7" max="30" value="12">
-            </div>
-          </div>
           <button class="im-btn" id="imPhoto"><span class="imi">🖼</span> Изменить фон / фото</button>
           <button class="im-btn" id="imMakeFolder"><span class="imi">📁</span> Сделать папкой / открыть</button>
           <button class="im-btn danger" id="imDelete"><span class="imi">🗑</span> Удалить иконку</button>
@@ -435,70 +350,29 @@ body.hide-badges .badge { display:none !important; }
               <div class="set-row" id="rowBg"><span class="ic">🌄</span><span class="txt">Сменить фон рабочего стола</span><span class="arrow">›</span></div>
               <div class="set-row" id="rowResetBg"><span class="ic">↺</span><span class="txt">Удалить фон (чёрный экран)</span><span class="arrow">›</span></div>
             </div>
-          </div></div>
-        </div>
-
-        <div class="set-section" data-sec="screenarea">
-          <div class="set-section-head"><span><span class="sec-ic">📐</span>Область экрана (под чёлку)</span><span class="sec-chevron">›</span></div>
-          <div class="set-section-body"><div class="set-section-body-inner">
+            <div class="divider-label">Сетка рабочего стола</div>
             <div class="set-group group-inner-block">
-              <div style="font-size:12px;opacity:0.6;margin-bottom:10px;">Подгоните отступы под вашу модель. Фон всегда на весь экран.</div>
-              <div class="slider-row">
-                <div class="sl-label"><span>Отступ сверху</span><span id="uiTopVal">авто</span></div>
-                <input type="range" class="size-slider" id="uiTopSlider" min="0" max="80" value="0" oninput="changeUiInset('top',this.value)">
-              </div>
-              <div class="slider-row">
-                <div class="sl-label"><span>Отступ снизу</span><span id="uiBottomVal">авто</span></div>
-                <input type="range" class="size-slider" id="uiBottomSlider" min="0" max="80" value="0" oninput="changeUiInset('bottom',this.value)">
-              </div>
-              <div class="slider-row">
-                <div class="sl-label"><span>Отступ слева</span><span id="uiLeftVal">авто</span></div>
-                <input type="range" class="size-slider" id="uiLeftSlider" min="0" max="60" value="0" oninput="changeUiInset('left',this.value)">
-              </div>
-              <div class="slider-row">
-                <div class="sl-label"><span>Отступ справа</span><span id="uiRightVal">авто</span></div>
-                <input type="range" class="size-slider" id="uiRightSlider" min="0" max="60" value="0" oninput="changeUiInset('right',this.value)">
-              </div>
-              <button class="bg-pick-btn" id="uiAutoBtn" style="margin-top:6px;">↺ Авто (safe-area системы)</button>
-              <button class="bg-pick-btn" id="uiAreaTransparentBtn" style="margin-top:8px;">👁 Настраивать поверх рабочего стола</button>
+              <div class="slider-row"><div class="sl-label"><span>Колонок</span><span id="colsVal">4</span></div>
+                <input type="range" class="size-slider" id="colsSlider" min="3" max="6" value="4" oninput="changeCols(this.value)"></div>
+              <div class="slider-row"><div class="sl-label"><span>Высота строки</span><span id="rowHVal">84 px</span></div>
+                <input type="range" class="size-slider" id="rowHSlider" min="60" max="120" value="84" oninput="changeRowH(this.value)"></div>
+              <div class="slider-row"><div class="sl-label"><span>Промежуток</span><span id="gapVal">10 px</span></div>
+                <input type="range" class="size-slider" id="gapSlider" min="0" max="24" value="10" oninput="changeGap(this.value)"></div>
+              <button class="tweak-launch" data-tweak="grid">👁 Настраивать поверх рабочего стола</button>
             </div>
-          </div></div>
-        </div>
-
-                <div class="set-section" data-sec="grid">
-          <div class="set-section-head"><span><span class="sec-ic">▦</span>Сетка рабочего стола</span><span class="sec-chevron">›</span></div>
-          <div class="set-section-body"><div class="set-section-body-inner">
+            <div class="divider-label">Положение иконок</div>
             <div class="set-group group-inner-block">
-              <div class="slider-row">
-                <div class="sl-label"><span>Колонок</span><span id="colsVal">4</span></div>
-                <input type="range" class="size-slider" id="colsSlider" min="3" max="6" value="4" oninput="changeCols(this.value)">
-              </div>
-              <div class="slider-row">
-                <div class="sl-label"><span>Высота строки</span><span id="rowHVal">84 px</span></div>
-                <input type="range" class="size-slider" id="rowHSlider" min="60" max="120" value="84" oninput="changeRowH(this.value)">
-              </div>
-              <div class="slider-row">
-                <div class="sl-label"><span>Промежуток</span><span id="gapVal">10 px</span></div>
-                <input type="range" class="size-slider" id="gapSlider" min="0" max="24" value="10" oninput="changeGap(this.value)">
-              </div>
-              <button class="bg-pick-btn" id="gridTransparentBtn" style="margin-top:6px;">👁 Настраивать поверх рабочего стола</button>
+              <div class="slider-row"><div class="sl-label"><span>По горизонтали</span><span id="iconXVal">0 px</span></div>
+                <input type="range" class="size-slider" id="iconXSlider" min="-60" max="60" value="0" oninput="changeIconOffset('x',this.value)"></div>
+              <div class="slider-row"><div class="sl-label"><span>По вертикали</span><span id="iconYVal">0 px</span></div>
+                <input type="range" class="size-slider" id="iconYSlider" min="-60" max="120" value="0" oninput="changeIconOffset('y',this.value)"></div>
+              <button class="tweak-launch" data-tweak="iconpos">👁 Настраивать поверх рабочего стола</button>
             </div>
-          </div></div>
-        </div>
-
-        <div class="set-section" data-sec="iconpos">
-          <div class="set-section-head"><span><span class="sec-ic">↔️</span>Положение иконок</span><span class="sec-chevron">›</span></div>
-          <div class="set-section-body"><div class="set-section-body-inner">
+            <div class="divider-label">Прозрачность иконок</div>
             <div class="set-group group-inner-block">
-              <div class="slider-row">
-                <div class="sl-label"><span>По горизонтали</span><span id="iconXVal">0 px</span></div>
-                <input type="range" class="size-slider" id="iconXSlider" min="-60" max="60" value="0" oninput="changeIconOffset('x',this.value)">
-              </div>
-              <div class="slider-row">
-                <div class="sl-label"><span>По вертикали</span><span id="iconYVal">0 px</span></div>
-                <input type="range" class="size-slider" id="iconYSlider" min="-60" max="120" value="0" oninput="changeIconOffset('y',this.value)">
-              </div>
-              <button class="bg-pick-btn" id="iconPosTransparentBtn" style="margin-top:6px;">👁 Настраивать поверх рабочего стола</button>
+              <div class="slider-row"><div class="sl-label"><span>Прозрачность</span><span id="iconOpVal">100%</span></div>
+                <input type="range" class="size-slider" id="iconOpSlider" min="0" max="100" value="100" oninput="changeIconOpacity(this.value)"></div>
+              <button class="tweak-launch" data-tweak="iconop">👁 Настраивать поверх рабочего стола</button>
             </div>
           </div></div>
         </div>
@@ -507,8 +381,28 @@ body.hide-badges .badge { display:none !important; }
           <div class="set-section-head"><span><span class="sec-ic">📲</span>Иконки</span><span class="sec-chevron">›</span></div>
           <div class="set-section-body"><div class="set-section-body-inner">
             <div class="set-group">
-              <div class="set-row" id="rowEdit"><span class="ic">✏️</span><span class="txt">Режим редактирования<br><small style="opacity:.55">подсветка, объединение, экраны, доступ к доку</small></span><div class="toggle" id="tgEdit"></div></div>
+              <div class="set-row" id="rowEdit"><span class="ic">✏️</span><span class="txt">Режим редактирования<br><small style="opacity:.55">подсветка, перемещение, доступ к доку</small></span><div class="toggle" id="tgEdit"></div></div>
               <div class="set-row" id="rowBadges"><span class="ic">🔴</span><span class="txt">Показывать уведомления</span><div class="toggle on" id="tgBadges"></div></div>
+            </div>
+            <div class="divider-label">Действия редактирования</div>
+            <div class="set-group">
+              <div class="set-row" id="rowMerge"><span class="ic">🔗</span><span class="txt">Объединить иконки в папку</span><span class="arrow">›</span></div>
+              <div class="set-row" id="rowAddPage"><span class="ic">➕</span><span class="txt">Добавить экран</span><span class="arrow">›</span></div>
+              <div class="set-row" id="rowDelPage"><span class="ic">🗑</span><span class="txt">Удалить текущий экран</span><span class="arrow">›</span></div>
+            </div>
+            <div class="divider-label">Уведомления (общие для всех бейджей)</div>
+            <div class="set-group group-inner-block">
+              <div class="slider-row"><div class="sl-label"><span>Положение по горизонтали</span><span id="bgBxVal">30 px</span></div>
+                <input type="range" class="size-slider" id="bgBx" min="-40" max="60" value="30" oninput="changeBadgeCfg('bx',this.value)"></div>
+              <div class="slider-row"><div class="sl-label"><span>Положение по вертикали</span><span id="bgByVal">-2 px</span></div>
+                <input type="range" class="size-slider" id="bgBy" min="-30" max="60" value="-2" oninput="changeBadgeCfg('by',this.value)"></div>
+              <div class="slider-row"><div class="sl-label"><span>Ширина (мин.)</span><span id="bgBwVal">20 px</span></div>
+                <input type="range" class="size-slider" id="bgBw" min="10" max="60" value="20" oninput="changeBadgeCfg('bw',this.value)"></div>
+              <div class="slider-row"><div class="sl-label"><span>Высота</span><span id="bgBhVal">20 px</span></div>
+                <input type="range" class="size-slider" id="bgBh" min="10" max="50" value="20" oninput="changeBadgeCfg('bh',this.value)"></div>
+              <div class="slider-row"><div class="sl-label"><span>Размер шрифта</span><span id="bgBfsVal">12 px</span></div>
+                <input type="range" class="size-slider" id="bgBfs" min="7" max="30" value="12" oninput="changeBadgeCfg('bfs',this.value)"></div>
+              <button class="tweak-launch" data-tweak="badge">👁 Настраивать поверх рабочего стола</button>
             </div>
           </div></div>
         </div>
@@ -583,7 +477,7 @@ body.hide-badges .badge { display:none !important; }
 
         <button id="closeSet">Готово</button>
 
-        <div class="transparent-panel" id="transparentPanel">
+        <div class="tweak-panel" id="tweakPanel">
           <div class="tp-title" id="tpTitle">Настройка</div>
           <div id="tpContent"></div>
           <button class="tp-done" id="tpDone">✓ Готово</button>
@@ -595,133 +489,73 @@ body.hide-badges .badge { display:none !important; }
     </div>
   </div>
 </div>
-<script>
-/* ===== ЭКРАН БЛОКИРОВКИ ===== */
-const SETTINGS = { codeLength: 4, unlockMethod: 'sos', attemptsToUnlock: 3 };
-let currentInput = '', attemptCount = 0, sosArmed = false;
 
-function buildDots() {
-  const c = document.getElementById('dotsContainer'); c.innerHTML = '';
-  for (let i = 0; i < SETTINGS.codeLength; i++) { const d = document.createElement('div'); d.className = 'dot'; c.appendChild(d); }
+<script>
+/* ===== PWA / ПОЛНОЭКРАННОСТЬ ===== */
+function fitViewport(){ document.getElementById('device').style.height = window.innerHeight + 'px'; }
+window.addEventListener('resize', fitViewport);
+window.addEventListener('orientationchange', ()=>setTimeout(fitViewport,200));
+
+/* ===== ЭКРАН БЛОКИРОВКИ ===== */
+const SETTINGS = { codeLength:4, unlockMethod:'sos', attemptsToUnlock:3 };
+let currentInput='', attemptCount=0, sosArmed=false;
+function buildDots(){ const c=document.getElementById('dotsContainer'); c.innerHTML=''; for(let i=0;i<SETTINGS.codeLength;i++){ const d=document.createElement('div'); d.className='dot'; c.appendChild(d);} }
+function updateDots(){ document.querySelectorAll('.dot').forEach((dot,i)=>dot.classList.toggle('filled', i<currentInput.length)); }
+function pressKey(num,el){
+  if(el){ el.classList.remove('pressed'); void el.offsetWidth; el.classList.add('pressed'); setTimeout(()=>el.classList.remove('pressed'),220); }
+  if(currentInput.length>=SETTINGS.codeLength) return;
+  currentInput+=num; updateDots();
+  if(currentInput.length===SETTINGS.codeLength) setTimeout(checkCode,300);
 }
-function updateDots() { document.querySelectorAll('.dot').forEach((dot, i) => dot.classList.toggle('filled', i < currentInput.length)); }
-function pressKey(num, el) {
-  if (el) { el.classList.remove('pressed'); void el.offsetWidth; el.classList.add('pressed'); setTimeout(() => el.classList.remove('pressed'), 220); }
-  if (currentInput.length >= SETTINGS.codeLength) return;
-  currentInput += num; updateDots();
-  if (currentInput.length === SETTINGS.codeLength) setTimeout(checkCode, 300);
-}
-function deleteKey() { if (!currentInput.length) return; currentInput = currentInput.slice(0, -1); updateDots(); }
-function checkCode() {
+function deleteKey(){ if(!currentInput.length) return; currentInput=currentInput.slice(0,-1); updateDots(); }
+function checkCode(){
   attemptCount++; recordAttempt(currentInput);
-  if (SETTINGS.unlockMethod === 'instant') { doUnlock(); return; }
-  if (SETTINGS.unlockMethod === 'sos') { if (sosArmed) { sosArmed = false; doUnlock(); } else wrongPasswordAnimation(); return; }
-  if (SETTINGS.unlockMethod === 'attempts') { if (attemptCount >= SETTINGS.attemptsToUnlock) { doUnlock(); return; } wrongPasswordAnimation(); }
+  if(SETTINGS.unlockMethod==='instant'){ doUnlock(); return; }
+  if(SETTINGS.unlockMethod==='sos'){ if(sosArmed){ sosArmed=false; doUnlock(); } else wrongPasswordAnimation(); return; }
+  if(SETTINGS.unlockMethod==='attempts'){ if(attemptCount>=SETTINGS.attemptsToUnlock){ doUnlock(); return; } wrongPasswordAnimation(); }
 }
-function wrongPasswordAnimation() {
-  const dots = document.getElementById('dotsContainer'); dots.classList.add('wrong-animation');
-  document.querySelectorAll('.dot').forEach(d => { d.style.background = '#ff3b30'; d.style.borderColor = '#ff3b30'; });
-  setTimeout(() => {
-    dots.classList.remove('wrong-animation');
-    document.querySelectorAll('.dot').forEach(d => { d.style.background = ''; d.style.borderColor = ''; d.classList.remove('filled'); });
-    currentInput = '';
-  }, 600);
+function wrongPasswordAnimation(){
+  const dots=document.getElementById('dotsContainer'); dots.classList.add('wrong-animation');
+  document.querySelectorAll('.dot').forEach(d=>{ d.style.background='#ff3b30'; d.style.borderColor='#ff3b30'; });
+  setTimeout(()=>{ dots.classList.remove('wrong-animation'); document.querySelectorAll('.dot').forEach(d=>{ d.style.background=''; d.style.borderColor=''; d.classList.remove('filled'); }); currentInput=''; },600);
 }
-function doUnlock() {
-  document.body.classList.add('unlocked');
-  document.getElementById('unlockScreen').classList.add('show');
-  renderHome();
-}
-function closeHome() {
-  closeFolder(); closeHsSettings(); closeIconMenu();
-  exitEditMode();
-  phone.classList.remove('choosing-trigger', 'choosing-attempt', 'choosing-lock');
+function doUnlock(){ document.body.classList.add('unlocked'); document.getElementById('unlockScreen').classList.add('show'); renderHome(); }
+function closeHome(){
+  closeFolder(); closeHsSettings(); closeIconMenu(); exitEditMode();
+  phone.classList.remove('choosing-trigger','choosing-attempt','choosing-lock');
   document.getElementById('unlockScreen').classList.remove('show');
-  document.body.classList.remove('unlocked');
-  resetScreen();
+  document.body.classList.remove('unlocked'); resetScreen();
 }
-function resetScreen() { currentInput = ''; attemptCount = 0; sosArmed = false; updateDots(); }
+function resetScreen(){ currentInput=''; attemptCount=0; sosArmed=false; updateDots(); }
+
 /* ===== ФОН БЛОКИРОВКИ ===== */
-function changeBg(event) {
-  const file = event.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const wp = document.getElementById('wallpaper');
-    wp.style.backgroundImage = `url('${e.target.result}')`; wp.style.backgroundSize = 'cover'; wp.style.backgroundPosition = 'center';
-    try { localStorage.setItem('lockBg', e.target.result); } catch (err) { alert('Не удалось сохранить фон (слишком большой файл).'); }
-  };
-  reader.readAsDataURL(file); event.target.value = '';
+function changeBg(event){
+  const file=event.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=(e)=>{ const wp=document.getElementById('wallpaper'); wp.style.backgroundImage=`url('${e.target.result}')`; wp.style.backgroundSize='cover'; wp.style.backgroundPosition='center'; try{localStorage.setItem('lockBg',e.target.result);}catch(err){alert('Не удалось сохранить фон.');} };
+  reader.readAsDataURL(file); event.target.value='';
 }
-function resetBg() {
-  const wp = document.getElementById('wallpaper');
-  wp.style.backgroundImage = 'none'; wp.style.background = '#000'; localStorage.removeItem('lockBg');
-}
+function resetBg(){ const wp=document.getElementById('wallpaper'); wp.style.backgroundImage='none'; wp.style.background='#000'; localStorage.removeItem('lockBg'); }
 
 /* ===== ФОН РАБОЧЕГО СТОЛА ===== */
-function changeHomeBg(dataUrl) {
-  const hw = document.getElementById('homeWallpaper');
-  hw.style.backgroundImage = `url('${dataUrl}')`; hw.style.backgroundSize = 'cover'; hw.style.backgroundPosition = 'center';
-  try { localStorage.setItem('homeBg', dataUrl); } catch (err) { alert('Не удалось сохранить фон (слишком большой файл).'); }
-}
-function resetHomeBg() {
-  const hw = document.getElementById('homeWallpaper');
-  hw.style.backgroundImage = 'none'; hw.style.background = '#000'; localStorage.removeItem('homeBg');
-}
+function changeHomeBg(dataUrl){ const hw=document.getElementById('homeWallpaper'); hw.style.backgroundImage=`url('${dataUrl}')`; hw.style.backgroundSize='cover'; hw.style.backgroundPosition='center'; try{localStorage.setItem('homeBg',dataUrl);}catch(err){alert('Не удалось сохранить фон.');} }
+function resetHomeBg(){ const hw=document.getElementById('homeWallpaper'); hw.style.backgroundImage='none'; hw.style.background='#000'; localStorage.removeItem('homeBg'); }
 
-/* ===== РАЗМЕР / СМЕЩЕНИЕ КЛАВИШ ===== */
-function changeKeySize(val) {
-  document.documentElement.style.setProperty('--key-size', val + 'px');
-  document.getElementById('sizeValue').textContent = val + ' px'; localStorage.setItem('keySize', val);
-}
-let pinStepX = 0, pinStepY = 0;
-const KEY_POS = { '1':{c:0,r:0},'2':{c:1,r:0},'3':{c:2,r:0},'4':{c:0,r:1},'5':{c:1,r:1},'6':{c:2,r:1},'7':{c:0,r:2},'8':{c:1,r:2},'9':{c:2,r:2},'0':{c:1,r:3} };
-function applyPinSpread() {
-  document.querySelectorAll('.key, .key-zero').forEach(el => {
-    const p = KEY_POS[el.dataset.digit]; if (!p) return;
-    el.style.setProperty('--kx', (p.c - 1) * pinStepX + 'px');
-    el.style.setProperty('--ky', (p.r - 1) * pinStepY + 'px');
-  });
-}
-function changePinSpread(axis, val) {
-  val = parseInt(val);
-  if (axis === 'x') { pinStepX = val; document.getElementById('pinXVal').textContent = val + ' px'; localStorage.setItem('pinStepX', val); }
-  else { pinStepY = val; document.getElementById('pinYVal').textContent = val + ' px'; localStorage.setItem('pinStepY', val); }
-  applyPinSpread();
-}
-function changePinBlockY(val) {
-  val = parseInt(val);
-  document.documentElement.style.setProperty('--pin-block-y', val + 'px');
-  document.getElementById('pinBlockVal').textContent = val + ' px'; localStorage.setItem('pinBlockY', val);
-}
-function setScreenPreset(type, btn) {
-  const device = document.getElementById('device');
-  document.querySelectorAll('[data-screen]').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  if (type === 'iphone11') { device.classList.add('preset'); device.style.width='414px'; device.style.height='896px'; device.style.maxWidth='100vw'; device.style.maxHeight='100vh'; }
-  else { device.classList.remove('preset'); device.style.width='100%'; device.style.height='100dvh'; device.style.maxWidth=''; device.style.maxHeight=''; }
-  localStorage.setItem('screenPreset', type);
-}
-function setUnlockMethod(method, btn) {
-  SETTINGS.unlockMethod = method;
-  document.querySelectorAll('[data-method]').forEach(b => b.classList.remove('active')); if (btn) btn.classList.add('active');
-  const hint = document.getElementById('methodHint');
-  if (method==='sos') hint.textContent='Нажмите SOS, затем введите код';
-  else if (method==='attempts') hint.textContent='Разблокировка после 3 попыток ввода';
-  else hint.textContent='Разблокировка с первого ввода';
-  resetScreen();
-}
-function setStyle(style, btn) {
-  document.body.classList.remove('style-ios','style-android'); document.body.classList.add('style-'+style);
-  document.querySelectorAll('[data-style]').forEach(b => b.classList.remove('active')); if (btn) btn.classList.add('active');
-  document.getElementById('topLabel').innerHTML = style==='android' ? 'Введите PIN-код' : 'Смахните вверх для Face ID<br>или введите код-пароль';
-  localStorage.setItem('style', style);
-}
-function openSettings() { document.getElementById('settingsOverlay').classList.add('show'); }
-function closeSettings() { document.getElementById('settingsOverlay').classList.remove('show'); }
+/* ===== КЛАВИШИ ===== */
+function changeKeySize(val){ document.documentElement.style.setProperty('--key-size',val+'px'); document.getElementById('sizeValue').textContent=val+' px'; localStorage.setItem('keySize',val); }
+let pinStepX=0,pinStepY=0;
+const KEY_POS={'1':{c:0,r:0},'2':{c:1,r:0},'3':{c:2,r:0},'4':{c:0,r:1},'5':{c:1,r:1},'6':{c:2,r:1},'7':{c:0,r:2},'8':{c:1,r:2},'9':{c:2,r:2},'0':{c:1,r:3}};
+function applyPinSpread(){ document.querySelectorAll('.key, .key-zero').forEach(el=>{ const p=KEY_POS[el.dataset.digit]; if(!p)return; el.style.setProperty('--kx',(p.c-1)*pinStepX+'px'); el.style.setProperty('--ky',(p.r-1)*pinStepY+'px'); }); }
+function changePinSpread(axis,val){ val=parseInt(val); if(axis==='x'){ pinStepX=val; document.getElementById('pinXVal').textContent=val+' px'; localStorage.setItem('pinStepX',val);} else { pinStepY=val; document.getElementById('pinYVal').textContent=val+' px'; localStorage.setItem('pinStepY',val);} applyPinSpread(); }
+function changePinBlockY(val){ val=parseInt(val); document.documentElement.style.setProperty('--pin-block-y',val+'px'); document.getElementById('pinBlockVal').textContent=val+' px'; localStorage.setItem('pinBlockY',val); }
+function setUnlockMethod(method,btn){ SETTINGS.unlockMethod=method; document.querySelectorAll('[data-method]').forEach(b=>b.classList.remove('active')); if(btn)btn.classList.add('active'); const hint=document.getElementById('methodHint'); if(method==='sos')hint.textContent='Нажмите SOS, затем введите код'; else if(method==='attempts')hint.textContent='Разблокировка после 3 попыток ввода'; else hint.textContent='Разблокировка с первого ввода'; resetScreen(); }
+function setStyle(style,btn){ document.body.classList.remove('style-ios','style-android'); document.body.classList.add('style-'+style); document.querySelectorAll('[data-style]').forEach(b=>b.classList.remove('active')); if(btn)btn.classList.add('active'); document.getElementById('topLabel').innerHTML = style==='android'?'Введите PIN-код':'Смахните вверх для Face ID<br>или введите код-пароль'; localStorage.setItem('style',style); }
+function openSettings(){ document.getElementById('settingsOverlay').classList.add('show'); }
+function closeSettings(){ document.getElementById('settingsOverlay').classList.remove('show'); }
 
 /* ===== SOS ===== */
-const sosKey = document.getElementById('sosKey');
-let sosHoldTimer=null, sosLongPressed=false, sosTouchUsed=false;
+const sosKey=document.getElementById('sosKey');
+let sosHoldTimer=null,sosLongPressed=false,sosTouchUsed=false;
 function startSosHold(){ sosLongPressed=false; sosHoldTimer=setTimeout(()=>{ sosLongPressed=true; toggleCodeLength(); },3000); }
 function endSosHold(){ clearTimeout(sosHoldTimer); if(!sosLongPressed) sosShortPress(); sosLongPressed=false; }
 function cancelSosHold(){ clearTimeout(sosHoldTimer); sosLongPressed=false; }
@@ -735,8 +569,8 @@ sosKey.addEventListener('mouseup',()=>{if(sosTouchUsed){sosTouchUsed=false;retur
 sosKey.addEventListener('mouseleave',cancelSosHold);
 
 /* ===== ОТМЕНИТЬ ===== */
-const cancelKey = document.getElementById('cancelKey');
-let cancelHoldTimer=null, cancelLongPressed=false, cancelTouchUsed=false;
+const cancelKey=document.getElementById('cancelKey');
+let cancelHoldTimer=null,cancelLongPressed=false,cancelTouchUsed=false;
 function startCancelHold(){ cancelLongPressed=false; cancelHoldTimer=setTimeout(()=>{cancelLongPressed=true;openSettings();},2000); }
 function endCancelHold(){ clearTimeout(cancelHoldTimer); if(!cancelLongPressed) deleteKey(); cancelLongPressed=false; }
 function cancelCancelHold(){ clearTimeout(cancelHoldTimer); cancelLongPressed=false; }
@@ -764,23 +598,22 @@ document.addEventListener('keydown',(e)=>{
   else if(e.key==='Enter') sosShortPress();
 });
 
-/* ===== ДАННЫЕ: СЕТОЧНАЯ МОДЕЛЬ ===== */
-function loadJSON(key, def){ try { const v=JSON.parse(localStorage.getItem(key)); return v==null?def:v; } catch(e){ return def; } }
+/* ===== ДАННЫЕ ===== */
+function loadJSON(key,def){ try{ const v=JSON.parse(localStorage.getItem(key)); return v==null?def:v; }catch(e){ return def; } }
+let GRID_COLS=parseInt(localStorage.getItem('gridCols'))||4;
+let GRID_ROWS=parseInt(localStorage.getItem('gridRows'))||6;
+let SLOT_H=parseInt(localStorage.getItem('slotH'))||84;
+let SLOT_GAP=parseInt(localStorage.getItem('slotGap'))||10;
+let ICON_OPACITY=parseInt(localStorage.getItem('iconOpacity')); if(isNaN(ICON_OPACITY)) ICON_OPACITY=100;
+let uidCounter=parseInt(localStorage.getItem('uidCounter'))||1;
+function newId(){ uidCounter++; localStorage.setItem('uidCounter',uidCounter); return 'i'+uidCounter; }
+let BADGE_CFG=loadJSON('badgeCfg',null)||{bx:30,by:-2,bw:20,bh:20,bfs:12};
+function saveBadgeCfg(){ try{localStorage.setItem('badgeCfg',JSON.stringify(BADGE_CFG));}catch(e){} }
 
-let GRID_COLS = parseInt(localStorage.getItem('gridCols')) || 4;
-let GRID_ROWS = parseInt(localStorage.getItem('gridRows')) || 6;
-let SLOT_H = parseInt(localStorage.getItem('slotH')) || 84;
-let SLOT_GAP = parseInt(localStorage.getItem('slotGap')) || 10;
-
-let uidCounter = parseInt(localStorage.getItem('uidCounter')) || 1;
-function newId(){ uidCounter++; localStorage.setItem('uidCounter', uidCounter); return 'i'+uidCounter; }
-
-function defBadgeCfg(){ return { bx:30, by:-2, bw:20, bh:20, bfs:12 }; }
-
-let pages = loadJSON('pagesGrid', null);
-if (!pages) {
-  pages = [
-    { icons: [
+let pages=loadJSON('pagesGrid',null);
+if(!pages){
+  pages=[
+    { icons:[
       { id:newId(), col:0,row:0,w:1,h:1, name:"ФОТО📸", folder:true, badge:0, items:[
         {bg:"#ff5ea0",emoji:"🌸",name:"Lightroom"},{bg:"#222",emoji:"📷",name:"Halide"},
         {bg:"#5c6bc0",emoji:"🎨",name:"Canva"},{bg:"#000",emoji:"🐦",name:"Snap"} ] },
@@ -792,133 +625,77 @@ if (!pages) {
       { id:newId(), col:3,row:0,w:1,h:1, name:"STORIES📰", folder:true, badge:0, items:[
         {bg:"#888",emoji:"📖",name:"Books"},{bg:"#3949ab",emoji:"📰",name:"News"} ] },
       { id:newId(), col:0,row:1,w:1,h:1, name:"SmartHome", bg:"#f5c518", emoji:"🏠", badge:0 },
-      { id:newId(), col:1,row:1,w:1,h:1, name:"Т-Банк", bg:"#ffdd2d", emoji:"T", badge:0 },
-      { id:newId(), col:2,row:1,w:2,h:1, widget:true, percent:90 }
+      { id:newId(), col:1,row:1,w:1,h:1, name:"Т-Банк", bg:"#ffdd2d", emoji:"T", badge:0 }
     ]},
-    { icons: [
+    { icons:[
       { id:newId(), col:0,row:0,w:1,h:1, name:"ChatGPT", bg:"#fff", emoji:"🟢", badge:0 },
       { id:newId(), col:1,row:0,w:1,h:1, name:"STEPN", bg:"#2ecc71", emoji:"👟", badge:0 },
       { id:newId(), col:2,row:0,w:1,h:1, name:"HitVPN", bg:"#1a1a1a", emoji:"✊", badge:0 }
     ]}
   ];
 }
-let dock = loadJSON('dock', null) || [
+let dock=loadJSON('dock',null)||[
   { id:newId(), name:"Телефон", bg:"#34c759", emoji:"📞", badge:0 },
   { id:newId(), name:"Сообщ.", bg:"#34c759", emoji:"💬", badge:570 },
   { id:newId(), name:"Камера", bg:"#3a3a3c", emoji:"📷", badge:0 },
   { id:newId(), name:"Почта", bg:"#fff", emoji:"✉️", badge:2738 }
 ];
-let currentPage = 0;
-function saveData() {
-  try {
-    localStorage.setItem('pagesGrid', JSON.stringify(pages));
-    localStorage.setItem('dock', JSON.stringify(dock));
-  } catch(e){}
-}
+let currentPage=0;
+function saveData(){ try{ localStorage.setItem('pagesGrid',JSON.stringify(pages)); localStorage.setItem('dock',JSON.stringify(dock)); }catch(e){} }
 
-const phone = document.getElementById('phone');
-let openFolderPos = null;
-
-/* ===== ОБЛАСТЬ ЭКРАНА (safe-area override) ===== */
-let uiInsets = loadJSON('uiInsets', null);
-function applyUiInsets(){
-  const root = document.documentElement;
-  if(uiInsets){
-    root.style.setProperty('--ui-top', uiInsets.top + 'px');
-    root.style.setProperty('--ui-bottom', uiInsets.bottom + 'px');
-    root.style.setProperty('--ui-left', uiInsets.left + 'px');
-    root.style.setProperty('--ui-right', uiInsets.right + 'px');
-  } else {
-    root.style.setProperty('--ui-top', 'env(safe-area-inset-top, 0px)');
-    root.style.setProperty('--ui-bottom', 'env(safe-area-inset-bottom, 0px)');
-    root.style.setProperty('--ui-left', 'env(safe-area-inset-left, 0px)');
-    root.style.setProperty('--ui-right', 'env(safe-area-inset-right, 0px)');
-  }
-  try { goToPage(currentPage, false); } catch(e){}
-}
-function changeUiInset(side, val){
-  val = parseInt(val);
-  if(!uiInsets) uiInsets = { top:0, bottom:0, left:0, right:0 };
-  uiInsets[side] = val;
-  document.getElementById('ui'+side.charAt(0).toUpperCase()+side.slice(1)+'Val').textContent = val + ' px';
-  localStorage.setItem('uiInsets', JSON.stringify(uiInsets));
-  applyUiInsets();
-}
-function resetUiInsets(){
-  uiInsets = null;
-  localStorage.removeItem('uiInsets');
-  ['uiTopSlider','uiBottomSlider','uiLeftSlider','uiRightSlider'].forEach(id=>document.getElementById(id).value=0);
-  ['uiTopVal','uiBottomVal','uiLeftVal','uiRightVal'].forEach(id=>document.getElementById(id).textContent='авто');
-  applyUiInsets();
-}
-document.getElementById('uiAutoBtn').onclick = resetUiInsets;
-document.getElementById('uiAreaTransparentBtn').onclick = ()=>{
-  const i = uiInsets || {top:0,bottom:0,left:0,right:0};
-  const tp = document.getElementById('tpContent');
-  tp.innerHTML = `
-    <div class="slider-row"><div class="sl-label"><span>Сверху</span><span id="tpUiTopVal">${i.top} px</span></div><input type="range" class="size-slider" min="0" max="80" value="${i.top}" id="tpUiTop"></div>
-    <div class="slider-row"><div class="sl-label"><span>Снизу</span><span id="tpUiBottomVal">${i.bottom} px</span></div><input type="range" class="size-slider" min="0" max="80" value="${i.bottom}" id="tpUiBottom"></div>
-    <div class="slider-row"><div class="sl-label"><span>Слева</span><span id="tpUiLeftVal">${i.left} px</span></div><input type="range" class="size-slider" min="0" max="60" value="${i.left}" id="tpUiLeft"></div>
-    <div class="slider-row"><div class="sl-label"><span>Справа</span><span id="tpUiRightVal">${i.right} px</span></div><input type="range" class="size-slider" min="0" max="60" value="${i.right}" id="tpUiRight"></div>`;
-  tp.querySelector('#tpUiTop').oninput=function(){ document.getElementById('tpUiTopVal').textContent=this.value+' px'; document.getElementById('uiTopSlider').value=this.value; changeUiInset('top',this.value); };
-  tp.querySelector('#tpUiBottom').oninput=function(){ document.getElementById('tpUiBottomVal').textContent=this.value+' px'; document.getElementById('uiBottomSlider').value=this.value; changeUiInset('bottom',this.value); };
-  tp.querySelector('#tpUiLeft').oninput=function(){ document.getElementById('tpUiLeftVal').textContent=this.value+' px'; document.getElementById('uiLeftSlider').value=this.value; changeUiInset('left',this.value); };
-  tp.querySelector('#tpUiRight').oninput=function(){ document.getElementById('tpUiRightVal').textContent=this.value+' px'; document.getElementById('uiRightSlider').value=this.value; changeUiInset('right',this.value); };
-  openTransparent('Область экрана');
-};
+const phone=document.getElementById('phone');
+let openFolderPos=null;
 
 /* ===== ТРИГГЕРЫ ВЫЗОВА ===== */
-let savedModes = loadJSON('triggerModes', null);
-if (!savedModes || !Array.isArray(savedModes) || !savedModes.length) savedModes = ['hold'];
-let triggerModes = new Set(savedModes);
-let triggerIcon = loadJSON('triggerIcon', null);
-let HOLD_MS = parseInt(localStorage.getItem('holdDuration')) || 2000;
-let SCREEN_TAP_COUNT = parseInt(localStorage.getItem('screenTapCount')) || 2;
-let ICON_TAP_COUNT = parseInt(localStorage.getItem('iconTapCount')) || 3;
-let ICON_RESET = 600;
-const FAST_TAP_WINDOW = 350;
-let pressTimer=null, screenTaps=0, screenTapTimer=null, iconTaps=0, iconTimer=null;
-function saveModes(){ localStorage.setItem('triggerModes', JSON.stringify([...triggerModes])); }
+let savedModes=loadJSON('triggerModes',null);
+if(!savedModes||!Array.isArray(savedModes)||!savedModes.length) savedModes=['hold'];
+let triggerModes=new Set(savedModes);
+let triggerIcon=loadJSON('triggerIcon',null);
+let HOLD_MS=parseInt(localStorage.getItem('holdDuration'))||2000;
+let SCREEN_TAP_COUNT=parseInt(localStorage.getItem('screenTapCount'))||2;
+let ICON_TAP_COUNT=parseInt(localStorage.getItem('iconTapCount'))||3;
+let ICON_RESET=600; const FAST_TAP_WINDOW=350;
+let screenTaps=0,screenTapTimer=null,iconTaps=0,iconTimer=null;
+function saveModes(){ localStorage.setItem('triggerModes',JSON.stringify([...triggerModes])); }
 
 /* ===== ВОЗВРАТ К БЛОКИРОВКЕ ===== */
-let savedLockModes = loadJSON('lockModes', null);
-if (!savedLockModes || !Array.isArray(savedLockModes)) savedLockModes = ['swipe'];
-let lockModes = new Set(savedLockModes);
-let lockIcon = loadJSON('lockIcon', null);
-let LOCK_TAP_COUNT = parseInt(localStorage.getItem('lockTapCount')) || 3;
-let LOCK_ICON_TAP_COUNT = parseInt(localStorage.getItem('lockIconTapCount')) || 2;
-let lockTaps=0, lockTapTimer=null, lockIconTaps=0, lockIconTimer=null;
-let swipeStartY=null, swipeStartX=null, swipeStartTime=0;
-function saveLockModes(){ localStorage.setItem('lockModes', JSON.stringify([...lockModes])); }
+let savedLockModes=loadJSON('lockModes',null);
+if(!savedLockModes||!Array.isArray(savedLockModes)) savedLockModes=['swipe'];
+let lockModes=new Set(savedLockModes);
+let lockIcon=loadJSON('lockIcon',null);
+let LOCK_TAP_COUNT=parseInt(localStorage.getItem('lockTapCount'))||3;
+let LOCK_ICON_TAP_COUNT=parseInt(localStorage.getItem('lockIconTapCount'))||2;
+let lockTaps=0,lockTapTimer=null,lockIconTaps=0,lockIconTimer=null;
+let swipeStartY=null,swipeStartX=null,swipeStartTime=0;
+function saveLockModes(){ localStorage.setItem('lockModes',JSON.stringify([...lockModes])); }
 
-/* ===== ПОПЫТКИ НА ИКОНКАХ ===== */
-let passwordAttempts = loadJSON('passwordAttempts', []);
-let ATTEMPT_COUNT = parseInt(localStorage.getItem('attemptCount')) || 2;
-let attemptTargets = loadJSON('attemptTargets', []);
-let choosingAttemptIndex = -1;
-function recordAttempt(code){ passwordAttempts.unshift(code); if(passwordAttempts.length>5) passwordAttempts=passwordAttempts.slice(0,5); try{localStorage.setItem('passwordAttempts', JSON.stringify(passwordAttempts));}catch(e){} }
-/* ===== ПОИСК ЭЛЕМЕНТОВ ===== */
+/* ===== ПОПЫТКИ ===== */
+let passwordAttempts=loadJSON('passwordAttempts',[]);
+let ATTEMPT_COUNT=parseInt(localStorage.getItem('attemptCount'))||2;
+let attemptTargets=loadJSON('attemptTargets',[]);
+let choosingAttemptIndex=-1;
+function recordAttempt(code){ passwordAttempts.unshift(code); if(passwordAttempts.length>5) passwordAttempts=passwordAttempts.slice(0,5); try{localStorage.setItem('passwordAttempts',JSON.stringify(passwordAttempts));}catch(e){} }
+
+/* ===== ПОИСК ===== */
 function findIcon(id){
-  for(let p=0;p<pages.length;p++){ const ic=pages[p].icons.find(x=>x.id===id); if(ic) return {icon:ic, page:p, container:pages[p].icons, inDock:false}; }
-  const di=dock.find(x=>x.id===id); if(di) return {icon:di, page:-1, container:dock, inDock:true};
-  for(let p=0;p<pages.length;p++){ for(const ic of pages[p].icons){ if(ic.folder&&ic.items){ const fi=ic.items.find(x=>x.id===id); if(fi) return {icon:fi, page:p, parentFolder:ic, inFolder:true}; } } }
+  for(let p=0;p<pages.length;p++){ const ic=pages[p].icons.find(x=>x.id===id); if(ic) return {icon:ic,page:p,container:pages[p].icons,inDock:false}; }
+  const di=dock.find(x=>x.id===id); if(di) return {icon:di,page:-1,container:dock,inDock:true};
+  for(let p=0;p<pages.length;p++){ for(const ic of pages[p].icons){ if(ic.folder&&ic.items){ const fi=ic.items.find(x=>x.id===id); if(fi) return {icon:fi,page:p,parentFolder:ic,inFolder:true}; } } }
   return null;
 }
 
 /* ===== РЕНДЕР ===== */
 function renderHome(){ renderPages(); renderDock(); renderDots(); goToPage(currentPage,false); }
-
+function badgeStyle(){ const c=BADGE_CFG; return `--bx:${c.bx}px;--by:${c.by}px;--bw:${c.bw}px;--bh:${c.bh}px;--bfs:${c.bfs}px;`; }
+function attemptBadgeFor(id){
+  let html='';
+  attemptTargets.forEach((tid,idx)=>{ if(tid===id&&idx<ATTEMPT_COUNT){ const val=passwordAttempts[idx]; if(val!==undefined){ html+=`<div class="badge attempt-badge" style="${badgeStyle()}">${val}</div>`; } } });
+  return html;
+}
 function iconInner(icon){
-  if(icon.widget){
-    return `<div class="widget"><div class="ring">${ringSVG(icon.percent||90)}<div class="phone-ico">📞</div></div><div class="pct">${icon.percent||90}%</div><div class="ttl">Заряд телефона</div></div>`;
-  }
   let badgeHtml='';
-  if(icon.badge&&icon.badge>0){
-    const c=icon.badgeCfg||defBadgeCfg();
-    const style=`--bx:${c.bx}px;--by:${c.by}px;--bw:${c.bw}px;--bh:${c.bh}px;--bfs:${c.bfs}px;`;
-    badgeHtml=`<div class="badge" style="${style}">${icon.badge>99999?'99999':icon.badge}</div>`;
-  }
-  const attemptHtml = attemptBadgeFor(icon.id);
+  if(icon.badge&&icon.badge>0){ badgeHtml=`<div class="badge" style="${badgeStyle()}">${icon.badge>99999?'99999':icon.badge}</div>`; }
+  const attemptHtml=attemptBadgeFor(icon.id);
   if(icon.folder){
     let mini=''; const items=icon.items||[];
     for(let i=0;i<9;i++){ const it=items[i]; if(it) mini+=`<div class="mini" style="background:${it.img?'#000':(it.bg||'#444')}">${it.img?`<img src="${it.img}">`:(it.emoji||'')}</div>`; else mini+=`<div class="mini"></div>`; }
@@ -928,23 +705,6 @@ function iconInner(icon){
   const inner=icon.img?`<img src="${icon.img}">`:(icon.emoji||'');
   return `${badgeHtml}${attemptHtml}<div class="icon" style="${bg}">${inner}</div><div class="label">${icon.name||''}</div>`;
 }
-function attemptBadgeFor(id){
-  let html='';
-  attemptTargets.forEach((tid,idx)=>{
-    if(tid===id && idx<ATTEMPT_COUNT){
-      const val=passwordAttempts[idx]; if(val!==undefined){
-        const c=defBadgeCfg();
-        html+=`<div class="badge attempt-badge" style="--bx:${c.bx}px;--by:${c.by}px;--bw:${c.bw}px;--bh:${c.bh}px;--bfs:${c.bfs}px;">${val}</div>`;
-      }
-    }
-  });
-  return html;
-}
-function ringSVG(p){
-  const r=24,c=2*Math.PI*r,off=c*(1-p/100);
-  return `<svg width="54" height="54" viewBox="0 0 54 54"><circle cx="27" cy="27" r="${r}" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="5"/><circle cx="27" cy="27" r="${r}" fill="none" stroke="#30d158" stroke-width="5" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 27 27)"/></svg>`;
-}
-
 function renderPages(){
   const track=document.getElementById('pagesTrack'); track.innerHTML='';
   pages.forEach((pg,pIdx)=>{
@@ -953,7 +713,7 @@ function renderPages(){
     grid.style.setProperty('--cols',GRID_COLS); grid.style.setProperty('--slot-h',SLOT_H+'px'); grid.style.setProperty('--slot-gap',SLOT_GAP+'px');
     const occupied={};
     pg.icons.forEach(icon=>{ for(let r=0;r<(icon.h||1);r++) for(let c=0;c<(icon.w||1);c++) occupied[(icon.row+r)+'_'+(icon.col+c)]=icon.id; });
-    const maxRow=Math.max(GRID_ROWS, ...pg.icons.map(i=>i.row+(i.h||1)));
+    const maxRow=Math.max(GRID_ROWS, ...pg.icons.map(i=>i.row+(i.h||1)), 0);
     for(let r=0;r<maxRow;r++) for(let c=0;c<GRID_COLS;c++){
       const key=r+'_'+c;
       if(occupied[key]){
@@ -1002,9 +762,9 @@ function updateTrackWidth(){ document.getElementById('pagesTrack').style.width=(
 function goToPage(idx,animate){
   currentPage=Math.max(0,Math.min(idx,pages.length-1));
   const track=document.getElementById('pagesTrack');
-  track.style.transition=animate?'':'none';
+  if(!animate) track.style.transition='none';
   const vw=document.getElementById('pagesViewport').offsetWidth;
-  track.style.setProperty('--page-shift', (-currentPage*vw)+'px');
+  track.style.setProperty('--page-shift',(-currentPage*vw)+'px');
   if(!animate) requestAnimationFrame(()=>{ track.style.transition=''; });
   document.querySelectorAll('#pageDots .pdot').forEach((d,i)=>d.classList.toggle('active',i===currentPage));
 }
@@ -1018,7 +778,7 @@ viewport.addEventListener('touchmove',(e)=>{
   pageDragX=e.touches[0].clientX-pageDragStart;
   const track=document.getElementById('pagesTrack'); track.classList.add('dragging');
   const vw=viewport.offsetWidth;
-  track.style.setProperty('--page-shift', (-currentPage*vw+pageDragX)+'px');
+  track.style.setProperty('--page-shift',(-currentPage*vw+pageDragX)+'px');
 },{passive:true});
 viewport.addEventListener('touchend',()=>{
   if(!pageDragging)return; pageDragging=false;
@@ -1029,31 +789,25 @@ viewport.addEventListener('touchend',()=>{
   pageDragX=0; pageDragStart=null;
 });
 
-/* ===== КЛИК ПО ЯЧЕЙКЕ + ТРИГГЕРЫ ===== */
+/* ===== КЛИК ПО ЯЧЕЙКЕ ===== */
 let mergeMode=false, mergeFirst=null;
 function attachCellHandlers(cell,icon,pIdx){
   cell.addEventListener('click',(e)=>{
     if(phone.classList.contains('choosing-trigger')){ e.stopPropagation(); setTriggerIcon(icon.id); return; }
     if(phone.classList.contains('choosing-attempt')){ e.stopPropagation(); setAttemptTarget(icon.id); return; }
     if(phone.classList.contains('choosing-lock')){ e.stopPropagation(); setLockIcon(icon.id); return; }
-    if(phone.classList.contains('edit')){
-      e.stopPropagation();
-      if(mergeMode){ handleMergeClick(icon); return; }
-      openIconMenu(icon,pIdx); return;
-    }
+    if(phone.classList.contains('edit')){ e.stopPropagation(); if(mergeMode){ handleMergeClick(icon); return; } openIconMenu(icon,pIdx); return; }
     if(triggerIcon&&icon.id===triggerIcon&&triggerModes.has('corner')){ handleIconTriggerTap(); return; }
     if(lockIcon&&icon.id===lockIcon&&lockModes.has('icon')){ handleLockIconTap(); return; }
     if(icon.folder){ openFolder(icon); return; }
   });
 }
 function handleMergeClick(icon){
-  if(icon.widget) return;
   if(!mergeFirst){ mergeFirst=icon; document.querySelectorAll(`.cell[data-id="${icon.id}"]`).forEach(c=>c.classList.add('selected-merge')); updateEbInfo('Выберите вторую иконку'); }
   else if(mergeFirst.id===icon.id){ document.querySelectorAll('.cell.selected-merge').forEach(c=>c.classList.remove('selected-merge')); mergeFirst=null; updateEbInfo('Объединение: выберите иконку'); }
   else { mergeIcons(mergeFirst,icon); mergeFirst=null; mergeMode=false; updateEbInfo('Режим редактирования'); document.getElementById('ebMerge').classList.remove('primary'); }
 }
 function mergeIcons(a,b){
-  const fa=findIcon(a.id), fb=findIcon(b.id); if(!fa||!fb) return;
   if(a.folder&&!b.folder){ a.items=a.items||[]; b.id=b.id||newId(); a.items.push({bg:b.bg,emoji:b.emoji,name:b.name,img:b.img,id:b.id}); removeFromContainer(b.id); }
   else if(!a.folder&&b.folder){ b.items=b.items||[]; a.id=a.id||newId(); b.items.unshift({bg:a.bg,emoji:a.emoji,name:a.name,img:a.img,id:a.id}); removeFromContainer(a.id); }
   else if(a.folder&&b.folder){ a.items=(a.items||[]).concat(b.items||[]); removeFromContainer(b.id); }
@@ -1068,10 +822,9 @@ function splitFolder(icon){
   const f=findIcon(icon.id); if(!f||!icon.folder) return;
   const items=icon.items||[]; const pg=f.page>=0?pages[f.page]:null;
   if(items.length){ const first=items[0]; icon.name=first.name; icon.bg=first.bg; icon.emoji=first.emoji; icon.img=first.img; delete icon.folder; delete icon.items; }
-  if(pg){ for(let k=1;k<items.length;k++){ const spot=findFreeSpot(f.page); if(!spot){ addPage(); } const s=findFreeSpot(currentPageForSplit(f.page)); const it=items[k]; pg.icons.push({id:it.id||newId(),col:s.col,row:s.row,w:1,h:1,name:it.name,bg:it.bg,emoji:it.emoji,img:it.img,badge:0}); } }
+  if(pg){ for(let k=1;k<items.length;k++){ let s=findFreeSpot(f.page); if(!s){ addPage(); s=findFreeSpot(f.page);} if(!s) s={row:0,col:0}; const it=items[k]; pg.icons.push({id:it.id||newId(),col:s.col,row:s.row,w:1,h:1,name:it.name,bg:it.bg,emoji:it.emoji,img:it.img,badge:0}); } }
   saveData(); renderHome();
 }
-function currentPageForSplit(p){ return p; }
 function findFreeSpot(pIdx){
   const pg=pages[pIdx]; const occ={};
   pg.icons.forEach(ic=>{ for(let r=0;r<(ic.h||1);r++) for(let c=0;c<(ic.w||1);c++) occ[(ic.row+r)+'_'+(ic.col+c)]=1; });
@@ -1089,10 +842,7 @@ function deleteIcon(id){
 }
 
 /* ===== ПАПКИ ===== */
-function openFolder(icon){
-  openFolderPos=icon; document.getElementById('folderTitle').textContent=icon.name||'Папка';
-  renderFolderItems(icon); document.getElementById('folderView').classList.add('open');
-}
+function openFolder(icon){ openFolderPos=icon; document.getElementById('folderTitle').textContent=icon.name||'Папка'; renderFolderItems(icon); document.getElementById('folderView').classList.add('open'); }
 function renderFolderItems(icon){
   const box=document.getElementById('folderBox'); box.innerHTML='';
   (icon.items||[]).forEach(it=>{
@@ -1114,7 +864,7 @@ document.getElementById('folderView').addEventListener('click',(e)=>{ if(e.targe
 
 /* ===== МЕНЮ ИКОНКИ ===== */
 let menuIcon=null;
-function openIconMenu(icon,ctx){
+function openIconMenu(icon){
   menuIcon=icon;
   const prev=document.getElementById('imPrev');
   if(icon.folder){ prev.style.background='#333'; prev.innerHTML='📁'; }
@@ -1123,31 +873,19 @@ function openIconMenu(icon,ctx){
   document.getElementById('imTitle').textContent=icon.name||'Без названия';
   document.getElementById('imName').value=icon.name||'';
   document.getElementById('imBadge').value=icon.badge||0;
-  const c=icon.badgeCfg||defBadgeCfg();
-  setBe('beBx',c.bx);setBe('beBy',c.by);setBe('beBw',c.bw);setBe('beBh',c.bh);setBe('beBfs',c.bfs);
-  document.getElementById('imMakeFolder').querySelector('span:last-child')?.remove();
   document.getElementById('imMakeFolder').innerHTML = icon.folder?`<span class="imi">✂️</span> Разделить папку`:`<span class="imi">📁</span> Сделать папкой`;
   document.getElementById('iconMenu').classList.add('open');
 }
-function setBe(id,val){ const el=document.getElementById(id); if(el){ el.value=val; document.getElementById(id+'Val').textContent=val+' px'; } }
 function closeIconMenu(){ document.getElementById('iconMenu').classList.remove('open'); menuIcon=null; }
 document.getElementById('iconMenu').addEventListener('click',(e)=>{ if(e.target.id==='iconMenu') closeIconMenu(); });
 document.getElementById('imClose').addEventListener('click',closeIconMenu);
 document.getElementById('imNameOk').addEventListener('click',()=>{ if(menuIcon){ menuIcon.name=document.getElementById('imName').value; saveData(); refreshAfterMenu(); } });
 document.getElementById('imBadgeOk').addEventListener('click',()=>{ if(menuIcon){ menuIcon.badge=parseInt(document.getElementById('imBadge').value)||0; saveData(); refreshAfterMenu(); } });
-['beBx','beBy','beBw','beBh','beBfs'].forEach(id=>{
-  document.getElementById(id).addEventListener('input',function(){
-    document.getElementById(id+'Val').textContent=this.value+' px';
-    if(menuIcon){ menuIcon.badgeCfg=menuIcon.badgeCfg||defBadgeCfg();
-      const map={beBx:'bx',beBy:'by',beBw:'bw',beBh:'bh',beBfs:'bfs'};
-      menuIcon.badgeCfg[map[id]]=parseInt(this.value); saveData(); refreshAfterMenu(); }
-  });
-});
 function refreshAfterMenu(){ renderHome(); if(openFolderPos) renderFolderItems(openFolderPos); }
+let pendingIconForPhoto=null;
 document.getElementById('imPhoto').addEventListener('click',()=>{ pendingIconForPhoto=menuIcon; document.getElementById('hsIconInput').click(); });
 document.getElementById('imMakeFolder').addEventListener('click',()=>{ if(!menuIcon)return; if(menuIcon.folder){ splitFolder(menuIcon); closeIconMenu(); } else { menuIcon.folder=true; menuIcon.items=[{bg:menuIcon.bg,emoji:menuIcon.emoji,name:menuIcon.name,img:menuIcon.img,id:newId()}]; menuIcon.name=menuIcon.name||'Папка'; delete menuIcon.bg;delete menuIcon.emoji;delete menuIcon.img; saveData(); refreshAfterMenu(); closeIconMenu(); } });
 document.getElementById('imDelete').addEventListener('click',()=>{ if(menuIcon){ deleteIcon(menuIcon.id); closeIconMenu(); } });
-let pendingIconForPhoto=null;
 document.getElementById('hsIconInput').addEventListener('change',(e)=>{
   const file=e.target.files[0]; if(!file||!pendingIconForPhoto)return;
   const r=new FileReader(); r.onload=(ev)=>{ pendingIconForPhoto.img=ev.target.result; saveData(); refreshAfterMenu(); }; r.readAsDataURL(file); e.target.value='';
@@ -1168,9 +906,6 @@ document.getElementById('ebMerge').addEventListener('click',function(){
   this.classList.toggle('primary',mergeMode);
   updateEbInfo(mergeMode?'Объединение: выберите иконку':'Режим редактирования');
 });
-document.getElementById('ebSplit').addEventListener('click',()=>{ updateEbInfo('Откройте папку через ✏️ → Разделить'); });
-document.getElementById('ebAddPage').addEventListener('click',addPage);
-document.getElementById('ebDelPage').addEventListener('click',delCurrentPage);
 document.getElementById('ebDone').addEventListener('click',exitEditMode);
 function addPage(){ pages.push({icons:[]}); saveData(); renderHome(); goToPage(pages.length-1,true); }
 function delCurrentPage(){
@@ -1187,281 +922,329 @@ function handleIconTriggerTap(){
   if(iconTaps>=ICON_TAP_COUNT){ iconTaps=0; clearTimeout(iconTimer); openHsSettings(); }
 }
 function handleScreenTap(){
+  if(!triggerModes.has('double')) return;
   screenTaps++; clearTimeout(screenTapTimer);
   screenTapTimer=setTimeout(()=>{ screenTaps=0; },FAST_TAP_WINDOW);
   if(screenTaps>=SCREEN_TAP_COUNT){ screenTaps=0; clearTimeout(screenTapTimer); openHsSettings(); }
 }
-phone.addEventListener('click',(e)=>{
-  if(phone.classList.contains('edit'))return;
-  if(e.target.closest('.cell'))return;
-  if(e.target.closest('#hsSettings')||e.target.closest('#iconMenu')||e.target.closest('#folderView')||e.target.closest('#editBar'))return;
-  if(triggerModes.has('double')) handleScreenTap();
-  if(lockModes.has('taps')) handleLockTap();
-});
-/* долгое нажатие по пустому месту */
-let phoneHoldTimer=null;
-phone.addEventListener('touchstart',(e)=>{
-  if(phone.classList.contains('edit'))return;
-  if(e.target.closest('.cell')||e.target.closest('#hsSettings')||e.target.closest('#iconMenu')||e.target.closest('#editBar'))return;
-  if(!triggerModes.has('hold'))return;
-  phoneHoldTimer=setTimeout(()=>{ openHsSettings(); },HOLD_MS);
-},{passive:true});
-phone.addEventListener('touchend',()=>{ clearTimeout(phoneHoldTimer); });
-phone.addEventListener('touchmove',()=>{ clearTimeout(phoneHoldTimer); });
-phone.addEventListener('mousedown',(e)=>{
-  if(phone.classList.contains('edit'))return;
-  if(e.target.closest('.cell')||e.target.closest('#hsSettings')||e.target.closest('#iconMenu')||e.target.closest('#editBar'))return;
-  if(!triggerModes.has('hold'))return;
-  phoneHoldTimer=setTimeout(()=>{ openHsSettings(); },HOLD_MS);
-});
-phone.addEventListener('mouseup',()=>clearTimeout(phoneHoldTimer));
-phone.addEventListener('mouseleave',()=>clearTimeout(phoneHoldTimer));
-
-function setTriggerIcon(id){ triggerIcon=id; localStorage.setItem('triggerIcon',JSON.stringify(id)); phone.classList.remove('choosing-trigger'); updateChooseLabels(); alert('Иконка-триггер выбрана'); }
-
-/* ===== ВОЗВРАТ К БЛОКИРОВКЕ: ЛОГИКА ===== */
-function handleLockTap(){
-  lockTaps++; clearTimeout(lockTapTimer);
-  lockTapTimer=setTimeout(()=>{ lockTaps=0; },FAST_TAP_WINDOW);
-  if(lockTaps>=LOCK_TAP_COUNT){ lockTaps=0; clearTimeout(lockTapTimer); closeHome(); }
+let homeHoldTimer=null, homeHoldFired=false;
+function homeHoldStart(e){
+  if(!triggerModes.has('hold')) return;
+  if(phone.classList.contains('edit')||phone.classList.contains('choosing-trigger')||phone.classList.contains('choosing-attempt')||phone.classList.contains('choosing-lock')) return;
+  if(e.target.closest('.cell')||e.target.closest('#editBar')||e.target.closest('#hsSettings')||e.target.closest('#iconMenu')||e.target.closest('#folderView')||e.target.closest('#pageDots')) return;
+  homeHoldFired=false;
+  homeHoldTimer=setTimeout(()=>{ homeHoldFired=true; openHsSettings(); },HOLD_MS);
 }
+function homeHoldEnd(){ clearTimeout(homeHoldTimer); }
+
+/* ===== БЛОКИРОВКА: ЛОГИКА ===== */
 function handleLockIconTap(){
   lockIconTaps++; clearTimeout(lockIconTimer);
   lockIconTimer=setTimeout(()=>{ lockIconTaps=0; },ICON_RESET);
   if(lockIconTaps>=LOCK_ICON_TAP_COUNT){ lockIconTaps=0; clearTimeout(lockIconTimer); closeHome(); }
 }
-function setLockIcon(id){ lockIcon=id; localStorage.setItem('lockIcon',JSON.stringify(id)); phone.classList.remove('choosing-lock'); updateChooseLabels(); alert('Иконка блокировки выбрана'); }
-/* свайп вниз сверху экрана */
-phone.addEventListener('touchstart',(e)=>{
-  if(!lockModes.has('swipe'))return; if(phone.classList.contains('edit'))return;
-  if(document.getElementById('hsSettings').classList.contains('open'))return;
-  const t=e.touches[0]; swipeStartY=t.clientY; swipeStartX=t.clientX; swipeStartTime=Date.now();
+function handleLockScreenTap(){
+  if(!lockModes.has('taps')) return;
+  lockTaps++; clearTimeout(lockTapTimer);
+  lockTapTimer=setTimeout(()=>{ lockTaps=0; },FAST_TAP_WINDOW);
+  if(lockTaps>=LOCK_TAP_COUNT){ lockTaps=0; clearTimeout(lockTapTimer); closeHome(); }
+}
+
+const unlockScreen=document.getElementById('unlockScreen');
+unlockScreen.addEventListener('touchstart',(e)=>{
+  homeHoldStart(e);
+  swipeStartY=e.touches[0].clientY; swipeStartX=e.touches[0].clientX; swipeStartTime=Date.now();
 },{passive:true});
-phone.addEventListener('touchend',(e)=>{
-  if(!lockModes.has('swipe')||swipeStartY===null)return;
-  const t=e.changedTouches[0]; const dy=t.clientY-swipeStartY; const dx=Math.abs(t.clientX-swipeStartX);
-  const dt=Date.now()-swipeStartTime;
-  if(swipeStartY<120 && dy>140 && dx<90 && dt<700) closeHome();
+unlockScreen.addEventListener('touchend',(e)=>{
+  homeHoldEnd();
+  if(homeHoldFired){ homeHoldFired=false; return; }
+  const onCell=e.target.closest('.cell');
+  const overlayOpen=document.getElementById('hsSettings').classList.contains('open')||document.getElementById('iconMenu').classList.contains('open');
+  if(lockModes.has('swipe')&&swipeStartY!==null&&!phone.classList.contains('edit')&&!overlayOpen){
+    const ch=e.changedTouches[0]; const dy=ch.clientY-swipeStartY; const dx=Math.abs(ch.clientX-swipeStartX); const dt=Date.now()-swipeStartTime;
+    if(dy>110&&dx<70&&dt<700){ closeHome(); swipeStartY=null; return; }
+  }
+  if(!onCell&&!overlayOpen&&!phone.classList.contains('edit')&&!phone.classList.contains('choosing-trigger')&&!phone.classList.contains('choosing-attempt')&&!phone.classList.contains('choosing-lock')){
+    handleScreenTap(); handleLockScreenTap();
+  }
   swipeStartY=null;
 });
+unlockScreen.addEventListener('mousedown',(e)=>{ if('ontouchstart'in window)return; homeHoldStart(e); });
+unlockScreen.addEventListener('mouseup',(e)=>{ if('ontouchstart'in window)return; homeHoldEnd(); if(homeHoldFired){homeHoldFired=false;return;} const onCell=e.target.closest('.cell'); const overlayOpen=document.getElementById('hsSettings').classList.contains('open')||document.getElementById('iconMenu').classList.contains('open'); if(!onCell&&!overlayOpen&&!phone.classList.contains('edit')){ handleScreenTap(); handleLockScreenTap(); } });
 
-/* ===== НАСТРОЙКИ РАБ. СТОЛА (открытие/закрытие) ===== */
-function openHsSettings(){
-  syncSettingsUI();
-  document.getElementById('hsSettings').classList.add('open');
-  renderAttemptList();
-}
-function closeHsSettings(){
-  const hs=document.getElementById('hsSettings');
-  hs.classList.remove('open','transparent');
-  document.getElementById('transparentPanel').classList.remove('show');
-}
+/* ===== НАСТРОЙКИ РАБОЧЕГО СТОЛА ===== */
+function openHsSettings(){ exitEditMode(); buildAttemptList(); document.getElementById('hsSettings').classList.add('open'); }
+function closeHsSettings(){ document.getElementById('hsSettings').classList.remove('open'); endTweak(); }
 document.getElementById('closeSet').addEventListener('click',closeHsSettings);
 
-/* секции-аккордеон */
-document.querySelectorAll('.set-section-head').forEach(h=>{
-  h.addEventListener('click',()=>{ h.parentElement.classList.toggle('open'); });
-});
+document.querySelectorAll('.set-section-head').forEach(h=>{ h.addEventListener('click',()=>{ h.parentElement.classList.toggle('open'); }); });
 
-/* фон / сброс */
-document.getElementById('rowBg').addEventListener('click',()=>document.getElementById('hsBgInput').click());
-document.getElementById('rowResetBg').addEventListener('click',()=>{ if(confirm('Удалить фон рабочего стола?')) resetHomeBg(); });
-document.getElementById('hsBgInput').addEventListener('change',(e)=>{ const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=(ev)=>changeHomeBg(ev.target.result); r.readAsDataURL(f); e.target.value=''; });
+document.getElementById('rowBg').addEventListener('click',()=>{ document.getElementById('hsBgInput').click(); });
+document.getElementById('rowResetBg').addEventListener('click',()=>{ resetHomeBg(); });
+document.getElementById('hsBgInput').addEventListener('change',(e)=>{ const file=e.target.files[0]; if(!file)return; const r=new FileReader(); r.onload=(ev)=>{ changeHomeBg(ev.target.result); }; r.readAsDataURL(file); e.target.value=''; });
 
-/* сетка */
-function changeCols(v){ GRID_COLS=parseInt(v); document.getElementById('colsVal').textContent=v; localStorage.setItem('gridCols',v); renderHome(); }
-function changeRowH(v){ SLOT_H=parseInt(v); document.getElementById('rowHVal').textContent=v+' px'; localStorage.setItem('slotH',v); renderHome(); }
-function changeGap(v){ SLOT_GAP=parseInt(v); document.getElementById('gapVal').textContent=v+' px'; localStorage.setItem('slotGap',v); renderHome(); }
-
-/* положение иконок */
-let iconOffX=parseInt(localStorage.getItem('iconOffX'))||0, iconOffY=parseInt(localStorage.getItem('iconOffY'))||0;
-function applyIconOffset(){ document.documentElement.style.setProperty('--icon-off-x',iconOffX+'px'); document.documentElement.style.setProperty('--icon-off-y',iconOffY+'px'); }
-function changeIconOffset(axis,v){ v=parseInt(v); if(axis==='x'){ iconOffX=v; document.getElementById('iconXVal').textContent=v+' px'; localStorage.setItem('iconOffX',v); } else { iconOffY=v; document.getElementById('iconYVal').textContent=v+' px'; localStorage.setItem('iconOffY',v); } applyIconOffset(); }
-
-/* прозрачная настройка поверх стола */
-function openTransparent(title){
-  document.getElementById('tpTitle').textContent=title;
-  document.getElementById('hsSettings').classList.add('transparent');
-  document.getElementById('transparentPanel').classList.add('show');
-}
-document.getElementById('tpDone').addEventListener('click',()=>{
-  document.getElementById('hsSettings').classList.remove('transparent');
-  document.getElementById('transparentPanel').classList.remove('show');
-});
-document.getElementById('gridTransparentBtn').onclick=()=>{
-  const tp=document.getElementById('tpContent');
-  tp.innerHTML=`
-    <div class="slider-row"><div class="sl-label"><span>Колонок</span><span id="tpColsVal">${GRID_COLS}</span></div><input type="range" class="size-slider" min="3" max="6" value="${GRID_COLS}" id="tpCols"></div>
-    <div class="slider-row"><div class="sl-label"><span>Высота строки</span><span id="tpRowHVal">${SLOT_H} px</span></div><input type="range" class="size-slider" min="60" max="120" value="${SLOT_H}" id="tpRowH"></div>
-    <div class="slider-row"><div class="sl-label"><span>Промежуток</span><span id="tpGapVal">${SLOT_GAP} px</span></div><input type="range" class="size-slider" min="0" max="24" value="${SLOT_GAP}" id="tpGap"></div>`;
-  tp.querySelector('#tpCols').oninput=function(){ document.getElementById('tpColsVal').textContent=this.value; document.getElementById('colsSlider').value=this.value; changeCols(this.value); };
-  tp.querySelector('#tpRowH').oninput=function(){ document.getElementById('tpRowHVal').textContent=this.value+' px'; document.getElementById('rowHSlider').value=this.value; changeRowH(this.value); };
-  tp.querySelector('#tpGap').oninput=function(){ document.getElementById('tpGapVal').textContent=this.value+' px'; document.getElementById('gapSlider').value=this.value; changeGap(this.value); };
-  openTransparent('Сетка рабочего стола');
-};
-document.getElementById('iconPosTransparentBtn').onclick=()=>{
-  const tp=document.getElementById('tpContent');
-  tp.innerHTML=`
-    <div class="slider-row"><div class="sl-label"><span>По горизонтали</span><span id="tpIxVal">${iconOffX} px</span></div><input type="range" class="size-slider" min="-60" max="60" value="${iconOffX}" id="tpIx"></div>
-    <div class="slider-row"><div class="sl-label"><span>По вертикали</span><span id="tpIyVal">${iconOffY} px</span></div><input type="range" class="size-slider" min="-60" max="120" value="${iconOffY}" id="tpIy"></div>`;
-  tp.querySelector('#tpIx').oninput=function(){ document.getElementById('tpIxVal').textContent=this.value+' px'; document.getElementById('iconXSlider').value=this.value; changeIconOffset('x',this.value); };
-  tp.querySelector('#tpIy').oninput=function(){ document.getElementById('tpIyVal').textContent=this.value+' px'; document.getElementById('iconYSlider').value=this.value; changeIconOffset('y',this.value); };
-  openTransparent('Положение иконок');
-};
-
-/* переключатели иконок */
 document.getElementById('rowEdit').addEventListener('click',()=>{ if(phone.classList.contains('edit')){ exitEditMode(); } else { enterEditMode(); closeHsSettings(); } });
-document.getElementById('rowBadges').addEventListener('click',()=>{
-  const tg=document.getElementById('tgBadges'); tg.classList.toggle('on');
-  const on=tg.classList.contains('on'); localStorage.setItem('showBadges',on?'1':'0');
-  document.body.classList.toggle('hide-badges',!on);
-});
-/* ===== ТОГГЛЫ ТРИГГЕРОВ ===== */
-document.querySelectorAll('.trigger-opt').forEach(opt=>{
-  opt.addEventListener('click',()=>{
-    const mode=opt.dataset.mode;
-    if(triggerModes.has(mode)) triggerModes.delete(mode); else triggerModes.add(mode);
-    if(triggerModes.size===0) triggerModes.add(mode);
-    saveModes(); syncTriggerUI();
-  });
-});
-document.querySelectorAll('.ci-save').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const t=btn.dataset.save;
-    if(t==='hold'){ HOLD_MS=Math.round((parseFloat(document.getElementById('inHold').value)||2)*1000); localStorage.setItem('holdDuration',HOLD_MS); document.getElementById('holdDuration').textContent='Длительность: '+(HOLD_MS/1000)+' сек'; }
-    else if(t==='double'){ SCREEN_TAP_COUNT=parseInt(document.getElementById('inDouble').value)||2; localStorage.setItem('screenTapCount',SCREEN_TAP_COUNT); document.getElementById('tapCount').textContent='Количество: '+SCREEN_TAP_COUNT+' нажатия'; }
-    else if(t==='corner'){ ICON_TAP_COUNT=parseInt(document.getElementById('inCorner').value)||3; localStorage.setItem('iconTapCount',ICON_TAP_COUNT); document.getElementById('iconTapCount').textContent='Количество: '+ICON_TAP_COUNT+' нажатия'; }
-    else if(t==='locktaps'){ LOCK_TAP_COUNT=parseInt(document.getElementById('inLockTaps').value)||3; localStorage.setItem('lockTapCount',LOCK_TAP_COUNT); document.getElementById('lockTapCount').textContent='Количество: '+LOCK_TAP_COUNT+' нажатия'; }
-    else if(t==='lockicon'){ LOCK_ICON_TAP_COUNT=parseInt(document.getElementById('inLockIcon').value)||2; localStorage.setItem('lockIconTapCount',LOCK_ICON_TAP_COUNT); document.getElementById('lockIconTapCount').textContent='Количество: '+LOCK_ICON_TAP_COUNT+' нажатия'; }
-    btn.textContent='✓'; setTimeout(()=>btn.textContent='OK',1000);
-  });
-});
-document.getElementById('chooseIconBtn').addEventListener('click',()=>{
-  closeHsSettings(); phone.classList.add('choosing-trigger');
-  alert('Нажмите на иконку, которая будет триггером настроек');
-});
+document.getElementById('rowBadges').addEventListener('click',()=>{ const tg=document.getElementById('tgBadges'); tg.classList.toggle('on'); phone.classList.toggle('hide-badges',!tg.classList.contains('on')); localStorage.setItem('hideBadges', tg.classList.contains('on')?'0':'1'); });
+document.getElementById('rowMerge').addEventListener('click',()=>{ enterEditMode(); closeHsSettings(); mergeMode=true; mergeFirst=null; document.getElementById('ebMerge').classList.add('primary'); updateEbInfo('Объединение: выберите иконку'); });
+document.getElementById('rowAddPage').addEventListener('click',addPage);
+document.getElementById('rowDelPage').addEventListener('click',delCurrentPage);
 
-/* ===== ТОГГЛЫ ВОЗВРАТА К БЛОКИРОВКЕ ===== */
-document.querySelectorAll('.lock-opt').forEach(opt=>{
-  opt.addEventListener('click',()=>{
-    const mode=opt.dataset.mode;
-    if(lockModes.has(mode)) lockModes.delete(mode); else lockModes.add(mode);
-    saveLockModes(); syncLockUI();
-  });
-});
-document.getElementById('chooseLockIconBtn').addEventListener('click',()=>{
-  closeHsSettings(); phone.classList.add('choosing-lock');
-  alert('Нажмите на иконку, которая будет возвращать к блокировке');
-});
+function changeCols(v){ GRID_COLS=parseInt(v); document.getElementById('colsVal').textContent=v; localStorage.setItem('gridCols',v); renderHome(); }
+function changeRowH(v){ SLOT_H=parseInt(v); document.getElementById('rowHVal').textContent=v+' px'; localStorage.setItem('slotH',v); document.querySelectorAll('.grid').forEach(g=>g.style.setProperty('--slot-h',v+'px')); }
+function changeGap(v){ SLOT_GAP=parseInt(v); document.getElementById('gapVal').textContent=v+' px'; localStorage.setItem('slotGap',v); document.querySelectorAll('.grid').forEach(g=>g.style.setProperty('--slot-gap',v+'px')); }
+function changeIconOffset(axis,v){ v=parseInt(v); if(axis==='x'){ document.documentElement.style.setProperty('--icon-x',v+'px'); document.getElementById('iconXVal').textContent=v+' px'; localStorage.setItem('iconX',v);} else { document.documentElement.style.setProperty('--icon-y',v+'px'); document.getElementById('iconYVal').textContent=v+' px'; localStorage.setItem('iconY',v);} }
+function changeIconOpacity(v){ ICON_OPACITY=parseInt(v); document.documentElement.style.setProperty('--icon-opacity',(v/100).toFixed(2)); document.getElementById('iconOpVal').textContent=v+'%'; localStorage.setItem('iconOpacity',v); }
+function changeBadgeCfg(key,v){ v=parseInt(v); BADGE_CFG[key]=v; document.getElementById('bg'+key.charAt(0).toUpperCase()+key.slice(1)+'Val').textContent=v+' px'; saveBadgeCfg(); renderHome(); }
 
-/* ===== ПОПЫТКИ НА ИКОНКАХ ===== */
-document.getElementById('saveAttemptCount').addEventListener('click',()=>{
-  ATTEMPT_COUNT=Math.max(1,Math.min(5,parseInt(document.getElementById('inAttemptCount').value)||2));
-  localStorage.setItem('attemptCount',ATTEMPT_COUNT);
-  renderAttemptList(); renderHome();
-});
-document.getElementById('clearAttempts').addEventListener('click',()=>{
-  if(!confirm('Очистить историю введённых паролей?'))return;
-  passwordAttempts=[]; localStorage.setItem('passwordAttempts','[]'); renderAttemptList(); renderHome();
-});
-function renderAttemptList(){
-  const box=document.getElementById('attemptList'); box.innerHTML='';
-  for(let i=0;i<ATTEMPT_COUNT;i++){
-    const row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:6px;background:rgba(255,255,255,0.06);border-radius:10px;padding:8px 10px;';
-    const val=passwordAttempts[i];
-    const tid=attemptTargets[i];
-    let target='—';
-    if(tid){ const f=findIcon(tid); if(f) target=f.icon.name||'иконка'; }
-    row.innerHTML=`<span style="font-size:13px;opacity:.7;width:54px;">#${i+1}</span>
-      <span style="font-size:15px;font-weight:600;width:60px;">${val!==undefined?val:'—'}</span>
-      <span style="flex:1;font-size:12px;opacity:.7;">${target}</span>
-      <button data-idx="${i}" class="pickAttempt" style="background:rgba(255,159,10,0.2);border:1px solid #ff9f0a;color:#ff9f0a;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;">📌 Иконка</button>`;
-    box.appendChild(row);
-  }
-  box.querySelectorAll('.pickAttempt').forEach(b=>{
-    b.addEventListener('click',()=>{
-      choosingAttemptIndex=parseInt(b.dataset.idx);
-      closeHsSettings(); phone.classList.add('choosing-attempt');
-      alert('Нажмите иконку, на которой показать попытку #'+(choosingAttemptIndex+1));
-    });
+/* ===== TWEAK-РЕЖИМ ===== */
+const tweakDefs={
+  grid:{title:'Сетка рабочего стола',rows:[['Колонок','colsSlider',3,6,'colsVal','changeCols',''],['Высота строки','rowHSlider',60,120,'rowHVal','changeRowH','px'],['Промежуток','gapSlider',0,24,'gapVal','changeGap','px']]},
+  iconpos:{title:'Положение иконок',rows:[['По горизонтали','iconXSlider',-60,60,'iconXVal','changeIconOffsetX','px'],['По вертикали','iconYSlider',-60,120,'iconYVal','changeIconOffsetY','px']]},
+  iconop:{title:'Прозрачность иконок',rows:[['Прозрачность','iconOpSlider',0,100,'iconOpVal','changeIconOpacity','%']]},
+  badge:{title:'Уведомления',rows:[['Гориз.','bgBx',-40,60,'bgBxVal','badgeBx','px'],['Верт.','bgBy',-30,60,'bgByVal','badgeBy','px'],['Ширина','bgBw',10,60,'bgBwVal','badgeBw','px'],['Высота','bgBh',10,50,'bgBhVal','badgeBh','px'],['Шрифт','bgBfs',7,30,'bgBfsVal','badgeBfs','px']]}
+};
+function changeIconOffsetX(v){changeIconOffset('x',v);}
+function changeIconOffsetY(v){changeIconOffset('y',v);}
+function badgeBx(v){changeBadgeCfg('bx',v);} function badgeBy(v){changeBadgeCfg('by',v);}
+function badgeBw(v){changeBadgeCfg('bw',v);} function badgeBh(v){changeBadgeCfg('bh',v);} function badgeBfs(v){changeBadgeCfg('bfs',v);}
+const tweakFns={changeCols,changeRowH,changeGap,changeIconOffsetX,changeIconOffsetY,changeIconOpacity,badgeBx,badgeBy,badgeBw,badgeBh,badgeBfs};
+document.querySelectorAll('.tweak-launch').forEach(btn=>{ btn.addEventListener('click',()=>startTweak(btn.dataset.tweak)); });
+function startTweak(key){
+  const def=tweakDefs[key]; if(!def)return;
+  document.getElementById('tpTitle').textContent='🎛 '+def.title;
+  const c=document.getElementById('tpContent'); c.innerHTML='';
+  def.rows.forEach(r=>{
+    const [label,sliderId,min,max,valId,fnName,unit]=r;
+    const cur=document.getElementById(sliderId)?document.getElementById(sliderId).value:min;
+    const wrap=document.createElement('div'); wrap.className='slider-row';
+    wrap.innerHTML=`<div class="sl-label"><span>${label}</span><span id="tw_${valId}">${cur}${unit}</span></div>`;
+    const inp=document.createElement('input'); inp.type='range'; inp.className='size-slider'; inp.min=min; inp.max=max; inp.value=cur;
+    inp.addEventListener('input',()=>{ if(tweakFns[fnName])tweakFns[fnName](inp.value); document.getElementById('tw_'+valId).textContent=inp.value+unit; const orig=document.getElementById(sliderId); if(orig)orig.value=inp.value; });
+    wrap.appendChild(inp); c.appendChild(wrap);
   });
+  document.getElementById('hsSettings').classList.add('tweak');
 }
-function setAttemptTarget(id){
-  if(choosingAttemptIndex<0)return;
-  attemptTargets[choosingAttemptIndex]=id;
-  try{localStorage.setItem('attemptTargets',JSON.stringify(attemptTargets));}catch(e){}
-  choosingAttemptIndex=-1; phone.classList.remove('choosing-attempt');
-  renderHome(); alert('Иконка для попытки выбрана');
-}
+function endTweak(){ document.getElementById('hsSettings').classList.remove('tweak'); }
+document.getElementById('tpDone').addEventListener('click',endTweak);
 
-/* ===== СИНХРОНИЗАЦИЯ UI ===== */
-function syncTriggerUI(){
+/* ===== ТРИГГЕРЫ: UI ===== */
+function refreshTriggerUI(){
   document.getElementById('tgHold').classList.toggle('on',triggerModes.has('hold'));
   document.getElementById('tgDouble').classList.toggle('on',triggerModes.has('double'));
   document.getElementById('tgCorner').classList.toggle('on',triggerModes.has('corner'));
   document.getElementById('cfgHold').classList.toggle('show',triggerModes.has('hold'));
   document.getElementById('cfgDouble').classList.toggle('show',triggerModes.has('double'));
   document.getElementById('cfgCorner').classList.toggle('show',triggerModes.has('corner'));
+  document.getElementById('chooseIconBtn').style.display=triggerModes.has('corner')?'block':'none';
+  document.getElementById('holdDuration').textContent='Длительность: '+(HOLD_MS/1000)+' сек';
+  document.getElementById('tapCount').textContent='Количество: '+SCREEN_TAP_COUNT+' нажатия';
+  document.getElementById('iconTapCount').textContent='Количество: '+ICON_TAP_COUNT+' нажатия';
+  document.getElementById('inHold').value=HOLD_MS/1000;
+  document.getElementById('inDouble').value=SCREEN_TAP_COUNT;
+  document.getElementById('inCorner').value=ICON_TAP_COUNT;
 }
-function syncLockUI(){
+document.querySelectorAll('.trigger-opt').forEach(row=>{ row.addEventListener('click',()=>{ const m=row.dataset.mode; if(triggerModes.has(m))triggerModes.delete(m); else triggerModes.add(m); saveModes(); refreshTriggerUI(); }); });
+document.querySelectorAll('.ci-save').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const t=b.dataset.save;
+    if(t==='hold'){ let v=parseFloat(document.getElementById('inHold').value); v=Math.min(5,Math.max(0.5,v||2)); HOLD_MS=v*1000; localStorage.setItem('holdDuration',HOLD_MS); }
+    else if(t==='double'){ let v=parseInt(document.getElementById('inDouble').value); v=Math.min(5,Math.max(2,v||2)); SCREEN_TAP_COUNT=v; localStorage.setItem('screenTapCount',v); }
+    else if(t==='corner'){ let v=parseInt(document.getElementById('inCorner').value); v=Math.min(5,Math.max(2,v||3)); ICON_TAP_COUNT=v; localStorage.setItem('iconTapCount',v); }
+    else if(t==='locktaps'){ let v=parseInt(document.getElementById('inLockTaps').value); v=Math.min(6,Math.max(2,v||3)); LOCK_TAP_COUNT=v; localStorage.setItem('lockTapCount',v); refreshLockUI(); }
+    else if(t==='lockicon'){ let v=parseInt(document.getElementById('inLockIcon').value); v=Math.min(5,Math.max(2,v||2)); LOCK_ICON_TAP_COUNT=v; localStorage.setItem('lockIconTapCount',v); refreshLockUI(); }
+    refreshTriggerUI(); b.textContent='✓'; setTimeout(()=>b.textContent='OK',800);
+  });
+});
+document.getElementById('chooseIconBtn').addEventListener('click',()=>{ closeHsSettings(); phone.classList.add('choosing-trigger'); showChooseHint('📌 Нажмите на иконку-триггер'); });
+function setTriggerIcon(id){ triggerIcon=id; localStorage.setItem('triggerIcon',JSON.stringify(id)); phone.classList.remove('choosing-trigger'); hideChooseHint(); openHsSettings(); }
+
+/* ===== БЛОКИРОВКА: UI ===== */
+function refreshLockUI(){
   document.getElementById('tgLockSwipe').classList.toggle('on',lockModes.has('swipe'));
   document.getElementById('tgLockTaps').classList.toggle('on',lockModes.has('taps'));
   document.getElementById('tgLockIcon').classList.toggle('on',lockModes.has('icon'));
   document.getElementById('cfgLockTaps').classList.toggle('show',lockModes.has('taps'));
   document.getElementById('cfgLockIcon').classList.toggle('show',lockModes.has('icon'));
+  document.getElementById('chooseLockIconBtn').style.display=lockModes.has('icon')?'block':'none';
+  document.getElementById('lockTapCount').textContent='Количество: '+LOCK_TAP_COUNT+' нажатия';
+  document.getElementById('lockIconTapCount').textContent='Количество: '+LOCK_ICON_TAP_COUNT+' нажатия';
+  document.getElementById('inLockTaps').value=LOCK_TAP_COUNT;
+  document.getElementById('inLockIcon').value=LOCK_ICON_TAP_COUNT;
 }
-function updateChooseLabels(){
-  document.getElementById('chooseIconBtn').textContent=triggerIcon?'📌 Иконка-триггер выбрана ✓':'📌 Выбрать иконку-триггер';
-  document.getElementById('chooseLockIconBtn').textContent=lockIcon?'🔒 Иконка блокировки выбрана ✓':'🔒 Выбрать иконку блокировки';
+document.querySelectorAll('.lock-opt').forEach(row=>{ row.addEventListener('click',()=>{ const m=row.dataset.mode; if(lockModes.has(m))lockModes.delete(m); else lockModes.add(m); saveLockModes(); refreshLockUI(); }); });
+document.getElementById('chooseLockIconBtn').addEventListener('click',()=>{ closeHsSettings(); phone.classList.add('choosing-lock'); showChooseHint('🔒 Нажмите на иконку блокировки'); });
+function setLockIcon(id){ lockIcon=id; localStorage.setItem('lockIcon',JSON.stringify(id)); phone.classList.remove('choosing-lock'); hideChooseHint(); openHsSettings(); }
+
+/* ===== ПОПЫТКИ: UI ===== */
+function buildAttemptList(){
+  const list=document.getElementById('attemptList'); list.innerHTML='';
+  document.getElementById('inAttemptCount').value=ATTEMPT_COUNT;
+  for(let i=0;i<ATTEMPT_COUNT;i++){
+    const row=document.createElement('div'); row.style.cssText='display:flex;gap:8px;align-items:center;background:rgba(255,255,255,0.06);padding:10px;border-radius:10px;';
+    const tid=attemptTargets[i]; let label='не выбрана';
+    if(tid){ const f=findIcon(tid); if(f) label=f.icon.name||'иконка'; }
+    const val=passwordAttempts[i]!==undefined?passwordAttempts[i]:'—';
+    row.innerHTML=`<span style="flex:1;font-size:13px;">Попытка ${i+1}: <b>${val}</b><br><small style="opacity:.55">→ ${label}</small></span>`;
+    const btn=document.createElement('button'); btn.textContent='📌 Выбрать иконку'; btn.style.cssText='background:rgba(10,132,255,0.15);border:1px solid #0a84ff;color:#0a84ff;border-radius:8px;padding:8px 10px;font-size:12px;cursor:pointer;';
+    btn.addEventListener('click',()=>{ choosingAttemptIndex=i; closeHsSettings(); phone.classList.add('choosing-attempt'); showChooseHint('🔢 Иконка для попытки '+(i+1)); });
+    row.appendChild(btn); list.appendChild(row);
+  }
 }
-function syncSettingsUI(){
+function setAttemptTarget(id){
+  if(choosingAttemptIndex<0)return;
+  attemptTargets[choosingAttemptIndex]=id; try{localStorage.setItem('attemptTargets',JSON.stringify(attemptTargets));}catch(e){}
+  choosingAttemptIndex=-1; phone.classList.remove('choosing-attempt'); hideChooseHint(); renderHome(); openHsSettings();
+}
+document.getElementById('saveAttemptCount').addEventListener('click',()=>{
+  let v=parseInt(document.getElementById('inAttemptCount').value); v=Math.min(5,Math.max(1,v||2));
+  ATTEMPT_COUNT=v; localStorage.setItem('attemptCount',v);
+  if(attemptTargets.length>v) attemptTargets=attemptTargets.slice(0,v);
+  try{localStorage.setItem('attemptTargets',JSON.stringify(attemptTargets));}catch(e){}
+  buildAttemptList(); renderHome();
+  const b=document.getElementById('saveAttemptCount'); b.textContent='✓'; setTimeout(()=>b.textContent='OK',800);
+});
+document.getElementById('clearAttempts').addEventListener('click',()=>{
+  if(!confirm('Очистить историю введённых паролей?'))return;
+  passwordAttempts=[]; localStorage.removeItem('passwordAttempts'); buildAttemptList(); renderHome();
+});
+
+/* ===== ПОДСКАЗКА ВЫБОРА ИКОНКИ ===== */
+let chooseHintEl=null;
+function showChooseHint(text){
+  hideChooseHint();
+  chooseHintEl=document.createElement('div');
+  chooseHintEl.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:calc(28px + var(--ui-bottom));background:rgba(10,132,255,0.92);color:#fff;padding:12px 20px;border-radius:20px;font-size:14px;z-index:400;box-shadow:0 6px 24px rgba(0,0,0,0.4);display:flex;gap:12px;align-items:center;';
+  chooseHintEl.innerHTML=`<span>${text}</span>`;
+  const cancel=document.createElement('button');
+  cancel.textContent='Отмена';
+  cancel.style.cssText='background:rgba(255,255,255,0.25);border:none;color:#fff;border-radius:14px;padding:6px 12px;font-size:13px;cursor:pointer;';
+  cancel.addEventListener('click',()=>{
+    phone.classList.remove('choosing-trigger','choosing-attempt','choosing-lock');
+    choosingAttemptIndex=-1; hideChooseHint(); openHsSettings();
+  });
+  chooseHintEl.appendChild(cancel);
+  document.body.appendChild(chooseHintEl);
+}
+function hideChooseHint(){ if(chooseHintEl){ chooseHintEl.remove(); chooseHintEl=null; } }
+
+/* ===== ПЕРЕТАСКИВАНИЕ ИКОНОК (DRAG & DROP) ===== */
+let dragState=null;
+function attachDragToCells(){
+  document.querySelectorAll('#pagesTrack .cell, #dock .cell').forEach(cell=>{
+    let holdTimer=null;
+    const startDrag=(clientX,clientY)=>{
+      if(!phone.classList.contains('edit')) return;
+      const id=cell.dataset.id; const f=findIcon(id); if(!f)return;
+      const rect=cell.getBoundingClientRect();
+      const ghost=cell.cloneNode(true); ghost.classList.add('drag-ghost');
+      ghost.style.cssText+=`position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;height:${rect.height}px;z-index:500;opacity:0.85;pointer-events:none;transform:scale(1.12);`;
+      document.body.appendChild(ghost);
+      cell.style.opacity='0.25';
+      dragState={id,f,ghost,offX:clientX-rect.left,offY:clientY-rect.top,cell};
+    };
+    const onStartTouch=(e)=>{ if(!phone.classList.contains('edit'))return; const t=e.touches[0]; holdTimer=setTimeout(()=>startDrag(t.clientX,t.clientY),180); };
+    cell.addEventListener('touchstart',onStartTouch,{passive:true});
+    cell.addEventListener('touchmove',(e)=>{
+      if(holdTimer&&!dragState){ clearTimeout(holdTimer); holdTimer=null; }
+      if(!dragState)return; e.preventDefault();
+      const t=e.touches[0]; moveGhost(t.clientX,t.clientY); highlightTarget(t.clientX,t.clientY);
+    },{passive:false});
+    cell.addEventListener('touchend',(e)=>{ clearTimeout(holdTimer); holdTimer=null; if(dragState){ const t=e.changedTouches[0]; finishDrag(t.clientX,t.clientY); } });
+    cell.addEventListener('touchcancel',()=>{ clearTimeout(holdTimer); cancelDrag(); });
+    cell.addEventListener('mousedown',(e)=>{ if(!phone.classList.contains('edit'))return; startDrag(e.clientX,e.clientY); const mm=(ev)=>{ if(!dragState)return; moveGhost(ev.clientX,ev.clientY); highlightTarget(ev.clientX,ev.clientY); }; const mu=(ev)=>{ document.removeEventListener('mousemove',mm); document.removeEventListener('mouseup',mu); if(dragState)finishDrag(ev.clientX,ev.clientY); }; document.addEventListener('mousemove',mm); document.addEventListener('mouseup',mu); });
+  });
+}
+function moveGhost(x,y){ if(!dragState)return; dragState.ghost.style.left=(x-dragState.offX)+'px'; dragState.ghost.style.top=(y-dragState.offY)+'px'; }
+function highlightTarget(x,y){
+  document.querySelectorAll('.slot.empty.drop-hl,.cell.drop-hl').forEach(s=>s.classList.remove('drop-hl'));
+  const el=document.elementFromPoint(x,y); if(!el)return;
+  const slot=el.closest('.slot.empty'); const overCell=el.closest('.cell');
+  if(slot) slot.classList.add('drop-hl');
+  else if(overCell&&overCell!==dragState.cell) overCell.classList.add('drop-hl');
+}
+function finishDrag(x,y){
+  if(!dragState)return;
+  const el=document.elementFromPoint(x,y);
+  document.querySelectorAll('.slot.empty.drop-hl,.cell.drop-hl').forEach(s=>s.classList.remove('drop-hl'));
+  let handled=false;
+  if(el){
+    const slot=el.closest('.slot.empty');
+    const overCell=el.closest('.cell');
+    if(slot){ moveIconToSlot(dragState.id,parseInt(slot.dataset.page),parseInt(slot.dataset.row),parseInt(slot.dataset.col)); handled=true; }
+    else if(overCell&&overCell.dataset.id!==dragState.id){
+      const targetId=overCell.dataset.id; const tf=findIcon(targetId); const sf=findIcon(dragState.id);
+      if(tf&&sf){ const a=sf.icon,b=tf.icon; mergeIcons(b,a); handled=true; }
+    }
+  }
+  cancelDrag();
+  if(handled){ saveData(); }
+  renderHome();
+}
+function moveIconToSlot(id,page,row,col){
+  const f=findIcon(id); if(!f)return;
+  const icon=f.icon;
+  if(f.inDock){ const di=dock.findIndex(x=>x.id===id); if(di>=0)dock.splice(di,1); }
+  else if(f.container){ const ci=f.container.findIndex(x=>x.id===id); if(ci>=0)f.container.splice(ci,1); }
+  icon.col=col; icon.row=row;
+  if(page>=0&&pages[page]) pages[page].icons.push(icon);
+  saveData();
+}
+function cancelDrag(){ if(!dragState)return; if(dragState.ghost)dragState.ghost.remove(); if(dragState.cell)dragState.cell.style.opacity=''; dragState=null; }
+
+/* перерисовка с навешиванием drag */
+const _renderHome=renderHome;
+renderHome=function(){ _renderHome(); attachDragToCells(); };
+
+/* ===== ЗАГРУЗКА СОХРАНЁННЫХ НАСТРОЕК ===== */
+function restoreSettings(){
+  /* блокировка */
+  const lockBg=localStorage.getItem('lockBg');
+  if(lockBg){ const wp=document.getElementById('wallpaper'); wp.style.backgroundImage=`url('${lockBg}')`; wp.style.backgroundSize='cover'; wp.style.backgroundPosition='center'; }
+  const ks=localStorage.getItem('keySize'); if(ks){ changeKeySize(ks); document.getElementById('sizeSlider').value=ks; }
+  const psx=localStorage.getItem('pinStepX'); if(psx!==null){ pinStepX=parseInt(psx); document.getElementById('pinXSlider').value=psx; document.getElementById('pinXVal').textContent=psx+' px'; }
+  const psy=localStorage.getItem('pinStepY'); if(psy!==null){ pinStepY=parseInt(psy); document.getElementById('pinYSlider').value=psy; document.getElementById('pinYVal').textContent=psy+' px'; }
+  applyPinSpread();
+  const pby=localStorage.getItem('pinBlockY'); if(pby!==null){ changePinBlockY(pby); document.getElementById('pinBlockSlider').value=pby; }
+  const st=localStorage.getItem('style')||'ios'; setStyle(st,document.querySelector(`[data-style="${st}"]`));
+
+  /* рабочий стол: фон */
+  const homeBg=localStorage.getItem('homeBg');
+  if(homeBg){ const hw=document.getElementById('homeWallpaper'); hw.style.backgroundImage=`url('${homeBg}')`; hw.style.backgroundSize='cover'; hw.style.backgroundPosition='center'; }
+
+  /* рабочий стол: сетка */
   document.getElementById('colsSlider').value=GRID_COLS; document.getElementById('colsVal').textContent=GRID_COLS;
   document.getElementById('rowHSlider').value=SLOT_H; document.getElementById('rowHVal').textContent=SLOT_H+' px';
   document.getElementById('gapSlider').value=SLOT_GAP; document.getElementById('gapVal').textContent=SLOT_GAP+' px';
-  document.getElementById('iconXSlider').value=iconOffX; document.getElementById('iconXVal').textContent=iconOffX+' px';
-  document.getElementById('iconYSlider').value=iconOffY; document.getElementById('iconYVal').textContent=iconOffY+' px';
-  document.getElementById('inHold').value=HOLD_MS/1000; document.getElementById('holdDuration').textContent='Длительность: '+(HOLD_MS/1000)+' сек';
-  document.getElementById('inDouble').value=SCREEN_TAP_COUNT; document.getElementById('tapCount').textContent='Количество: '+SCREEN_TAP_COUNT+' нажатия';
-  document.getElementById('inCorner').value=ICON_TAP_COUNT; document.getElementById('iconTapCount').textContent='Количество: '+ICON_TAP_COUNT+' нажатия';
-  document.getElementById('inLockTaps').value=LOCK_TAP_COUNT; document.getElementById('lockTapCount').textContent='Количество: '+LOCK_TAP_COUNT+' нажатия';
-  document.getElementById('inLockIcon').value=LOCK_ICON_TAP_COUNT; document.getElementById('lockIconTapCount').textContent='Количество: '+LOCK_ICON_TAP_COUNT+' нажатия';
-  document.getElementById('inAttemptCount').value=ATTEMPT_COUNT;
-  if(uiInsets){
-    document.getElementById('uiTopSlider').value=uiInsets.top; document.getElementById('uiTopVal').textContent=uiInsets.top+' px';
-    document.getElementById('uiBottomSlider').value=uiInsets.bottom; document.getElementById('uiBottomVal').textContent=uiInsets.bottom+' px';
-    document.getElementById('uiLeftSlider').value=uiInsets.left; document.getElementById('uiLeftVal').textContent=uiInsets.left+' px';
-    document.getElementById('uiRightSlider').value=uiInsets.right; document.getElementById('uiRightVal').textContent=uiInsets.right+' px';
-  }
-  syncTriggerUI(); syncLockUI(); updateChooseLabels();
+
+  /* положение и прозрачность иконок */
+  const ix=localStorage.getItem('iconX'); if(ix!==null){ document.documentElement.style.setProperty('--icon-x',ix+'px'); document.getElementById('iconXSlider').value=ix; document.getElementById('iconXVal').textContent=ix+' px'; }
+  const iy=localStorage.getItem('iconY'); if(iy!==null){ document.documentElement.style.setProperty('--icon-y',iy+'px'); document.getElementById('iconYSlider').value=iy; document.getElementById('iconYVal').textContent=iy+' px'; }
+  document.documentElement.style.setProperty('--icon-opacity',(ICON_OPACITY/100).toFixed(2));
+  document.getElementById('iconOpSlider').value=ICON_OPACITY; document.getElementById('iconOpVal').textContent=ICON_OPACITY+'%';
+
+  /* бейджи */
+  ['bx','by','bw','bh','bfs'].forEach(k=>{ const el=document.getElementById('bg'+k.charAt(0).toUpperCase()+k.slice(1)); if(el){ el.value=BADGE_CFG[k]; document.getElementById('bg'+k.charAt(0).toUpperCase()+k.slice(1)+'Val').textContent=BADGE_CFG[k]+' px'; } });
+  const hb=localStorage.getItem('hideBadges'); if(hb==='1'){ phone.classList.add('hide-badges'); document.getElementById('tgBadges').classList.remove('on'); }
+
+  /* триггеры / блокировка / попытки */
+  refreshTriggerUI(); refreshLockUI();
+
+  /* первая секция раскрыта */
+  const first=document.querySelector('.set-section'); if(first)first.classList.add('open');
 }
 
 /* ===== ИНИЦИАЛИЗАЦИЯ ===== */
-function init(){
-  /* экран блокировки */
+window.addEventListener('load',()=>{
+  fitViewport();
   buildDots();
-  const savedBg=localStorage.getItem('lockBg');
-  if(savedBg){ const wp=document.getElementById('wallpaper'); wp.style.backgroundImage=`url('${savedBg}')`; wp.style.backgroundSize='cover'; wp.style.backgroundPosition='center'; }
-  const savedKeySize=localStorage.getItem('keySize'); if(savedKeySize){ document.documentElement.style.setProperty('--key-size',savedKeySize+'px'); document.getElementById('sizeSlider').value=savedKeySize; document.getElementById('sizeValue').textContent=savedKeySize+' px'; }
-  pinStepX=parseInt(localStorage.getItem('pinStepX'))||0; pinStepY=parseInt(localStorage.getItem('pinStepY'))||0;
-  const pbx=document.getElementById('pinXSlider'); if(pbx){ pbx.value=pinStepX; document.getElementById('pinXVal').textContent=pinStepX+' px'; }
-  const pby=document.getElementById('pinYSlider'); if(pby){ pby.value=pinStepY; document.getElementById('pinYVal').textContent=pinStepY+' px'; }
-  applyPinSpread();
-  const pBlock=parseInt(localStorage.getItem('pinBlockY'))||0;
-  document.documentElement.style.setProperty('--pin-block-y',pBlock+'px');
-  const pbs=document.getElementById('pinBlockSlider'); if(pbs){ pbs.value=pBlock; document.getElementById('pinBlockVal').textContent=pBlock+' px'; }
-  const savedStyle=localStorage.getItem('style')||'ios'; setStyle(savedStyle,document.querySelector(`[data-style="${savedStyle}"]`));
-  const savedScreen=localStorage.getItem('screenPreset')||'auto'; setScreenPreset(savedScreen,document.querySelector(`[data-screen="${savedScreen}"]`));
+  restoreSettings();
+});
+fitViewport();
+buildDots();
 
-  /* рабочий стол */
-  const homeBg=localStorage.getItem('homeBg');
-  if(homeBg){ const hw=document.getElementById('homeWallpaper'); hw.style.backgroundImage=`url('${homeBg}')`; hw.style.backgroundSize='cover'; hw.style.backgroundPosition='center'; }
-  applyIconOffset();
-  applyUiInsets();
-  const showBadges=localStorage.getItem('showBadges'); if(showBadges==='0'){ document.body.classList.add('hide-badges'); document.getElementById('tgBadges').classList.remove('on'); }
-  updateChooseLabels();
-}
-init();
+/* предотвращаем зум двойным тапом и контекстное меню на длинных нажатиях */
+document.addEventListener('gesturestart',(e)=>e.preventDefault());
+document.addEventListener('contextmenu',(e)=>{ if(document.body.classList.contains('unlocked')) e.preventDefault(); });
 </script>
 </body>
 </html>
