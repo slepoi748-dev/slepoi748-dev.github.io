@@ -83,18 +83,23 @@ button{cursor:pointer}
   background:#000;
 }
 
-.wallpaper,#homeWallpaper{
+.wallpaper,
+#homeWallpaper {
   position:absolute;
   left:0;
   right:0;
-  top:calc(-1 * var(--bg-bleed-top));
-  bottom:calc(-1 * var(--bg-bleed-bottom));
+
+  top:calc(0px - var(--bg-bleed-top));
+  bottom:calc(0px - var(--bg-bleed-bottom));
+
   width:100%;
   height:auto;
+
   background:#000;
   background-size:cover;
   background-position:center var(--bg-pos-y);
   background-repeat:no-repeat;
+
   z-index:0;
   pointer-events:none;
 }
@@ -230,6 +235,7 @@ body.unlocked .lock-screen{display:none}
   flex-direction:column;
   padding:calc(50px + var(--safe-top)) 22px calc(30px + var(--safe-bottom));
   background:rgba(0,0,0,.78);
+  -webkit-backdrop-filter:blur(16px);
   backdrop-filter:blur(16px);
   overflow-y:auto;
   color:#fff;
@@ -381,6 +387,7 @@ body.unlocked .lock-screen{display:none}
 
 .folder{
   background:rgba(30,30,30,.65);
+  -webkit-backdrop-filter:blur(8px);
   backdrop-filter:blur(8px);
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -510,7 +517,9 @@ body.hide-badges .badge{display:none!important}
   gap:8px;
   transform:translate(var(--dock-x),var(--dock-y));
 }
-#phone.edit #dock{margin-bottom:calc(86px + var(--safe-bottom))}
+#phone.edit #dock {
+  margin-bottom:calc(86px + var(--safe-bottom) + var(--work-bottom-extra));
+}
 
 /* EDIT BAR */
 
@@ -550,6 +559,7 @@ body.hide-badges .badge{display:none!important}
   flex-direction:column;
   align-items:center;
   background:rgba(0,0,0,.45);
+  -webkit-backdrop-filter:blur(22px);
   backdrop-filter:blur(22px);
 }
 #folderView.open{display:flex}
@@ -592,6 +602,7 @@ body.hide-badges .badge{display:none!important}
   align-items:center;
   justify-content:center;
   background:rgba(0,0,0,.55);
+   -webkit-backdrop-filter:blur(8px);
   backdrop-filter:blur(8px);
 }
 #iconMenu.open{display:flex}
@@ -678,6 +689,7 @@ body.hide-badges .badge{display:none!important}
   padding:calc(40px + var(--safe-top)) 22px calc(60px + var(--safe-bottom));
   overflow-y:auto;
   background:rgba(0,0,0,.55);
+  -webkit-backdrop-filter:blur(18px);
   backdrop-filter:blur(18px);
   color:#fff;
 }
@@ -1180,9 +1192,14 @@ function readAndCompressImage(file,maxSide=1600,quality=.82){
   });
 }
 
-function fitViewport(){
-  const h=window.visualViewport?window.visualViewport.height:window.innerHeight;
-  $("device").style.height=h+"px";
+function fitViewport() {
+  const h = Math.max(
+    window.innerHeight || 0,
+    window.visualViewport ? window.visualViewport.height : 0,
+    document.documentElement.clientHeight || 0
+  );
+
+  $("device").style.height = h + "px";
 }
 window.addEventListener("resize",fitViewport);
 if(window.visualViewport){
