@@ -2,15 +2,12 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#000000">
 <meta name="color-scheme" content="dark">
-
 <title>Lock Screen</title>
 
 <style>
@@ -40,6 +37,8 @@
   --icon-opacity:1;
   --icon-x:0px;
   --icon-y:0px;
+
+  --dock-x:0px;
   --dock-y:0px;
 
   --badge-x:30px;
@@ -55,8 +54,6 @@ body {
   height:100%;
   min-height:100vh;
   min-height:100dvh;
-  margin:0;
-  padding:0;
   overflow:hidden;
   background:#000;
   position:fixed;
@@ -66,15 +63,16 @@ body {
 }
 
 body {
-  padding-top:0 !important;
-  padding-bottom:0 !important;
-  padding-left:0 !important;
-  padding-right:0 !important;
+  padding:0 !important;
 }
 
 button,
 input {
   font-family:inherit;
+}
+
+button {
+  cursor:pointer;
 }
 
 #device {
@@ -92,10 +90,7 @@ input {
 .wallpaper,
 #homeWallpaper {
   position:absolute;
-  left:0;
-  top:0;
-  right:0;
-  bottom:0;
+  inset:0;
   width:100%;
   height:100%;
   background:#000;
@@ -109,7 +104,7 @@ input[type=file] {
   display:none;
 }
 
-/* LOCK */
+/* LOCK SCREEN */
 
 .lock-screen {
   position:relative;
@@ -127,7 +122,7 @@ body.unlocked .lock-screen {
 }
 
 .top-label {
-  margin-top:calc(22vh + var(--safe-top) * 0.15);
+  margin-top:calc(22vh + var(--safe-top) * .15);
   text-align:center;
   font-size:16px;
   line-height:1.45;
@@ -181,7 +176,7 @@ body.unlocked .lock-screen {
   width:92%;
   max-width:340px;
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(3, 1fr);
   gap:12px;
   justify-items:center;
 }
@@ -201,7 +196,6 @@ body.unlocked .lock-screen {
   justify-content:center;
   align-items:center;
   backdrop-filter:blur(8px);
-  cursor:pointer;
   transform:translate(var(--kx,0px), var(--ky,0px));
 }
 
@@ -229,7 +223,7 @@ body.unlocked .lock-screen {
   width:92%;
   max-width:340px;
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(3, 1fr);
   gap:12px;
   align-items:center;
   padding:12px 0 calc(36px + var(--safe-bottom));
@@ -241,10 +235,9 @@ body.unlocked .lock-screen {
   border:none;
   font-size:17px;
   padding:10px 0;
-  cursor:pointer;
 }
 
-/* LOCK SETTINGS */
+/* COMMON SETTINGS UI */
 
 .overlay {
   position:absolute;
@@ -282,7 +275,6 @@ body.unlocked .lock-screen {
   border:none;
   border-radius:20px;
   padding:8px 16px;
-  cursor:pointer;
 }
 
 .block {
@@ -348,6 +340,7 @@ body.unlocked .lock-screen {
   padding:11px 12px;
   outline:none;
   font-size:15px;
+  user-select:text;
 }
 
 .option-row {
@@ -379,7 +372,6 @@ body.unlocked .lock-screen {
   border:1px solid rgba(255,255,255,.25);
   border-radius:12px;
   padding:14px;
-  cursor:pointer;
 }
 
 .hint {
@@ -464,7 +456,6 @@ body.unlocked .lock-screen {
   flex-direction:column;
   align-items:center;
   justify-content:flex-start;
-  cursor:pointer;
 }
 
 .icon,
@@ -489,8 +480,8 @@ body.unlocked .lock-screen {
   background:rgba(30,30,30,.65);
   backdrop-filter:blur(8px);
   display:grid;
-  grid-template-columns:repeat(3,1fr);
-  grid-template-rows:repeat(3,1fr);
+  grid-template-columns:repeat(3, 1fr);
+  grid-template-rows:repeat(3, 1fr);
   gap:2px;
   padding:5px;
 }
@@ -504,6 +495,7 @@ body.unlocked .lock-screen {
   align-items:center;
   justify-content:center;
   font-size:8px;
+  overflow:hidden;
 }
 
 .empty-icon {
@@ -591,6 +583,12 @@ body.hide-badges .badge {
   animation:wiggle .32s infinite alternate;
 }
 
+#phone.moving .empty-icon {
+  display:flex;
+  border-color:#30d158;
+  color:#30d158;
+}
+
 @keyframes wiggle {
   from { transform:rotate(-1deg); }
   to { transform:rotate(1deg); }
@@ -642,7 +640,7 @@ body.hide-badges .badge {
   grid-template-columns:repeat(4, 1fr);
   justify-items:center;
   gap:8px;
-  transform:translateY(var(--dock-y));
+  transform:translate(var(--dock-x), var(--dock-y));
 }
 
 #phone.edit #dock {
@@ -660,6 +658,7 @@ body.hide-badges .badge {
   z-index:65;
   padding:12px 14px calc(12px + var(--safe-bottom));
   justify-content:center;
+  gap:8px;
   pointer-events:none;
 }
 
@@ -671,13 +670,22 @@ body.hide-badges .badge {
   pointer-events:auto;
 }
 
-#editDone {
+#editDone,
+#cancelMove {
   background:rgba(20,20,20,.82);
   border:1px solid rgba(255,255,255,.25);
   color:#fff;
   border-radius:14px;
-  padding:11px 22px;
+  padding:11px 18px;
   font-size:15px;
+}
+
+#cancelMove {
+  display:none;
+}
+
+#phone.moving #cancelMove {
+  display:block;
 }
 
 /* FOLDER */
@@ -714,10 +722,18 @@ body.hide-badges .badge {
   background:rgba(180,180,180,.18);
   border:1px solid rgba(255,255,255,.18);
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(3, 1fr);
   gap:22px 18px;
   justify-items:center;
   align-content:start;
+}
+
+.folder-empty-hint {
+  color:#fff;
+  opacity:.55;
+  font-size:13px;
+  text-align:center;
+  margin-top:20px;
 }
 
 /* ICON MENU */
@@ -803,6 +819,7 @@ body.hide-badges .badge {
   padding:11px 12px;
   font-size:14px;
   outline:none;
+  user-select:text;
 }
 
 .menu-row input[type=color] {
@@ -832,7 +849,6 @@ body.hide-badges .badge {
   padding:13px 14px;
   border-radius:12px;
   font-size:14px;
-  cursor:pointer;
   margin-bottom:9px;
   text-align:left;
 }
@@ -891,7 +907,6 @@ body.hide-badges .badge {
   padding:14px 16px;
   font-size:15px;
   font-weight:700;
-  cursor:pointer;
 }
 
 .chev {
@@ -910,7 +925,7 @@ body.hide-badges .badge {
 }
 
 .section.open .section-body {
-  max-height:5000px;
+  max-height:6000px;
 }
 
 .section-inner {
@@ -930,7 +945,6 @@ body.hide-badges .badge {
   justify-content:space-between;
   padding:15px 16px;
   font-size:15px;
-  cursor:pointer;
   border-bottom:1px solid rgba(255,255,255,.08);
 }
 
@@ -1051,7 +1065,7 @@ body.style-android .top-label {
     <div class="dots" id="dots"></div>
 
     <div class="passcode">
-      <div class="keyboard" id="keyboard">
+      <div class="keyboard">
         <div class="key" data-digit="1"><span class="key-number">1</span><span class="key-letters">&nbsp;</span></div>
         <div class="key" data-digit="2"><span class="key-number">2</span><span class="key-letters">АБВГ<br>ABC</span></div>
         <div class="key" data-digit="3"><span class="key-number">3</span><span class="key-letters">ДЕЖЗ<br>DEF</span></div>
@@ -1152,6 +1166,7 @@ body.style-android .top-label {
 
       <div id="editBar">
         <button id="editDone">✓ Готово</button>
+        <button id="cancelMove">Отменить перенос</button>
       </div>
 
       <div id="folderView">
@@ -1194,6 +1209,7 @@ body.style-android .top-label {
           <button class="menu-btn" id="pickIconPhoto">🖼 Фото с устройства</button>
           <button class="menu-btn" id="resetIconPhoto">🚫 Убрать фото</button>
           <button class="menu-btn" id="makeFolder">📁 Сделать папкой / открыть</button>
+          <button class="menu-btn" id="moveIcon">↔️ Переместить</button>
           <button class="menu-btn danger" id="deleteIcon">🗑 Удалить</button>
           <button class="menu-close" id="closeIconMenu">Закрыть</button>
         </div>
@@ -1257,6 +1273,10 @@ body.style-android .top-label {
 
               <div class="divider">Смещение дока</div>
               <div class="set-group group-pad">
+                <div class="slider-row">
+                  <div class="sl-label"><span>Док по X</span><span id="dockXVal">0 px</span></div>
+                  <input class="slider" id="dockXSlider" type="range" min="-240" max="240" step="1" value="0">
+                </div>
                 <div class="slider-row">
                   <div class="sl-label"><span>Док по Y</span><span id="dockYVal">0 px</span></div>
                   <input class="slider" id="dockYSlider" type="range" min="-240" max="240" step="1" value="0">
@@ -1325,6 +1345,7 @@ body.style-android .top-label {
                 <div class="set-row" id="rowDouble"><span class="ic">👆</span><span class="txt">Двойное нажатие по рабочему столу</span><div class="toggle" id="tgDouble"></div></div>
                 <div class="set-row" id="chooseTriggerIcon"><span class="ic">🎯</span><span class="txt" id="triggerText">Иконка-триггер: не выбрана</span><span class="arrow">›</span></div>
               </div>
+              <div class="hint">Иконка-триггер срабатывает по двойному нажатию</div>
             </div>
           </div>
         </div>
@@ -1337,6 +1358,7 @@ body.style-android .top-label {
                 <div class="set-row" id="rowLockSwipe"><span class="ic">⬇️</span><span class="txt">Свайп вниз сверху</span><div class="toggle on" id="tgLockSwipe"></div></div>
                 <div class="set-row" id="chooseLockIcon"><span class="ic">🔐</span><span class="txt" id="lockText">Иконка блокировки: не выбрана</span><span class="arrow">›</span></div>
               </div>
+              <div class="hint">Иконка блокировки срабатывает по двойному нажатию</div>
             </div>
           </div>
         </div>
@@ -1352,6 +1374,10 @@ body.style-android .top-label {
 <script>
 "use strict";
 
+/* ---------- HELPERS ---------- */
+
+const DATA_VERSION = 3;
+
 function $(id) {
   return document.getElementById(id);
 }
@@ -1360,10 +1386,28 @@ function rootSet(name, value) {
   document.documentElement.style.setProperty(name, value);
 }
 
+function safeSet(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (err) {
+    alert("Недостаточно памяти для сохранения данных. Попробуйте выбрать изображение меньшего размера.");
+    return false;
+  }
+}
+
+function safeRemove(key) {
+  try {
+    localStorage.removeItem(key);
+  } catch {}
+}
+
 function loadJSON(key, def) {
   try {
-    const v = JSON.parse(localStorage.getItem(key));
-    return v == null ? def : v;
+    const raw = localStorage.getItem(key);
+    if (!raw) return def;
+    const parsed = JSON.parse(raw);
+    return parsed == null ? def : parsed;
   } catch {
     return def;
   }
@@ -1372,27 +1416,101 @@ function loadJSON(key, def) {
 function saveJSON(key, val) {
   try {
     localStorage.setItem(key, JSON.stringify(val));
-  } catch {}
+    return true;
+  } catch {
+    alert("Недостаточно памяти для сохранения рабочего стола.");
+    return false;
+  }
+}
+
+function normalizeColor(v) {
+  const s = String(v || "").trim();
+  return /^#[0-9a-fA-F]{6}$/.test(s) ? s : "#444444";
+}
+
+function clampNum(v, min, max, fallback) {
+  const n = parseInt(v, 10);
+  if (Number.isNaN(n)) return fallback;
+  return Math.max(min, Math.min(max, n));
+}
+
+function setText(el, text) {
+  el.textContent = String(text || "");
+}
+
+function trimEmptyTail(arr) {
+  if (!Array.isArray(arr)) return [];
+  while (arr.length && arr[arr.length - 1] == null) arr.pop();
+  return arr;
+}
+
+function readAndCompressImage(file, maxSide = 1600, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type || !file.type.startsWith("image/")) {
+      reject(new Error("Не изображение"));
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const img = new Image();
+
+      img.onload = () => {
+        let w = img.naturalWidth || img.width;
+        let h = img.naturalHeight || img.height;
+
+        const scale = Math.min(1, maxSide / Math.max(w, h));
+        w = Math.max(1, Math.round(w * scale));
+        h = Math.max(1, Math.round(h * scale));
+
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+
+        const ctx = canvas.getContext("2d", { alpha:false });
+        ctx.drawImage(img, 0, 0, w, h);
+
+        let data;
+        try {
+          data = canvas.toDataURL("image/jpeg", quality);
+        } catch {
+          data = reader.result;
+        }
+
+        resolve(data);
+      };
+
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 function fitViewport() {
   $("device").style.height = window.innerHeight + "px";
 }
+
 window.addEventListener("resize", fitViewport);
 window.addEventListener("orientationchange", () => setTimeout(fitViewport, 250));
 fitViewport();
 
-let uidCounter = parseInt(localStorage.getItem("uidCounter") || "1", 10);
+/* ---------- IDS ---------- */
+
+let uidCounter = clampNum(localStorage.getItem("uidCounter"), 1, 9999999, 1);
 
 function newId() {
   uidCounter++;
-  localStorage.setItem("uidCounter", String(uidCounter));
+  safeSet("uidCounter", String(uidCounter));
   return "i" + uidCounter;
 }
 
-/* LOCK */
+/* ---------- LOCK ---------- */
 
-const settings = {
+const lockSettings = {
   codeLength:4,
   unlockMethod:localStorage.getItem("unlockMethod") || "sos",
   attemptsToUnlock:3
@@ -1404,11 +1522,13 @@ let attemptCount = 0;
 let sosArmed = false;
 
 function buildDots() {
-  $("dots").innerHTML = "";
-  for (let i = 0; i < settings.codeLength; i++) {
+  const dots = $("dots");
+  dots.innerHTML = "";
+
+  for (let i = 0; i < lockSettings.codeLength; i++) {
     const d = document.createElement("div");
     d.className = "dot";
-    $("dots").appendChild(d);
+    dots.appendChild(d);
   }
 }
 
@@ -1419,10 +1539,12 @@ function updateDots() {
 }
 
 function pressDigit(n) {
-  if (currentInput.length >= settings.codeLength) return;
+  if (currentInput.length >= lockSettings.codeLength) return;
+
   currentInput += n;
   updateDots();
-  if (currentInput.length === settings.codeLength) {
+
+  if (currentInput.length === lockSettings.codeLength) {
     setTimeout(checkCode, 260);
   }
 }
@@ -1436,13 +1558,13 @@ function deleteDigit() {
 function checkCode() {
   attemptCount++;
 
-  if (settings.unlockMethod === "instant") {
+  if (lockSettings.unlockMethod === "instant") {
     if (currentInput === realPin) unlock();
     else wrongCode();
     return;
   }
 
-  if (settings.unlockMethod === "sos") {
+  if (lockSettings.unlockMethod === "sos") {
     if (sosArmed) {
       sosArmed = false;
       unlock();
@@ -1452,8 +1574,8 @@ function checkCode() {
     return;
   }
 
-  if (settings.unlockMethod === "attempts") {
-    if (attemptCount >= settings.attemptsToUnlock) unlock();
+  if (lockSettings.unlockMethod === "attempts") {
+    if (attemptCount >= lockSettings.attemptsToUnlock) unlock();
     else wrongCode();
   }
 }
@@ -1461,6 +1583,7 @@ function checkCode() {
 function wrongCode() {
   const dots = $("dots");
   dots.classList.add("wrong");
+
   document.querySelectorAll(".dot").forEach(d => {
     d.style.background = "#ff3b30";
     d.style.borderColor = "#ff3b30";
@@ -1489,8 +1612,11 @@ function lockBack() {
   closeHomeSettings();
   exitEditMode();
   cancelChoose();
+  cancelMoveMode();
+
   $("unlockScreen").classList.remove("show");
   document.body.classList.remove("unlocked");
+
   currentInput = "";
   attemptCount = 0;
   sosArmed = false;
@@ -1501,15 +1627,18 @@ document.querySelectorAll(".key,.key-zero").forEach(k => {
   k.addEventListener("click", () => pressDigit(k.dataset.digit));
 });
 
+/* SOS / CANCEL */
+
 let sosTimer = null;
 let sosLong = false;
 
 function sosStart() {
   sosLong = false;
   clearTimeout(sosTimer);
+
   sosTimer = setTimeout(() => {
     sosLong = true;
-    settings.codeLength = settings.codeLength === 4 ? 6 : 4;
+    lockSettings.codeLength = lockSettings.codeLength === 4 ? 6 : 4;
     currentInput = "";
     sosArmed = false;
     buildDots();
@@ -1519,10 +1648,12 @@ function sosStart() {
 
 function sosEnd() {
   clearTimeout(sosTimer);
+
   if (!sosLong) {
-    if (settings.unlockMethod === "sos") sosArmed = true;
+    if (lockSettings.unlockMethod === "sos") sosArmed = true;
     currentInput = "";
     updateDots();
+
     $("sosKey").style.opacity = ".35";
     setTimeout(() => $("sosKey").style.opacity = "1", 250);
   }
@@ -1546,6 +1677,7 @@ let cancelLong = false;
 function cancelStart() {
   cancelLong = false;
   clearTimeout(cancelTimer);
+
   cancelTimer = setTimeout(() => {
     cancelLong = true;
     openLockSettings();
@@ -1569,6 +1701,8 @@ $("cancelKey").addEventListener("touchend", e => {
   cancelEnd();
 }, { passive:false });
 
+/* LOCK SETTINGS */
+
 function openLockSettings() {
   $("lockSettings").classList.add("show");
 }
@@ -1580,14 +1714,14 @@ function closeLockSettings() {
 $("closeLockSettings").onclick = closeLockSettings;
 
 $("keySizeSlider").oninput = e => {
-  const v = e.target.value;
+  const v = clampNum(e.target.value, 60, 120, 96);
   rootSet("--key-size", v + "px");
   $("keySizeVal").textContent = v + " px";
-  localStorage.setItem("keySize", v);
+  safeSet("keySize", String(v));
 };
 
-let pinStepX = parseInt(localStorage.getItem("pinStepX") || "0", 10);
-let pinStepY = parseInt(localStorage.getItem("pinStepY") || "0", 10);
+let pinStepX = clampNum(localStorage.getItem("pinStepX"), -80, 80, 0);
+let pinStepY = clampNum(localStorage.getItem("pinStepY"), -80, 80, 0);
 
 const keyPos = {
   "1":{c:0,r:0},"2":{c:1,r:0},"3":{c:2,r:0},
@@ -1606,66 +1740,72 @@ function applyPinSpread() {
 }
 
 $("pinXSlider").oninput = e => {
-  pinStepX = parseInt(e.target.value, 10);
+  pinStepX = clampNum(e.target.value, -80, 80, 0);
   $("pinXVal").textContent = pinStepX + " px";
-  localStorage.setItem("pinStepX", String(pinStepX));
+  safeSet("pinStepX", String(pinStepX));
   applyPinSpread();
 };
 
 $("pinYSlider").oninput = e => {
-  pinStepY = parseInt(e.target.value, 10);
+  pinStepY = clampNum(e.target.value, -80, 80, 0);
   $("pinYVal").textContent = pinStepY + " px";
-  localStorage.setItem("pinStepY", String(pinStepY));
+  safeSet("pinStepY", String(pinStepY));
   applyPinSpread();
 };
 
 $("pinBlockSlider").oninput = e => {
-  const v = parseInt(e.target.value, 10);
+  const v = clampNum(e.target.value, -240, 140, 0);
   rootSet("--pin-y", v + "px");
   $("pinBlockVal").textContent = v + " px";
-  localStorage.setItem("pinBlockY", String(v));
+  safeSet("pinBlockY", String(v));
 };
 
 $("savePin").onclick = () => {
   const v = $("realPinInput").value.replace(/\D/g, "").slice(0, 6);
+
   if (!v) {
     alert("Введите код");
     return;
   }
+
   realPin = v;
-  localStorage.setItem("realPin", v);
+  safeSet("realPin", v);
   alert("Сохранено");
 };
 
 $("pickLockBg").onclick = () => $("lockBgInput").click();
 
-$("lockBgInput").onchange = e => {
+$("lockBgInput").onchange = async e => {
   const f = e.target.files[0];
   if (!f) return;
-  const r = new FileReader();
-  r.onload = ev => {
-    $("wallpaper").style.backgroundImage = `url('${ev.target.result}')`;
-    localStorage.setItem("lockBg", ev.target.result);
-  };
-  r.readAsDataURL(f);
+
+  try {
+    const img = await readAndCompressImage(f, 1800, .82);
+    $("wallpaper").style.backgroundImage = `url("${img}")`;
+    safeSet("lockBg", img);
+  } catch {
+    alert("Не удалось загрузить изображение");
+  }
+
   e.target.value = "";
 };
 
 $("resetLockBg").onclick = () => {
   $("wallpaper").style.backgroundImage = "none";
-  localStorage.removeItem("lockBg");
+  safeRemove("lockBg");
 };
 
 document.querySelectorAll("[data-method]").forEach(btn => {
   btn.onclick = () => {
-    settings.unlockMethod = btn.dataset.method;
-    localStorage.setItem("unlockMethod", settings.unlockMethod);
+    lockSettings.unlockMethod = btn.dataset.method;
+    safeSet("unlockMethod", lockSettings.unlockMethod);
+
     document.querySelectorAll("[data-method]").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
 
-    if (settings.unlockMethod === "sos") $("methodHint").textContent = "Нажмите SOS, затем код";
-    if (settings.unlockMethod === "attempts") $("methodHint").textContent = "После 3 попыток";
-    if (settings.unlockMethod === "instant") $("methodHint").textContent = "При верном коде";
+    if (lockSettings.unlockMethod === "sos") $("methodHint").textContent = "Нажмите SOS, затем код";
+    if (lockSettings.unlockMethod === "attempts") $("methodHint").textContent = "После 3 попыток";
+    if (lockSettings.unlockMethod === "instant") $("methodHint").textContent = "При верном коде";
 
     currentInput = "";
     attemptCount = 0;
@@ -1677,16 +1817,22 @@ document.querySelectorAll("[data-method]").forEach(btn => {
 document.querySelectorAll("[data-style]").forEach(btn => {
   btn.onclick = () => {
     const s = btn.dataset.style;
+
     document.body.classList.remove("style-ios", "style-android");
     document.body.classList.add("style-" + s);
-    localStorage.setItem("style", s);
+
+    safeSet("style", s);
+
     document.querySelectorAll("[data-style]").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
-    $("topLabel").innerHTML = s === "android" ? "Введите PIN-код" : "Смахните вверх для Face ID<br>или введите код-пароль";
+
+    $("topLabel").innerHTML = s === "android"
+      ? "Введите PIN-код"
+      : "Смахните вверх для Face ID<br>или введите код-пароль";
   };
 });
 
-/* HOME DATA */
+/* ---------- HOME DATA ---------- */
 
 function blankIcon() {
   return {
@@ -1701,9 +1847,8 @@ function blankIcon() {
   };
 }
 
-let pages = loadJSON("pagesGrid", null);
-if (!pages) {
-  pages = [{
+function defaultPages() {
+  return [{
     bg:null,
     icons:[
       {...blankIcon(), name:"Фото", emoji:"🌄", bg:"#ff9f0a"},
@@ -1714,9 +1859,8 @@ if (!pages) {
   }];
 }
 
-let dock = loadJSON("dock", null);
-if (!dock) {
-  dock = [
+function defaultDock() {
+  return [
     {...blankIcon(), name:"Телефон", emoji:"☎️", bg:"#30d158"},
     {...blankIcon(), name:"Почта", emoji:"✉️", bg:"#0a84ff"},
     {...blankIcon(), name:"Камера", emoji:"📷", bg:"#8e8e93"},
@@ -1724,25 +1868,50 @@ if (!dock) {
   ];
 }
 
+let storedVersion = clampNum(localStorage.getItem("dataVersion"), 0, 999, 0);
+let pages = loadJSON("pagesGrid", null);
+let dock = loadJSON("dock", null);
+
+if (!Array.isArray(pages) || !pages.length) pages = defaultPages();
+if (!Array.isArray(dock)) dock = defaultDock();
+
+function normalizeIcon(ic) {
+  if (!ic || typeof ic !== "object") return null;
+
+  ic.id = ic.id || newId();
+  ic.name = typeof ic.name === "string" ? ic.name.slice(0, 40) : "";
+  ic.bg = normalizeColor(ic.bg || "#444444");
+  ic.emoji = typeof ic.emoji === "string" ? ic.emoji.slice(0, 8) : "";
+  ic.img = typeof ic.img === "string" ? ic.img : null;
+  ic.badge = clampNum(ic.badge, 0, 99999, 0);
+  ic.folder = !!ic.folder;
+
+  if (!Array.isArray(ic.items)) ic.items = [];
+  ic.items = ic.items.map(normalizeIcon);
+  trimEmptyTail(ic.items);
+
+  return ic;
+}
+
 function normalizeData() {
-  if (!Array.isArray(pages) || !pages.length) pages = [{bg:null, icons:[]}];
+  if (!Array.isArray(pages) || !pages.length) pages = defaultPages();
 
-  pages.forEach(pg => {
-    if (!pg) return;
-    if (!Array.isArray(pg.icons)) pg.icons = [];
-    pg.icons.forEach(ic => {
-      if (!ic) return;
-      if (!ic.id) ic.id = newId();
-      if (ic.folder && !Array.isArray(ic.items)) ic.items = [];
-    });
+  pages = pages.map(pg => {
+    if (!pg || typeof pg !== "object") pg = {};
+    pg.bg = typeof pg.bg === "string" ? pg.bg : null;
+    pg.icons = Array.isArray(pg.icons) ? pg.icons.map(normalizeIcon) : [];
+    trimEmptyTail(pg.icons);
+    return pg;
   });
 
-  if (!Array.isArray(dock)) dock = [];
-  dock.forEach(ic => {
-    if (!ic) return;
-    if (!ic.id) ic.id = newId();
-    if (ic.folder && !Array.isArray(ic.items)) ic.items = [];
-  });
+  dock = Array.isArray(dock) ? dock.map(normalizeIcon) : defaultDock();
+  trimEmptyTail(dock);
+
+  if (!pages.length) pages = defaultPages();
+
+  if (storedVersion < DATA_VERSION) {
+    safeSet("dataVersion", String(DATA_VERSION));
+  }
 }
 
 normalizeData();
@@ -1751,21 +1920,23 @@ function saveData() {
   normalizeData();
   saveJSON("pagesGrid", pages);
   saveJSON("dock", dock);
+  safeSet("dataVersion", String(DATA_VERSION));
 }
 
 let currentPage = 0;
 const PAGE_SLOTS = 32;
 const DOCK_SLOTS = 4;
 
-let gridCols = parseInt(localStorage.getItem("gridCols") || "4", 10);
-let gapX = parseInt(localStorage.getItem("gapX") || "10", 10);
-let gapY = parseInt(localStorage.getItem("gapY") || "14", 10);
-let iconSize = parseInt(localStorage.getItem("iconSize") || "60", 10);
-let iconRadius = parseInt(localStorage.getItem("iconRadius") || "15", 10);
-let iconOpacity = parseInt(localStorage.getItem("iconOpacity") || "100", 10);
-let iconX = parseInt(localStorage.getItem("iconX") || "0", 10);
-let iconY = parseInt(localStorage.getItem("iconY") || "0", 10);
-let dockY = parseInt(localStorage.getItem("dockY") || "0", 10);
+let gridCols = clampNum(localStorage.getItem("gridCols"), 3, 6, 4);
+let gapX = clampNum(localStorage.getItem("gapX"), 0, 70, 10);
+let gapY = clampNum(localStorage.getItem("gapY"), 0, 90, 14);
+let iconSize = clampNum(localStorage.getItem("iconSize"), 36, 110, 60);
+let iconRadius = clampNum(localStorage.getItem("iconRadius"), 0, 55, 15);
+let iconOpacity = clampNum(localStorage.getItem("iconOpacity"), 0, 100, 100);
+let iconX = clampNum(localStorage.getItem("iconX"), -240, 240, 0);
+let iconY = clampNum(localStorage.getItem("iconY"), -240, 240, 0);
+let dockX = clampNum(localStorage.getItem("dockX"), -240, 240, 0);
+let dockY = clampNum(localStorage.getItem("dockY"), -240, 240, 0);
 
 let badgeCfg = loadJSON("badgeCfg", {
   x:30,
@@ -1774,6 +1945,12 @@ let badgeCfg = loadJSON("badgeCfg", {
   h:20,
   fs:12
 });
+
+badgeCfg.x = clampNum(badgeCfg.x, -90, 110, 30);
+badgeCfg.y = clampNum(badgeCfg.y, -90, 110, -2);
+badgeCfg.w = clampNum(badgeCfg.w, 10, 80, 20);
+badgeCfg.h = clampNum(badgeCfg.h, 10, 70, 20);
+badgeCfg.fs = clampNum(badgeCfg.fs, 7, 30, 12);
 
 function applyVars() {
   rootSet("--cols", gridCols);
@@ -1784,8 +1961,8 @@ function applyVars() {
   rootSet("--icon-opacity", iconOpacity / 100);
   rootSet("--icon-x", iconX + "px");
   rootSet("--icon-y", iconY + "px");
+  rootSet("--dock-x", dockX + "px");
   rootSet("--dock-y", dockY + "px");
-
   rootSet("--badge-x", badgeCfg.x + "px");
   rootSet("--badge-y", badgeCfg.y + "px");
   rootSet("--badge-w", badgeCfg.w + "px");
@@ -1794,15 +1971,16 @@ function applyVars() {
 }
 
 function saveHomeCfg() {
-  localStorage.setItem("gridCols", gridCols);
-  localStorage.setItem("gapX", gapX);
-  localStorage.setItem("gapY", gapY);
-  localStorage.setItem("iconSize", iconSize);
-  localStorage.setItem("iconRadius", iconRadius);
-  localStorage.setItem("iconOpacity", iconOpacity);
-  localStorage.setItem("iconX", iconX);
-  localStorage.setItem("iconY", iconY);
-  localStorage.setItem("dockY", dockY);
+  safeSet("gridCols", String(gridCols));
+  safeSet("gapX", String(gapX));
+  safeSet("gapY", String(gapY));
+  safeSet("iconSize", String(iconSize));
+  safeSet("iconRadius", String(iconRadius));
+  safeSet("iconOpacity", String(iconOpacity));
+  safeSet("iconX", String(iconX));
+  safeSet("iconY", String(iconY));
+  safeSet("dockX", String(dockX));
+  safeSet("dockY", String(dockY));
   saveJSON("badgeCfg", badgeCfg);
 }
 
@@ -1811,54 +1989,107 @@ function isEdit() {
 }
 
 function badgeText(n) {
-  n = parseInt(n || 0, 10);
+  n = clampNum(n, 0, 99999, 0);
   if (n <= 0) return "";
   return n > 9999 ? Math.floor(n / 1000) + "k" : String(n);
 }
 
-function iconInner(ic) {
+/* ---------- RENDER ICONS SAFELY ---------- */
+
+function makeIconVisual(ic) {
   if (!ic) {
-    return `
-      <div class="icon empty-icon">＋</div>
-      <div class="label empty-label">Пусто</div>
-    `;
+    const icon = document.createElement("div");
+    icon.className = "icon empty-icon";
+    icon.textContent = "＋";
+
+    const label = document.createElement("div");
+    label.className = "label empty-label";
+    label.textContent = "Пусто";
+
+    return [icon, label];
   }
 
-  let html = "";
+  const nodes = [];
 
   if (ic.folder) {
-    html += `<div class="folder">`;
-    const arr = (ic.items || []).slice(0, 9);
+    const folder = document.createElement("div");
+    folder.className = "folder";
+
+    const items = (ic.items || []).slice(0, 9);
+
     for (let i = 0; i < 9; i++) {
-      const it = arr[i];
-      if (!it) {
-        html += `<div class="mini" style="background:transparent"></div>`;
-      } else if (it.img) {
-        html += `<div class="mini" style="background-image:url('${it.img}')"></div>`;
+      const mini = document.createElement("div");
+      mini.className = "mini";
+
+      const it = items[i];
+
+      if (it) {
+        if (it.img) {
+          mini.style.backgroundImage = `url("${it.img}")`;
+        } else {
+          mini.style.background = normalizeColor(it.bg);
+          mini.textContent = it.emoji || "";
+        }
       } else {
-        html += `<div class="mini" style="background:${it.bg || "#444"}">${it.emoji || ""}</div>`;
+        mini.style.background = "transparent";
       }
+
+      folder.appendChild(mini);
     }
-    html += `</div>`;
-  } else if (ic.img) {
-    html += `<div class="icon" style="background-image:url('${ic.img}')"></div>`;
+
+    nodes.push(folder);
   } else {
-    html += `<div class="icon" style="background:${ic.bg || "#444"}">${ic.emoji || ""}</div>`;
+    const icon = document.createElement("div");
+    icon.className = "icon";
+
+    if (ic.img) {
+      icon.style.backgroundImage = `url("${ic.img}")`;
+    } else {
+      icon.style.background = normalizeColor(ic.bg);
+      icon.textContent = ic.emoji || "";
+    }
+
+    nodes.push(icon);
   }
 
   const b = badgeText(ic.badge);
-  if (b) html += `<div class="badge">${b}</div>`;
 
-  html += `<div class="label">${ic.name || ""}</div>`;
-  return html;
+  if (b) {
+    const badge = document.createElement("div");
+    badge.className = "badge";
+    badge.textContent = b;
+    nodes.push(badge);
+  }
+
+  const label = document.createElement("div");
+  label.className = "label";
+  label.textContent = ic.name || "";
+  nodes.push(label);
+
+  return nodes;
 }
 
 function buildCell(ic, context, index, pageIndex) {
   const cell = document.createElement("div");
   cell.className = "cell";
   if (!ic) cell.classList.add("empty-cell");
-  cell.innerHTML = iconInner(ic);
+
+  const nodes = makeIconVisual(ic);
+  nodes.forEach(n => cell.appendChild(n));
+
   attachCell(cell, ic, context, index, pageIndex);
+
+  if (ic) {
+    const del = document.createElement("div");
+    del.className = "del";
+    del.textContent = "×";
+    del.onclick = e => {
+      e.stopPropagation();
+      deleteAt(context, index, pageIndex);
+    };
+    cell.appendChild(del);
+  }
+
   return cell;
 }
 
@@ -1869,10 +2100,10 @@ function renderHome() {
   const pg = pages[currentPage];
 
   if (pg && pg.bg) {
-    hw.style.backgroundImage = `url('${pg.bg}')`;
+    hw.style.backgroundImage = `url("${pg.bg}")`;
   } else {
     const common = localStorage.getItem("homeBg");
-    hw.style.backgroundImage = common ? `url('${common}')` : "none";
+    hw.style.backgroundImage = common ? `url("${common}")` : "none";
     if (!common) hw.style.background = "#000";
   }
 
@@ -1886,7 +2117,9 @@ function renderHome() {
     const grid = document.createElement("div");
     grid.className = "grid";
 
-    const count = isEdit() ? Math.max(PAGE_SLOTS, page.icons.length + 4) : page.icons.length;
+    const count = isEdit()
+      ? Math.max(PAGE_SLOTS, page.icons.length + 4)
+      : page.icons.length;
 
     for (let i = 0; i < count; i++) {
       grid.appendChild(buildCell(page.icons[i] || null, "page", i, pi));
@@ -1904,7 +2137,10 @@ function renderHome() {
 function renderDock() {
   const d = $("dock");
   d.innerHTML = "";
-  const count = isEdit() ? DOCK_SLOTS : dock.length;
+
+  const count = isEdit()
+    ? Math.max(DOCK_SLOTS, dock.length)
+    : dock.length;
 
   for (let i = 0; i < count; i++) {
     d.appendChild(buildCell(dock[i] || null, "dock", i, -1));
@@ -1919,19 +2155,55 @@ function renderDots() {
     const dot = document.createElement("div");
     dot.className = "pdot" + (i === currentPage ? " active" : "");
     dot.onclick = () => goToPage(i, true);
+
+    dot.oncontextmenu = e => {
+      e.preventDefault();
+      tryDeleteEmptyPage(i);
+    };
+
+    let timer = null;
+    dot.addEventListener("touchstart", () => {
+      timer = setTimeout(() => tryDeleteEmptyPage(i), 800);
+    }, { passive:true });
+    dot.addEventListener("touchend", () => clearTimeout(timer));
+    dot.addEventListener("touchmove", () => clearTimeout(timer));
+
     d.appendChild(dot);
   });
 }
 
+function tryDeleteEmptyPage(i) {
+  if (pages.length <= 1) return;
+  if (!isEdit()) return;
+
+  const pg = pages[i];
+  const hasIcons = pg.icons.some(Boolean);
+
+  if (hasIcons) {
+    alert("Удалить можно только пустой экран.");
+    return;
+  }
+
+  if (!confirm("Удалить пустой экран?")) return;
+
+  pages.splice(i, 1);
+  if (currentPage >= pages.length) currentPage = pages.length - 1;
+
+  saveData();
+  renderHome();
+}
+
 function goToPage(i, anim) {
   currentPage = Math.max(0, Math.min(pages.length - 1, i));
+
   const track = $("pagesTrack");
   track.style.transition = anim ? "transform .3s ease" : "none";
   track.style.transform = `translateX(${-currentPage * 100}%)`;
+
   renderDots();
 }
 
-/* CELLS */
+/* ---------- CELL LOGIC ---------- */
 
 let iconCtx = null;
 let folderCtx = null;
@@ -1940,21 +2212,29 @@ let choosingLock = false;
 let triggerIconId = localStorage.getItem("triggerIconId") || "";
 let lockIconId = localStorage.getItem("lockIconId") || "";
 
+let movingCtx = null;
+
+const iconTapState = new Map();
+
 function findIcon(id) {
   for (let p = 0; p < pages.length; p++) {
     const idx = pages[p].icons.findIndex(x => x && x.id === id);
-    if (idx >= 0) return {icon:pages[p].icons[idx], context:"page", page:p, index:idx};
+    if (idx >= 0) return { icon:pages[p].icons[idx], context:"page", page:p, index:idx };
   }
 
   const di = dock.findIndex(x => x && x.id === id);
-  if (di >= 0) return {icon:dock[di], context:"dock", page:-1, index:di};
+  if (di >= 0) return { icon:dock[di], context:"dock", page:-1, index:di };
 
   for (let p = 0; p < pages.length; p++) {
     for (let i = 0; i < pages[p].icons.length; i++) {
       const ic = pages[p].icons[i];
+
       if (ic && ic.folder && Array.isArray(ic.items)) {
         const fi = ic.items.findIndex(x => x && x.id === id);
-        if (fi >= 0) return {icon:ic.items[fi], context:"folder", parent:ic, page:p, index:fi};
+
+        if (fi >= 0) {
+          return { icon:ic.items[fi], context:"folder", parent:ic, page:p, index:fi };
+        }
       }
     }
   }
@@ -1962,16 +2242,19 @@ function findIcon(id) {
   return null;
 }
 
+function getArrayByContext(context, pageIndex) {
+  if (context === "dock") return dock;
+  if (context === "page") return pages[pageIndex].icons;
+  if (context === "folder" && folderCtx) return folderCtx.icon.items;
+  return null;
+}
+
 function createIconAt(context, index, pageIndex) {
   const ic = blankIcon();
+  const arr = getArrayByContext(context, pageIndex);
+  if (!arr) return;
 
-  if (context === "dock") {
-    dock[index] = ic;
-  } else if (context === "page") {
-    pages[pageIndex].icons[index] = ic;
-  } else if (context === "folder" && folderCtx) {
-    folderCtx.icon.items[index] = ic;
-  }
+  arr[index] = ic;
 
   saveData();
   renderHome();
@@ -1980,13 +2263,85 @@ function createIconAt(context, index, pageIndex) {
 }
 
 function deleteAt(context, index, pageIndex) {
-  if (context === "dock") dock[index] = null;
-  else if (context === "page") pages[pageIndex].icons[index] = null;
-  else if (context === "folder" && folderCtx) folderCtx.icon.items[index] = null;
+  const arr = getArrayByContext(context, pageIndex);
+  if (!arr) return;
+
+  arr[index] = null;
+  trimEmptyTail(arr);
+
+  if (context === "folder" && folderCtx && folderCtx.icon.items.every(x => !x)) {
+    folderCtx.icon.items = [];
+  }
 
   saveData();
   renderHome();
   if (folderCtx) renderFolderBox(folderCtx.icon);
+}
+
+function startMove(context, index, pageIndex) {
+  const arr = getArrayByContext(context, pageIndex);
+  if (!arr || !arr[index]) return;
+
+  movingCtx = {
+    context,
+    index,
+    pageIndex,
+    icon:arr[index]
+  };
+
+  $("phone").classList.add("moving");
+  closeIconMenu();
+  showChoose("Выберите пустую ячейку для переноса");
+  if (!isEdit()) enterEditMode();
+}
+
+function cancelMoveMode() {
+  movingCtx = null;
+  $("phone").classList.remove("moving");
+  $("chooseHint").classList.remove("show");
+}
+
+function placeMovedIcon(context, index, pageIndex) {
+  if (!movingCtx) return;
+
+  const fromArr = getArrayByContext(movingCtx.context, movingCtx.pageIndex);
+  const toArr = getArrayByContext(context, pageIndex);
+
+  if (!fromArr || !toArr) return;
+  if (toArr[index]) {
+    alert("Выберите пустую ячейку.");
+    return;
+  }
+
+  toArr[index] = movingCtx.icon;
+  fromArr[movingCtx.index] = null;
+
+  trimEmptyTail(fromArr);
+  trimEmptyTail(toArr);
+
+  cancelMoveMode();
+  saveData();
+  renderHome();
+  if (folderCtx) renderFolderBox(folderCtx.icon);
+}
+
+function registerDoubleIconTap(id, callback) {
+  const now = Date.now();
+  const prev = iconTapState.get(id) || 0;
+
+  if (now - prev < 450) {
+    iconTapState.set(id, 0);
+    callback();
+    return true;
+  }
+
+  iconTapState.set(id, now);
+
+  setTimeout(() => {
+    if (iconTapState.get(id) === now) iconTapState.set(id, 0);
+  }, 500);
+
+  return false;
 }
 
 function attachCell(cell, ic, context, index, pageIndex) {
@@ -1994,13 +2349,21 @@ function attachCell(cell, ic, context, index, pageIndex) {
     e.stopPropagation();
 
     if (!ic) {
-      if (isEdit()) createIconAt(context, index, pageIndex);
+      if (movingCtx) {
+        placeMovedIcon(context, index, pageIndex);
+        return;
+      }
+
+      if (isEdit()) {
+        createIconAt(context, index, pageIndex);
+      }
+
       return;
     }
 
     if (choosingTrigger) {
       triggerIconId = ic.id;
-      localStorage.setItem("triggerIconId", triggerIconId);
+      safeSet("triggerIconId", triggerIconId);
       cancelChoose();
       openHomeSettings();
       syncTriggerLabels();
@@ -2009,7 +2372,7 @@ function attachCell(cell, ic, context, index, pageIndex) {
 
     if (choosingLock) {
       lockIconId = ic.id;
-      localStorage.setItem("lockIconId", lockIconId);
+      safeSet("lockIconId", lockIconId);
       cancelChoose();
       openHomeSettings();
       syncTriggerLabels();
@@ -2022,13 +2385,13 @@ function attachCell(cell, ic, context, index, pageIndex) {
     }
 
     if (ic.id === triggerIconId) {
-      openHomeSettings();
-      return;
+      const done = registerDoubleIconTap(ic.id + "_trigger", openHomeSettings);
+      if (done) return;
     }
 
     if (ic.id === lockIconId) {
-      lockBack();
-      return;
+      const done = registerDoubleIconTap(ic.id + "_lock", lockBack);
+      if (done) return;
     }
 
     if (ic.folder) {
@@ -2040,7 +2403,9 @@ function attachCell(cell, ic, context, index, pageIndex) {
 
   const start = () => {
     if (!ic) return;
+
     clearTimeout(timer);
+
     timer = setTimeout(() => {
       if (!isEdit()) enterEditMode();
       openIconMenu(ic, context, index, pageIndex);
@@ -2055,17 +2420,6 @@ function attachCell(cell, ic, context, index, pageIndex) {
   cell.addEventListener("touchstart", start, { passive:true });
   cell.addEventListener("touchend", end);
   cell.addEventListener("touchmove", end);
-
-  if (ic) {
-    const del = document.createElement("div");
-    del.className = "del";
-    del.textContent = "×";
-    del.onclick = e => {
-      e.stopPropagation();
-      deleteAt(context, index, pageIndex);
-    };
-    cell.appendChild(del);
-  }
 }
 
 function enterEditMode() {
@@ -2077,15 +2431,17 @@ function enterEditMode() {
 function exitEditMode() {
   $("phone").classList.remove("edit");
   $("tgEdit").classList.remove("on");
+  cancelMoveMode();
   renderHome();
 }
 
 $("editDone").onclick = exitEditMode;
+$("cancelMove").onclick = cancelMoveMode;
 
-/* FOLDER */
+/* ---------- FOLDER ---------- */
 
 function openFolder(ic, context, index, pageIndex) {
-  folderCtx = {icon:ic, context, index, pageIndex};
+  folderCtx = { icon:ic, context, index, pageIndex };
   $("folderTitle").textContent = ic.name || "Папка";
   renderFolderBox(ic);
   $("folderView").classList.add("open");
@@ -2099,7 +2455,19 @@ function closeFolder() {
 function renderFolderBox(ic) {
   const box = $("folderBox");
   box.innerHTML = "";
-  const count = isEdit() ? Math.max(9, ic.items.length + 3) : ic.items.length;
+
+  const count = isEdit()
+    ? Math.max(9, ic.items.length + 3)
+    : ic.items.length;
+
+  if (!isEdit() && !ic.items.some(Boolean)) {
+    const hint = document.createElement("div");
+    hint.className = "folder-empty-hint";
+    hint.style.gridColumn = "1 / -1";
+    hint.textContent = "Папка пуста. Включите режим редактирования, чтобы добавить иконки.";
+    box.appendChild(hint);
+    return;
+  }
 
   for (let i = 0; i < count; i++) {
     box.appendChild(buildCell(ic.items[i] || null, "folder", i, currentPage));
@@ -2110,10 +2478,10 @@ $("folderView").onclick = e => {
   if (e.target.id === "folderView") closeFolder();
 };
 
-/* ICON MENU */
+/* ---------- ICON MENU ---------- */
 
 function openIconMenu(ic, context, index, pageIndex) {
-  iconCtx = {icon:ic, context, index, pageIndex};
+  iconCtx = { icon:ic, context, index, pageIndex };
 
   const p = $("menuPreview");
   p.style.backgroundImage = "none";
@@ -2123,18 +2491,18 @@ function openIconMenu(ic, context, index, pageIndex) {
     p.style.background = "#333";
     p.textContent = "📁";
   } else if (ic.img) {
-    p.style.backgroundImage = `url('${ic.img}')`;
+    p.style.backgroundImage = `url("${ic.img}")`;
   } else {
-    p.style.background = ic.bg || "#444";
+    p.style.background = normalizeColor(ic.bg);
     p.textContent = ic.emoji || "";
   }
 
   $("menuTitle").textContent = ic.name || (ic.folder ? "Папка" : "Иконка");
   $("menuName").value = ic.name || "";
   $("menuEmoji").value = ic.emoji || "";
-  $("menuColor").value = /^#[0-9a-f]{6}$/i.test(ic.bg || "") ? ic.bg : "#444444";
-  $("menuColorText").value = ic.bg || "#444444";
-  $("menuBadge").value = ic.badge || 0;
+  $("menuColor").value = normalizeColor(ic.bg);
+  $("menuColorText").value = normalizeColor(ic.bg);
+  $("menuBadge").value = clampNum(ic.badge, 0, 99999, 0);
   $("makeFolder").textContent = ic.folder ? "📁 Открыть папку" : "📁 Сделать папкой";
 
   $("iconMenu").classList.add("open");
@@ -2161,13 +2529,13 @@ function afterIconChange() {
 
 $("saveName").onclick = () => {
   if (!iconCtx) return;
-  iconCtx.icon.name = $("menuName").value;
+  iconCtx.icon.name = $("menuName").value.slice(0, 40);
   afterIconChange();
 };
 
 $("saveEmoji").onclick = () => {
   if (!iconCtx) return;
-  iconCtx.icon.emoji = $("menuEmoji").value;
+  iconCtx.icon.emoji = $("menuEmoji").value.slice(0, 8);
   iconCtx.icon.img = null;
   afterIconChange();
 };
@@ -2178,29 +2546,31 @@ $("menuColor").oninput = e => {
 
 $("saveColor").onclick = () => {
   if (!iconCtx) return;
-  iconCtx.icon.bg = $("menuColorText").value || $("menuColor").value;
+  iconCtx.icon.bg = normalizeColor($("menuColorText").value || $("menuColor").value);
   afterIconChange();
 };
 
 $("saveBadge").onclick = () => {
   if (!iconCtx) return;
-  iconCtx.icon.badge = parseInt($("menuBadge").value || "0", 10);
+  iconCtx.icon.badge = clampNum($("menuBadge").value, 0, 99999, 0);
   afterIconChange();
 };
 
 $("pickIconPhoto").onclick = () => $("iconPhotoInput").click();
 
-$("iconPhotoInput").onchange = e => {
+$("iconPhotoInput").onchange = async e => {
   const f = e.target.files[0];
   if (!f || !iconCtx) return;
 
-  const r = new FileReader();
-  r.onload = ev => {
-    iconCtx.icon.img = ev.target.result;
+  try {
+    const img = await readAndCompressImage(f, 512, .84);
+    iconCtx.icon.img = img;
     iconCtx.icon.emoji = "";
     afterIconChange();
-  };
-  r.readAsDataURL(f);
+  } catch {
+    alert("Не удалось загрузить изображение");
+  }
+
   e.target.value = "";
 };
 
@@ -2221,13 +2591,34 @@ $("makeFolder").onclick = () => {
     return;
   }
 
+  const oldIcon = {
+    ...blankIcon(),
+    name:ic.name,
+    bg:ic.bg,
+    emoji:ic.emoji,
+    img:ic.img,
+    badge:ic.badge,
+    folder:false,
+    items:[]
+  };
+
   ic.folder = true;
   ic.items = [];
+  if (oldIcon.name || oldIcon.emoji || oldIcon.img) {
+    ic.items.push(oldIcon);
+  }
+
   ic.img = null;
   ic.emoji = "";
+  ic.badge = 0;
   if (!ic.name) ic.name = "Папка";
 
   afterIconChange();
+};
+
+$("moveIcon").onclick = () => {
+  if (!iconCtx) return;
+  startMove(iconCtx.context, iconCtx.index, iconCtx.pageIndex);
 };
 
 $("deleteIcon").onclick = () => {
@@ -2236,7 +2627,7 @@ $("deleteIcon").onclick = () => {
   closeIconMenu();
 };
 
-/* HOME SETTINGS */
+/* ---------- HOME SETTINGS ---------- */
 
 function openHomeSettings() {
   $("homeSettings").classList.add("open");
@@ -2253,39 +2644,46 @@ document.querySelectorAll(".section-head").forEach(h => {
   h.onclick = () => h.parentElement.classList.toggle("open");
 });
 
-function setSlider(id, valId, get, set, suffix) {
+function setSlider(id, valId, get, set, suffix, needRender) {
   const el = $(id);
   const lab = $(valId);
+
   el.value = get();
   lab.textContent = get() + suffix;
 
   el.oninput = () => {
     const v = parseInt(el.value, 10);
+
     set(v);
     lab.textContent = v + suffix;
     applyVars();
     saveHomeCfg();
-    renderHome();
+
+    if (needRender) renderHome();
   };
 }
 
 function syncHomeSettings() {
-  setSlider("colsSlider", "colsVal", () => gridCols, v => gridCols = v, "");
-  setSlider("gapXSlider", "gapXVal", () => gapX, v => gapX = v, "px");
-  setSlider("gapYSlider", "gapYVal", () => gapY, v => gapY = v, "px");
+  setSlider("colsSlider", "colsVal", () => gridCols, v => gridCols = v, "", true);
+  setSlider("gapXSlider", "gapXVal", () => gapX, v => gapX = v, "px", false);
+  setSlider("gapYSlider", "gapYVal", () => gapY, v => gapY = v, "px", false);
 
-  setSlider("iconSizeSlider", "iconSizeVal", () => iconSize, v => iconSize = v, "px");
-  setSlider("iconRadiusSlider", "iconRadiusVal", () => iconRadius, v => iconRadius = v, "px");
-  setSlider("iconXSlider", "iconXVal", () => iconX, v => iconX = v, " px");
-  setSlider("iconYSlider", "iconYVal", () => iconY, v => iconY = v, " px");
-  setSlider("dockYSlider", "dockYVal", () => dockY, v => dockY = v, " px");
-  setSlider("iconOpacitySlider", "iconOpacityVal", () => iconOpacity, v => iconOpacity = v, "%");
+  setSlider("iconSizeSlider", "iconSizeVal", () => iconSize, v => iconSize = v, "px", false);
+  setSlider("iconRadiusSlider", "iconRadiusVal", () => iconRadius, v => iconRadius = v, "px", false);
 
-  setSlider("badgeXSlider", "badgeXVal", () => badgeCfg.x, v => badgeCfg.x = v, " px");
-  setSlider("badgeYSlider", "badgeYVal", () => badgeCfg.y, v => badgeCfg.y = v, " px");
-  setSlider("badgeWSlider", "badgeWVal", () => badgeCfg.w, v => badgeCfg.w = v, " px");
-  setSlider("badgeHSlider", "badgeHVal", () => badgeCfg.h, v => badgeCfg.h = v, " px");
-  setSlider("badgeFsSlider", "badgeFsVal", () => badgeCfg.fs, v => badgeCfg.fs = v, " px");
+  setSlider("iconXSlider", "iconXVal", () => iconX, v => iconX = v, " px", false);
+  setSlider("iconYSlider", "iconYVal", () => iconY, v => iconY = v, " px", false);
+
+  setSlider("dockXSlider", "dockXVal", () => dockX, v => dockX = v, " px", false);
+  setSlider("dockYSlider", "dockYVal", () => dockY, v => dockY = v, " px", false);
+
+  setSlider("iconOpacitySlider", "iconOpacityVal", () => iconOpacity, v => iconOpacity = v, "%", false);
+
+  setSlider("badgeXSlider", "badgeXVal", () => badgeCfg.x, v => badgeCfg.x = v, " px", false);
+  setSlider("badgeYSlider", "badgeYVal", () => badgeCfg.y, v => badgeCfg.y = v, " px", false);
+  setSlider("badgeWSlider", "badgeWVal", () => badgeCfg.w, v => badgeCfg.w = v, " px", false);
+  setSlider("badgeHSlider", "badgeHVal", () => badgeCfg.h, v => badgeCfg.h = v, " px", false);
+  setSlider("badgeFsSlider", "badgeFsVal", () => badgeCfg.fs, v => badgeCfg.fs = v, " px", false);
 
   $("tgEdit").classList.toggle("on", isEdit());
   $("tgBadges").classList.toggle("on", localStorage.getItem("showBadges") !== "0");
@@ -2305,12 +2703,12 @@ $("rowBadges").onclick = () => {
   const on = !$("tgBadges").classList.contains("on");
   $("tgBadges").classList.toggle("on", on);
   document.body.classList.toggle("hide-badges", !on);
-  localStorage.setItem("showBadges", on ? "1" : "0");
+  safeSet("showBadges", on ? "1" : "0");
   renderHome();
 };
 
 $("addPage").onclick = () => {
-  pages.push({bg:null, icons:[]});
+  pages.push({ bg:null, icons:[] });
   currentPage = pages.length - 1;
   saveData();
   renderHome();
@@ -2323,7 +2721,7 @@ document.querySelectorAll("[data-act]").forEach(row => {
     if (act === "homeBg") $("homeBgInput").click();
 
     if (act === "homeBgReset") {
-      localStorage.removeItem("homeBg");
+      safeRemove("homeBg");
       renderHome();
     }
 
@@ -2337,34 +2735,38 @@ document.querySelectorAll("[data-act]").forEach(row => {
   };
 });
 
-$("homeBgInput").onchange = e => {
+$("homeBgInput").onchange = async e => {
   const f = e.target.files[0];
   if (!f) return;
 
-  const r = new FileReader();
-  r.onload = ev => {
-    localStorage.setItem("homeBg", ev.target.result);
+  try {
+    const img = await readAndCompressImage(f, 1800, .82);
+    safeSet("homeBg", img);
     renderHome();
-  };
-  r.readAsDataURL(f);
+  } catch {
+    alert("Не удалось загрузить изображение");
+  }
+
   e.target.value = "";
 };
 
-$("pageBgInput").onchange = e => {
+$("pageBgInput").onchange = async e => {
   const f = e.target.files[0];
   if (!f) return;
 
-  const r = new FileReader();
-  r.onload = ev => {
-    pages[currentPage].bg = ev.target.result;
+  try {
+    const img = await readAndCompressImage(f, 1800, .82);
+    pages[currentPage].bg = img;
     saveData();
     renderHome();
-  };
-  r.readAsDataURL(f);
+  } catch {
+    alert("Не удалось загрузить изображение");
+  }
+
   e.target.value = "";
 };
 
-/* TRIGGERS */
+/* ---------- TRIGGERS ---------- */
 
 let holdEnabled = localStorage.getItem("holdEnabled") !== "0";
 let doubleEnabled = localStorage.getItem("doubleEnabled") === "1";
@@ -2372,19 +2774,19 @@ let lockSwipeEnabled = localStorage.getItem("lockSwipeEnabled") !== "0";
 
 $("rowHold").onclick = () => {
   holdEnabled = !holdEnabled;
-  localStorage.setItem("holdEnabled", holdEnabled ? "1" : "0");
+  safeSet("holdEnabled", holdEnabled ? "1" : "0");
   $("tgHold").classList.toggle("on", holdEnabled);
 };
 
 $("rowDouble").onclick = () => {
   doubleEnabled = !doubleEnabled;
-  localStorage.setItem("doubleEnabled", doubleEnabled ? "1" : "0");
+  safeSet("doubleEnabled", doubleEnabled ? "1" : "0");
   $("tgDouble").classList.toggle("on", doubleEnabled);
 };
 
 $("rowLockSwipe").onclick = () => {
   lockSwipeEnabled = !lockSwipeEnabled;
-  localStorage.setItem("lockSwipeEnabled", lockSwipeEnabled ? "1" : "0");
+  safeSet("lockSwipeEnabled", lockSwipeEnabled ? "1" : "0");
   $("tgLockSwipe").classList.toggle("on", lockSwipeEnabled);
 };
 
@@ -2421,10 +2823,11 @@ function cancelChoose() {
 
 $("chooseHint").onclick = () => {
   cancelChoose();
+  cancelMoveMode();
   openHomeSettings();
 };
 
-/* HOME GESTURES */
+/* ---------- HOME GESTURES ---------- */
 
 let holdTimer = null;
 let holdSX = 0;
@@ -2491,7 +2894,7 @@ $("phone").addEventListener("click", e => {
   }
 });
 
-/* PAGE SWIPE */
+/* ---------- PAGE SWIPE ---------- */
 
 let swipeX = 0;
 let swipeY = 0;
@@ -2526,7 +2929,7 @@ $("pagesViewport").addEventListener("mouseup", e => swipeEnd(e.clientX, e.client
 $("pagesViewport").addEventListener("touchstart", e => swipeStart(e.touches[0].clientX, e.touches[0].clientY), { passive:true });
 $("pagesViewport").addEventListener("touchend", e => swipeEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY), { passive:true });
 
-/* KEYBOARD */
+/* ---------- KEYBOARD ---------- */
 
 document.addEventListener("keydown", e => {
   if ($("lockSettings").classList.contains("show")) {
@@ -2542,11 +2945,13 @@ document.addEventListener("keydown", e => {
       else if (isEdit()) exitEditMode();
       else lockBack();
     }
+
     return;
   }
 
   if (e.key >= "0" && e.key <= "9") pressDigit(e.key);
   if (e.key === "Backspace") deleteDigit();
+
   if (e.key === "Enter") {
     sosArmed = true;
     currentInput = "";
@@ -2554,18 +2959,16 @@ document.addEventListener("keydown", e => {
   }
 });
 
-/* INIT */
+/* ---------- INIT ---------- */
 
 (function init() {
   buildDots();
   updateDots();
 
-  const keySize = localStorage.getItem("keySize");
-  if (keySize) {
-    rootSet("--key-size", keySize + "px");
-    $("keySizeSlider").value = keySize;
-    $("keySizeVal").textContent = keySize + " px";
-  }
+  const keySize = clampNum(localStorage.getItem("keySize"), 60, 120, 96);
+  rootSet("--key-size", keySize + "px");
+  $("keySizeSlider").value = keySize;
+  $("keySizeVal").textContent = keySize + " px";
 
   $("pinXSlider").value = pinStepX;
   $("pinYSlider").value = pinStepY;
@@ -2573,17 +2976,17 @@ document.addEventListener("keydown", e => {
   $("pinYVal").textContent = pinStepY + " px";
   applyPinSpread();
 
-  const pby = parseInt(localStorage.getItem("pinBlockY") || "0", 10);
+  const pby = clampNum(localStorage.getItem("pinBlockY"), -240, 140, 0);
   $("pinBlockSlider").value = pby;
   $("pinBlockVal").textContent = pby + " px";
   rootSet("--pin-y", pby + "px");
 
   const lb = localStorage.getItem("lockBg");
-  if (lb) $("wallpaper").style.backgroundImage = `url('${lb}')`;
+  if (lb) $("wallpaper").style.backgroundImage = `url("${lb}")`;
 
   $("realPinInput").value = realPin;
 
-  const methodBtn = document.querySelector(`[data-method="${settings.unlockMethod}"]`);
+  const methodBtn = document.querySelector(`[data-method="${lockSettings.unlockMethod}"]`);
   if (methodBtn) methodBtn.click();
 
   const style = localStorage.getItem("style") || "ios";
