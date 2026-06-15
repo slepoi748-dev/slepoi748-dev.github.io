@@ -5,638 +5,2692 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#000000">
 <title>Lock Screen</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
-:root {
---ui-top: env(safe-area-inset-top, 0px);
---ui-bottom: env(safe-area-inset-bottom, 0px);
---ui-left: env(safe-area-inset-left, 0px);
---ui-right: env(safe-area-inset-right, 0px);
---icon-opacity: 1;
---icon-size: 60px;
---icon-radius: 15px;
---label-h: 16px;
---gap-x: 10px;
---gap-y: 14px;
---cols: 4;
+* {
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
 }
-html,body { width:100%; height:100%; min-height:100vh; min-height:100dvh; overflow:hidden; font-family:-apple-system,'SF Pro Display',sans-serif; background:#000; position:fixed; inset:0; }
-#device { position:fixed; inset:0; width:100vw; height:100vh; height:100dvh; margin:0 auto; overflow:hidden; background:#000; }
-.wallpaper { position:absolute; inset:0; background:#000; background-size:cover; background-position:center; z-index:0; transition:background 0.4s ease; }
-#bgInput { display:none; }
-.lock-screen { position:relative; width:100%; height:100%; z-index:2; display:flex; flex-direction:column; align-items:center; padding-top:var(--ui-top); }
-body.unlocked .lock-screen { display:none; }
-.top-label { margin-top:22%; text-align:center; color:white; font-size:16px; font-weight:400; line-height:1.5; text-shadow:0 1px 6px rgba(0,0,0,0.5); padding:0 40px; }
-.dots-container { display:flex; gap:18px; margin-top:18px; height:14px; align-items:center; }
-.dot { width:13px; height:13px; border-radius:50%; border:1.5px solid rgba(255,255,255,0.85); background:transparent; transition:all 0.15s ease; }
-.dot.filled { background:white; border-color:white; animation:dotPop 0.15s ease; }
-@keyframes dotPop { 0%{transform:scale(0.8);} 50%{transform:scale(1.2);} 100%{transform:scale(1);} }
-.wrong-animation { animation:wrongShake 0.5s ease; }
-@keyframes wrongShake { 0%,100%{transform:translateX(0);} 15%{transform:translateX(-10px);} 30%{transform:translateX(10px);} 45%{transform:translateX(-8px);} 60%{transform:translateX(8px);} 75%{transform:translateX(-4px);} 90%{transform:translateX(4px);} }
-.passcode-section { position:absolute; bottom:0; width:100%; display:flex; flex-direction:column; align-items:center; transform:translateY(var(--pin-block-y,0px)); transition:transform 0.2s ease; }
-.keyboard { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; width:92%; max-width:340px; justify-items:center; }
-.key, .key-zero { display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; aspect-ratio:1; border-radius:50%; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); color:white; cursor:pointer; position:relative; overflow:hidden; max-width:var(--key-size,96px); max-height:var(--key-size,96px); margin:0 auto; text-align:center; transform:translate(var(--kx,0px), var(--ky,0px)); transition:background 0.1s ease, transform 0.12s ease; }
-.key.pressed, .key-zero.pressed { animation:keyPop 0.2s ease; }
-@keyframes keyPop { 0%{background:rgba(255,255,255,0.45);} 40%{transform:translate(var(--kx,0px), var(--ky,0px)) scale(0.9);background:rgba(255,255,255,0.5);} 100%{transform:translate(var(--kx,0px), var(--ky,0px)) scale(1);} }
-.key:active, .key-zero:active { background:rgba(255,255,255,0.35); }
-.key-number { font-size:calc(var(--key-size,96px)*0.33); font-weight:300; line-height:1; pointer-events:none; }
-.key-letters { font-size:8px; font-weight:400; letter-spacing:1px; opacity:0.65; margin-top:2px; pointer-events:none; text-align:center; line-height:1.4; }
-.bottom-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; width:92%; max-width:340px; padding:12px 0 calc(36px + var(--ui-bottom)); align-items:center; }
-.btn-sos, .btn-cancel { color:white; font-size:17px; font-weight:400; background:transparent; border:none; cursor:pointer; padding:10px 0; opacity:0.9; letter-spacing:0.2px; display:flex; align-items:center; justify-content:center; }
-.btn-sos:active, .btn-cancel:active { opacity:0.4; }
-.key-zero .key-number { font-size:calc(var(--key-size,96px)*0.33); font-weight:300; pointer-events:none; }
-.unlock-screen { position:absolute; inset:0; width:100%; height:100%; z-index:100; display:none; }
-.unlock-screen.show { display:block; animation:unlockAnim 0.5s ease forwards; }
-@keyframes unlockAnim { 0%{opacity:0;transform:scale(1.04);} 100%{opacity:1;transform:scale(1);} }
-.settings-overlay { position:absolute; inset:0; z-index:200; background:rgba(0,0,0,0.78); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); display:none; flex-direction:column; padding:calc(50px + var(--ui-top)) 22px calc(30px + var(--ui-bottom)); overflow-y:auto; }
-.settings-overlay.show { display:flex; animation:settingsAnim 0.3s ease forwards; }
-@keyframes settingsAnim { 0%{opacity:0;transform:translateY(20px);} 100%{opacity:1;transform:translateY(0);} }
-.settings-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
-.settings-title { color:white; font-size:22px; font-weight:600; }
-.settings-close { color:white; font-size:16px; background:rgba(255,255,255,0.15); border:none; padding:8px 16px; border-radius:20px; cursor:pointer; }
-.settings-close:active { opacity:0.5; }
-.settings-block { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:16px; margin-bottom:16px; }
-.settings-block-title { color:white; font-size:15px; font-weight:600; margin-bottom:12px; opacity:0.9; }
-.size-slider { width:100%; -webkit-appearance:none; appearance:none; height:6px; border-radius:3px; background:rgba(255,255,255,0.25); outline:none; }
-.size-slider::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:22px; height:22px; border-radius:50%; background:white; cursor:pointer; }
-.size-slider::-moz-range-thumb { width:22px; height:22px; border-radius:50%; background:white; border:none; cursor:pointer; }
-.size-value { color:white; font-size:13px; opacity:0.7; margin-top:8px; text-align:center; }
-.slider-row { margin-bottom:14px; }
-.slider-row:last-child { margin-bottom:0; }
-.slider-row .sl-label { color:#fff; font-size:13px; opacity:0.8; margin-bottom:6px; display:flex; justify-content:space-between; }
-.option-row { display:flex; gap:8px; flex-wrap:wrap; }
-.option-btn { flex:1; min-width:80px; color:white; font-size:14px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); padding:12px 10px; border-radius:12px; cursor:pointer; text-align:center; transition:all 0.15s ease; }
-.option-btn.active { background:rgba(255,255,255,0.9); color:#16213e; font-weight:600; }
-.option-btn:active { transform:scale(0.96); }
-.bg-pick-btn { width:100%; color:white; font-size:15px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); padding:14px; border-radius:12px; cursor:pointer; }
-.bg-pick-btn:active { opacity:0.6; }
-.settings-hint { color:white; opacity:0.45; font-size:12px; text-align:center; margin-top:8px; }
-body.style-android .keyboard { gap:18px; }
-body.style-android .bottom-row { gap:18px; }
-body.style-android .key, body.style-android .key-zero { border-radius:50%; background:rgba(255,255,255,0.08); border:none; }
-body.style-android .top-label { font-size:14px; opacity:0.85; }
-body.style-android .dot { width:11px; height:11px; }
-body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; text-transform:uppercase; letter-spacing:1px; }
-#phone { position:relative; width:100%; height:100%; background:#000; overflow:hidden; color:#fff; display:flex; flex-direction:column; }
-#homeWallpaper { position:absolute; inset:0; background:#000; background-size:cover; background-position:center; z-index:0; transition:background 0.4s ease; }
-#phone > #pagesViewport, #phone > #pageDots, #phone > #search, #phone > #dock { position:relative; z-index:1; }
-#pagesViewport { flex:1; overflow:hidden; position:relative; }
-#pagesTrack { display:flex; height:100%; transition:transform 0.3s cubic-bezier(.22,.61,.36,1); will-change:transform; }
-.page { flex:0 0 100%; width:100%; height:100%; padding:calc(24px + var(--ui-top)) calc(16px + var(--ui-right)) 0 calc(16px + var(--ui-left)); overflow-y:auto; overflow-x:hidden; position:relative; }
-.grid { display:grid; grid-template-columns:repeat(var(--cols,4),1fr); grid-auto-rows:calc(var(--icon-size,60px) + var(--label-h,16px) + 4px); column-gap:var(--gap-x,10px); row-gap:var(--gap-y,14px); width:100%; transform:translate(var(--icon-x,0px), var(--icon-y,0px)); position:relative; z-index:1; justify-items:center; }
-.cell { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; cursor:pointer; width:var(--icon-size,60px); height:100%; }
-.cell .icon, .cell .folder { transition:opacity 0.2s ease; }
-.icon { width:var(--icon-size,60px); height:var(--icon-size,60px); border-radius:var(--icon-radius,15px); display:flex; align-items:center; justify-content:center; font-size:calc(var(--icon-size,60px)*0.5); color:#fff; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.3); background-size:cover; background-position:center; }
-.icon.empty-icon { background:rgba(120,120,120,0.25) !important; box-shadow:none; border:1px dashed rgba(255,255,255,0.25); }
-.icon img { width:100%; height:100%; object-fit:cover; }
-.cell.big { width:100%; }
-.cell.big .icon, .cell.big .folder { width:100%; height:var(--icon-size,60px); }
-.folder { width:var(--icon-size,60px); height:var(--icon-size,60px); border-radius:var(--icon-radius,15px); background:rgba(20,20,20,0.55); backdrop-filter:blur(8px); display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); gap:2.5px; padding:5px; box-shadow:0 2px 6px rgba(0,0,0,0.3); }
-.folder .mini { border-radius:4px; font-size:8px; display:flex; align-items:center; justify-content:center; overflow:hidden; color:#fff; background-size:cover; background-position:center; }
-.label { margin-top:4px; height:var(--label-h,16px); line-height:var(--label-h,16px); font-size:12px; text-align:center; text-shadow:0 1px 3px rgba(0,0,0,0.6); max-width:130%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:opacity 0.2s ease; }
-#phone:not(.edit) .grid .cell .icon,
-#phone:not(.edit) .grid .cell .folder,
-#phone:not(.edit) .grid .cell .label,
-#phone:not(.edit) #dock .cell .icon,
-#phone:not(.edit) #dock .cell .folder { opacity:var(--icon-opacity,1); }
-#phone.edit .grid .cell .icon, #phone.edit .grid .cell .folder { outline:2px solid #ff3b30; outline-offset:2px; border-radius:var(--icon-radius,15px); }
-#phone.edit .grid .cell.sel .icon, #phone.edit .grid .cell.sel .folder { outline:2px solid #30d158; box-shadow:0 0 0 3px rgba(48,209,88,0.35); }
-#phone.edit .grid .cell, #phone.edit #folderBox .cell, #phone.edit #dock .cell { animation:wiggle 0.3s infinite alternate; }
-@keyframes wiggle { from { transform:rotate(-1deg); } to { transform:rotate(1deg); } }
-body.hide-badges .badge { display:none !important; }
-.badge { position:absolute; z-index:3; background:#ff3b30; color:#fff; font-weight:700; border:none; display:flex; align-items:center; justify-content:center; border-radius:12px; overflow:hidden; line-height:1; left:50%; top:0; transform:translate(calc(-50% + var(--bx,30px)), calc(-50% + var(--by,-2px))); min-width:var(--bw,20px); height:var(--bh,20px); padding:0 5px; font-size:var(--bfs,12px); }
-.del-corner { display:none; position:absolute; top:-8px; left:-8px; width:22px; height:22px; border-radius:50%; background:#e0e0e0; color:#000; font-size:16px; font-weight:700; align-items:center; justify-content:center; z-index:6; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.4); }
-#phone.edit .grid .cell .del-corner, #phone.edit #dock .cell .del-corner, #phone.edit #folderBox .cell .del-corner { display:flex; }
-#phone.choosing-trigger .grid .cell .icon, #phone.choosing-trigger .grid .cell .folder,
-#phone.choosing-attempt .grid .cell .icon, #phone.choosing-attempt .grid .cell .folder,
-#phone.choosing-lock .grid .cell .icon, #phone.choosing-lock .grid .cell .folder { outline:2px solid #0a84ff; outline-offset:2px; }
-#phone.choosing-trigger .grid .cell .icon, #phone.choosing-trigger .grid .cell .folder, #phone.choosing-trigger .grid .cell .label,
-#phone.choosing-attempt .grid .cell .icon, #phone.choosing-attempt .grid .cell .folder, #phone.choosing-attempt .grid .cell .label,
-#phone.choosing-lock .grid .cell .icon, #phone.choosing-lock .grid .cell .folder, #phone.choosing-lock .grid .cell .label { opacity:1; }
-#editBar { display:none; position:absolute; bottom:0; left:0; right:0; z-index:65; background:transparent; padding:12px 14px calc(12px + var(--ui-bottom)); flex-wrap:wrap; gap:8px; justify-content:center; pointer-events:none; }
-#phone.edit #editBar { display:flex; }
-#editBar > * { pointer-events:auto; }
-#editBar button { background:rgba(20,20,20,0.78); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:12px; padding:10px 14px; font-size:13px; cursor:pointer; backdrop-filter:blur(8px); }
-#editBar button.primary { background:rgba(48,209,88,0.32); border-color:#30d158; color:#fff; }
-#editBar button:active { transform:scale(0.96); }
-#editBar .eb-info { width:100%; text-align:center; font-size:12px; opacity:0.85; margin-bottom:2px; background:rgba(0,0,0,0.45); border-radius:8px; padding:4px 8px; }
-#pageDots { display:flex; justify-content:center; align-items:center; gap:8px; padding:6px 0 2px; min-height:20px; }
-#pageDots .pdot { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,0.35); transition:.2s; }
-#pageDots .pdot.active { background:#fff; transform:scale(1.15); }
-#search { align-self:center; margin:6px 0 12px; background:rgba(120,120,120,0.3); backdrop-filter:blur(12px); padding:7px 18px; border-radius:18px; font-size:14px; display:flex; gap:6px; align-items:center; cursor:pointer; }
-#phone:not(.edit) #search { opacity:0; }
-#phone.edit #dock { margin-bottom:calc(96px + var(--ui-bottom)); }
-#dock { margin:0 calc(12px + var(--ui-right)) calc(16px + var(--ui-bottom)) calc(12px + var(--ui-left)); background:transparent; backdrop-filter:none; border-radius:32px; padding:12px 14px; display:flex; justify-content:space-around; align-items:flex-start; gap:8px; transition:margin .2s ease; }
-#dock .cell { height:auto; }
-#dock .label { display:none; }
-#folderView { position:absolute; inset:0; z-index:40; display:none; flex-direction:column; align-items:center; background:rgba(0,0,0,0.45); backdrop-filter:blur(22px); animation:fadeIn 0.25s ease; }
-#folderView.open { display:flex; }
-#folderTitle { font-size:30px; font-weight:700; margin:calc(60px + var(--ui-top)) 0 26px; align-self:flex-start; padding-left:40px; text-shadow:0 1px 6px rgba(0,0,0,0.6); }
-#folderBox { width:300px; min-height:300px; background:rgba(180,180,180,0.18); border:1px solid rgba(255,255,255,0.18); border-radius:34px; padding:26px 22px; display:grid; grid-template-columns:repeat(3,1fr); gap:22px 18px; align-content:start; justify-items:center; }
-#folderBox .cell { height:auto; }
-#folderBox .cell .icon { width:58px; height:58px; }
-#folderBox .cell .label, #folderBox .cell .icon, #folderBox .cell .folder { opacity:1 !important; }
-#iconMenu { position:absolute; inset:0; z-index:70; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); backdrop-filter:blur(6px); animation:fadeIn 0.2s ease; }
-#iconMenu.open { display:flex; }
-.im-card { width:320px; max-width:92%; background:#1c1c1e; border:1px solid rgba(255,255,255,0.12); border-radius:22px; padding:18px; box-shadow:0 12px 40px rgba(0,0,0,0.6); animation:imPop 0.2s ease; max-height:88%; overflow-y:auto; }
-@keyframes imPop { 0%{transform:scale(0.9);opacity:0;} 100%{transform:scale(1);opacity:1;} }
-.im-head { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
-.im-prev { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; overflow:hidden; flex-shrink:0; position:relative; background-size:cover; background-position:center; }
-.im-prev img { width:100%; height:100%; object-fit:cover; }
-.im-title { font-size:16px; font-weight:600; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.im-btn { width:100%; display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.08); border:none; color:#fff; padding:13px 14px; border-radius:12px; font-size:14px; cursor:pointer; margin-bottom:9px; text-align:left; }
-.im-btn:active { background:rgba(255,255,255,0.18); }
-.im-btn .imi { font-size:17px; width:22px; text-align:center; }
-.im-btn.danger { color:#ff453a; }
-.im-row { display:flex; gap:8px; align-items:center; margin-bottom:9px; }
-.im-row input[type=text], .im-row input[type=number] { flex:1; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:10px; padding:11px 12px; font-size:14px; outline:none; }
-.im-row input[type=color] { width:46px; height:42px; border:none; background:none; border-radius:10px; cursor:pointer; padding:0; }
-.im-row .im-ok { background:rgba(48,209,88,0.2); border:1px solid #30d158; color:#30d158; border-radius:10px; padding:11px 15px; font-size:13px; cursor:pointer; }
-.im-close { width:100%; background:rgba(255,255,255,0.12); border:none; color:#fff; padding:12px; border-radius:12px; font-size:15px; cursor:pointer; margin-top:4px; }
-.im-close:active { transform:scale(0.97); }
-.im-sub { font-size:11px; opacity:0.5; margin:2px 2px 8px; }
-#hsSettings { position:absolute; inset:0; z-index:50; background:rgba(0,0,0,0.55); backdrop-filter:blur(18px); display:none; flex-direction:column; padding:calc(40px + var(--ui-top)) 22px calc(60px + var(--ui-bottom)); overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; animation:fadeIn 0.25s ease; transition:background .25s ease, backdrop-filter .25s ease; }
-#hsSettings.open { display:flex; }
-#hsSettings.tweak { background:rgba(0,0,0,0.05); backdrop-filter:none; -webkit-backdrop-filter:none; pointer-events:none; }
-#hsSettings.tweak h2, #hsSettings.tweak .subtitle, #hsSettings.tweak .set-section { opacity:0.12; pointer-events:none; transition:opacity .25s ease; }
-#hsSettings.tweak #closeSet { opacity:0.12; pointer-events:none; }
-#hsSettings.tweak .tweak-panel { display:block; pointer-events:auto; opacity:1; }
-.tweak-panel { display:none; position:fixed; bottom:0; left:0; right:0; background:rgba(20,20,20,0.94); backdrop-filter:blur(14px); border-radius:18px 18px 0 0; padding:16px 16px calc(16px + var(--ui-bottom)); z-index:300; box-shadow:0 -6px 30px rgba(0,0,0,0.5); }
-.tweak-panel .tp-title { font-size:14px; font-weight:600; margin-bottom:12px; }
-.tweak-panel .tp-done { width:100%; margin-top:8px; background:rgba(48,209,88,0.25); border:1px solid #30d158; color:#fff; border-radius:12px; padding:12px; font-size:15px; cursor:pointer; }
-#hsSettings::-webkit-scrollbar { width:6px; }
-#hsSettings::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.25); border-radius:3px; }
-@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
-#hsSettings h2 { font-size:22px; font-weight:700; margin-bottom:4px; }
-#hsSettings .subtitle { font-size:13px; opacity:0.6; margin-bottom:22px; }
-.set-section { margin-bottom:14px; flex-shrink:0; }
-.set-section-head { display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.1); border-radius:14px; padding:14px 16px; cursor:pointer; font-size:15px; font-weight:600; }
-.set-section-head .sec-ic { margin-right:10px; }
-.set-section-head .sec-chevron { transition:transform .25s ease; opacity:0.6; font-size:16px; }
-.set-section.open .set-section-head .sec-chevron { transform:rotate(90deg); }
-.set-section-body { max-height:0; overflow:hidden; transition:max-height .3s ease; }
-.set-section.open .set-section-body { max-height:6000px; }
-.set-section-body-inner { padding-top:10px; }
-.set-group { background:rgba(255,255,255,0.08); border-radius:16px; overflow:hidden; margin-bottom:12px; }
-.set-row { display:flex; align-items:center; justify-content:space-between; padding:15px 16px; font-size:15px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.08); }
-.set-row:last-child { border-bottom:none; }
-.set-row .ic { font-size:18px; margin-right:12px; }
-.set-row .txt { flex:1; }
-.set-row .arrow { opacity:0.4; font-size:18px; }
-.toggle { width:48px; height:28px; border-radius:14px; background:rgba(255,255,255,0.25); position:relative; transition:0.2s; flex-shrink:0; }
-.toggle.on { background:#30d158; }
-.toggle::after { content:''; position:absolute; top:2px; left:2px; width:24px; height:24px; border-radius:50%; background:#fff; transition:0.2s; }
-.toggle.on::after { left:22px; }
-.choose-btn { display:none; margin:0 16px 14px; padding:11px; background:rgba(48,209,88,0.2); border:1px solid #30d158; color:#30d158; border-radius:12px; font-size:14px; text-align:center; cursor:pointer; }
-.choose-btn.show { display:block; }
-.config-inline { display:none; padding:14px 16px 16px; background:rgba(255,159,10,0.10); border-bottom:1px solid rgba(255,255,255,0.08); }
-.config-inline.show { display:block; }
-.config-inline .ci-label { font-size:13px; opacity:0.8; margin-bottom:8px; }
-.config-inline .ci-row { display:flex; gap:8px; align-items:center; }
-.config-inline input { flex:1; background:rgba(255,255,255,0.12); border:1px solid rgba(255,159,10,0.5); color:#fff; border-radius:10px; padding:10px 12px; font-size:15px; outline:none; }
-.config-inline .ci-unit { font-size:13px; opacity:0.7; min-width:30px; }
-.config-inline .ci-save { background:rgba(48,209,88,0.2); border:1px solid #30d158; color:#30d158; border-radius:10px; padding:10px 16px; font-size:14px; cursor:pointer; }
-.info-line { font-size:12px; opacity:0.7; padding:0 16px 12px; }
-#closeSet { margin-top:10px; align-self:center; background:rgba(255,255,255,0.15); color:#fff; border:none; border-radius:14px; padding:13px 40px; font-size:16px; cursor:pointer; flex-shrink:0; }
-#hsBgInput, #hsIconInput, #hsPageBgInput, #galleryInput { display:none; }
-#attemptList { display:flex; flex-direction:column; gap:8px; }
-.group-inner-block { padding:14px 16px; }
-.tweak-launch { width:100%; margin-top:6px; color:#0a84ff; font-size:13px; background:rgba(10,132,255,0.12); border:1px solid rgba(10,132,255,0.5); padding:11px; border-radius:12px; cursor:pointer; }
-.divider-label { font-size:12px; text-transform:uppercase; letter-spacing:.5px; opacity:0.5; margin:14px 2px 8px; }
-#chooseHint { display:none; position:absolute; bottom:calc(20px + var(--ui-bottom)); left:50%; transform:translateX(-50%); z-index:400; background:rgba(10,132,255,0.92); color:#fff; padding:12px 18px; border-radius:14px; font-size:13px; text-align:center; max-width:90%; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.4); }
-#chooseHint.show { display:block; }
-#galleryModal { position:absolute; inset:0; z-index:500; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.65); backdrop-filter:blur(8px); }
-#galleryModal.open { display:flex; }
-.gm-card { width:340px; max-width:94%; max-height:84%; background:#1c1c1e; border:1px solid rgba(255,255,255,0.12); border-radius:22px; padding:18px; display:flex; flex-direction:column; }
-.gm-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-.gm-title { font-size:16px; font-weight:600; }
-.gm-upload { background:rgba(10,132,255,0.2); border:1px solid #0a84ff; color:#0a84ff; border-radius:10px; padding:8px 14px; font-size:13px; cursor:pointer; }
-.gm-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; overflow-y:auto; padding-right:4px; }
-.gm-item { position:relative; aspect-ratio:1; border-radius:10px; overflow:hidden; cursor:pointer; background:#333; background-size:cover; background-position:center; border:2px solid transparent; }
-.gm-item:active { border-color:#0a84ff; }
-.gm-item .gm-del { position:absolute; top:2px; right:2px; width:20px; height:20px; border-radius:50%; background:rgba(255,59,48,0.9); color:#fff; font-size:13px; display:flex; align-items:center; justify-content:center; }
-.gm-empty { grid-column:1/-1; text-align:center; opacity:0.5; font-size:13px; padding:30px 0; }
-.gm-close { margin-top:12px; background:rgba(255,255,255,0.12); border:none; color:#fff; border-radius:12px; padding:12px; font-size:15px; cursor:pointer; }
+
+:root {
+  --ui-top: env(safe-area-inset-top, 0px);
+  --ui-bottom: env(safe-area-inset-bottom, 0px);
+  --ui-left: env(safe-area-inset-left, 0px);
+  --ui-right: env(safe-area-inset-right, 0px);
+
+  --key-size:96px;
+  --pin-block-y:0px;
+
+  --cols:4;
+  --gap-x:10px;
+  --gap-y:14px;
+
+  --icon-size:60px;
+  --icon-radius:15px;
+  --icon-opacity:1;
+  --icon-x:0px;
+  --icon-y:0px;
+  --dock-y:0px;
+
+  --badge-x:30px;
+  --badge-y:-2px;
+  --badge-w:20px;
+  --badge-h:20px;
+  --badge-fs:12px;
+}
+
+html,
+body {
+  width:100%;
+  height:100%;
+  min-height:100vh;
+  min-height:100dvh;
+  overflow:hidden;
+  font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  background:#000;
+  position:fixed;
+  inset:0;
+}
+
+button,
+input {
+  font-family:inherit;
+}
+
+#device {
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100vh;
+  height:100dvh;
+  overflow:hidden;
+  background:#000;
+}
+
+/* LOCK SCREEN */
+
+.wallpaper {
+  position:absolute;
+  inset:0;
+  background:#000;
+  background-size:cover;
+  background-position:center;
+  z-index:0;
+}
+
+#bgInput,
+#homeBgInput,
+#iconPhotoInput,
+#pageBgInput {
+  display:none;
+}
+
+.lock-screen {
+  position:relative;
+  z-index:2;
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding-top:var(--ui-top);
+}
+
+body.unlocked .lock-screen {
+  display:none;
+}
+
+.top-label {
+  margin-top:22%;
+  text-align:center;
+  color:#fff;
+  font-size:16px;
+  line-height:1.45;
+  text-shadow:0 1px 6px rgba(0,0,0,.55);
+  padding:0 30px;
+}
+
+.dots-container {
+  display:flex;
+  gap:18px;
+  margin-top:18px;
+  height:16px;
+  align-items:center;
+}
+
+.dot {
+  width:13px;
+  height:13px;
+  border-radius:50%;
+  border:1.5px solid rgba(255,255,255,.85);
+  background:transparent;
+  transition:.15s;
+}
+
+.dot.filled {
+  background:#fff;
+  border-color:#fff;
+}
+
+.wrong-animation {
+  animation:wrongShake .5s ease;
+}
+
+@keyframes wrongShake {
+  0%,100% { transform:translateX(0); }
+  15% { transform:translateX(-10px); }
+  30% { transform:translateX(10px); }
+  45% { transform:translateX(-8px); }
+  60% { transform:translateX(8px); }
+  75% { transform:translateX(-4px); }
+  90% { transform:translateX(4px); }
+}
+
+.passcode-section {
+  position:absolute;
+  bottom:0;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  transform:translateY(var(--pin-block-y));
+}
+
+.keyboard {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  width:92%;
+  max-width:340px;
+  justify-items:center;
+}
+
+.key,
+.key-zero {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  aspect-ratio:1;
+  max-width:var(--key-size);
+  max-height:var(--key-size);
+  border-radius:50%;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.25);
+  color:#fff;
+  cursor:pointer;
+  backdrop-filter:blur(8px);
+  transform:translate(var(--kx,0px), var(--ky,0px));
+}
+
+.key:active,
+.key-zero:active {
+  background:rgba(255,255,255,.35);
+}
+
+.key-number {
+  font-size:calc(var(--key-size) * .33);
+  font-weight:300;
+  line-height:1;
+}
+
+.key-letters {
+  font-size:8px;
+  letter-spacing:1px;
+  opacity:.65;
+  margin-top:2px;
+  text-align:center;
+  line-height:1.25;
+}
+
+.bottom-row {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  width:92%;
+  max-width:340px;
+  padding:12px 0 calc(36px + var(--ui-bottom));
+  align-items:center;
+}
+
+.btn-sos,
+.btn-cancel {
+  color:#fff;
+  background:transparent;
+  border:none;
+  font-size:17px;
+  padding:10px 0;
+  cursor:pointer;
+}
+
+/* LOCK SETTINGS */
+
+.settings-overlay {
+  position:absolute;
+  inset:0;
+  z-index:200;
+  display:none;
+  flex-direction:column;
+  padding:calc(50px + var(--ui-top)) 22px calc(30px + var(--ui-bottom));
+  background:rgba(0,0,0,.78);
+  backdrop-filter:blur(14px);
+  overflow-y:auto;
+}
+
+.settings-overlay.show {
+  display:flex;
+}
+
+.settings-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:24px;
+}
+
+.settings-title {
+  color:#fff;
+  font-size:22px;
+  font-weight:700;
+}
+
+.settings-close {
+  color:#fff;
+  background:rgba(255,255,255,.15);
+  border:none;
+  border-radius:20px;
+  padding:8px 16px;
+  cursor:pointer;
+}
+
+.settings-block {
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:16px;
+}
+
+.settings-block-title {
+  color:#fff;
+  font-size:15px;
+  font-weight:600;
+  margin-bottom:12px;
+}
+
+.slider-row {
+  margin-bottom:14px;
+}
+
+.slider-row:last-child {
+  margin-bottom:0;
+}
+
+.sl-label {
+  display:flex;
+  justify-content:space-between;
+  color:#fff;
+  opacity:.85;
+  font-size:13px;
+  margin-bottom:6px;
+}
+
+.size-slider {
+  width:100%;
+  appearance:none;
+  height:6px;
+  border-radius:3px;
+  background:rgba(255,255,255,.25);
+  outline:none;
+}
+
+.size-slider::-webkit-slider-thumb {
+  appearance:none;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:#fff;
+  cursor:pointer;
+}
+
+.option-row {
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.option-btn {
+  flex:1;
+  min-width:80px;
+  color:#fff;
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.2);
+  padding:12px 10px;
+  border-radius:12px;
+  cursor:pointer;
+}
+
+.option-btn.active {
+  background:#fff;
+  color:#111;
+  font-weight:700;
+}
+
+.bg-pick-btn {
+  width:100%;
+  color:#fff;
+  background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.25);
+  padding:14px;
+  border-radius:12px;
+  cursor:pointer;
+}
+
+.settings-hint {
+  color:#fff;
+  opacity:.45;
+  font-size:12px;
+  text-align:center;
+  margin-top:8px;
+}
+
+/* HOME */
+
+.unlock-screen {
+  position:absolute;
+  inset:0;
+  z-index:100;
+  display:none;
+}
+
+.unlock-screen.show {
+  display:block;
+}
+
+#phone {
+  position:relative;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  color:#fff;
+  background:#000;
+  display:flex;
+  flex-direction:column;
+}
+
+#homeWallpaper {
+  position:absolute;
+  inset:0;
+  z-index:0;
+  background:#000;
+  background-size:cover;
+  background-position:center;
+}
+
+#pagesViewport,
+#pageDots,
+#search,
+#dock {
+  position:relative;
+  z-index:1;
+}
+
+#pagesViewport {
+  flex:1;
+  overflow:hidden;
+}
+
+#pagesTrack {
+  display:flex;
+  height:100%;
+  transition:transform .3s ease;
+}
+
+.page {
+  flex:0 0 100%;
+  width:100%;
+  height:100%;
+  padding:calc(24px + var(--ui-top)) calc(16px + var(--ui-right)) 0 calc(16px + var(--ui-left));
+  overflow:hidden;
+}
+
+.grid {
+  display:grid;
+  grid-template-columns:repeat(var(--cols), 1fr);
+  grid-auto-rows:calc(var(--icon-size) + 20px);
+  column-gap:var(--gap-x);
+  row-gap:var(--gap-y);
+  width:100%;
+  justify-items:center;
+  transform:translate(var(--icon-x), var(--icon-y));
+}
+
+.cell {
+  position:relative;
+  width:var(--icon-size);
+  height:calc(var(--icon-size) + 20px);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  cursor:pointer;
+}
+
+.icon,
+.folder {
+  width:var(--icon-size);
+  height:var(--icon-size);
+  border-radius:var(--icon-radius);
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:calc(var(--icon-size) * .48);
+  color:#fff;
+  background:#444;
+  background-size:cover;
+  background-position:center;
+  box-shadow:0 2px 6px rgba(0,0,0,.3);
+  opacity:var(--icon-opacity);
+}
+
+.empty-icon {
+  background:rgba(255,255,255,.08) !important;
+  border:1px dashed rgba(255,255,255,.3);
+  box-shadow:none;
+  display:none;
+}
+
+#phone.edit .empty-icon {
+  display:flex;
+}
+
+.folder {
+  background:rgba(20,20,20,.55);
+  backdrop-filter:blur(8px);
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(3,1fr);
+  gap:2px;
+  padding:5px;
+}
+
+.folder .mini {
+  border-radius:4px;
+  background:#555;
+  background-size:cover;
+  background-position:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:8px;
+}
+
+.label {
+  margin-top:4px;
+  height:16px;
+  line-height:16px;
+  font-size:12px;
+  max-width:130%;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  text-align:center;
+  text-shadow:0 1px 3px rgba(0,0,0,.6);
+  opacity:var(--icon-opacity);
+}
+
+.empty-label {
+  display:none;
+}
+
+#phone.edit .empty-label {
+  display:block;
+  opacity:.35;
+}
+
+.badge {
+  position:absolute;
+  z-index:4;
+  left:50%;
+  top:0;
+  transform:translate(calc(-50% + var(--badge-x)), calc(-50% + var(--badge-y)));
+  min-width:var(--badge-w);
+  height:var(--badge-h);
+  padding:0 5px;
+  border-radius:12px;
+  background:#ff3b30;
+  color:#fff;
+  font-size:var(--badge-fs);
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+}
+
+body.hide-badges .badge {
+  display:none !important;
+}
+
+.del-corner {
+  display:none;
+  position:absolute;
+  top:-8px;
+  left:-8px;
+  z-index:6;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:#e0e0e0;
+  color:#000;
+  font-size:16px;
+  font-weight:700;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 1px 4px rgba(0,0,0,.4);
+}
+
+#phone.edit .cell:not(.empty-cell) .del-corner {
+  display:flex;
+}
+
+#phone.edit .cell {
+  animation:wiggle .32s infinite alternate;
+}
+
+@keyframes wiggle {
+  from { transform:rotate(-1deg); }
+  to { transform:rotate(1deg); }
+}
+
+#pageDots {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+  min-height:20px;
+  padding:6px 0 2px;
+}
+
+.pdot {
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:rgba(255,255,255,.35);
+}
+
+.pdot.active {
+  background:#fff;
+  transform:scale(1.15);
+}
+
+#search {
+  align-self:center;
+  margin:6px 0 12px;
+  padding:7px 18px;
+  border-radius:18px;
+  background:rgba(120,120,120,.3);
+  backdrop-filter:blur(12px);
+  font-size:14px;
+}
+
+#phone:not(.edit) #search {
+  opacity:0;
+}
+
+#dock {
+  margin:0 calc(12px + var(--ui-right)) calc(16px + var(--ui-bottom)) calc(12px + var(--ui-left));
+  padding:12px 14px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  justify-items:center;
+  align-items:flex-start;
+  gap:8px;
+  transform:translateY(var(--dock-y));
+}
+
+#dock .cell {
+  height:calc(var(--icon-size) + 20px);
+}
+
+#dock .label {
+  display:block;
+}
+
+#phone.edit #dock {
+  margin-bottom:calc(82px + var(--ui-bottom));
+}
+
+#editBar {
+  display:none;
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:65;
+  padding:12px 14px calc(12px + var(--ui-bottom));
+  justify-content:center;
+  pointer-events:none;
+}
+
+#phone.edit #editBar {
+  display:flex;
+}
+
+#editBar > * {
+  pointer-events:auto;
+}
+
+#editBar button {
+  background:rgba(20,20,20,.78);
+  border:1px solid rgba(255,255,255,.2);
+  color:#fff;
+  border-radius:12px;
+  padding:10px 18px;
+  font-size:14px;
+}
+
+.eb-info {
+  width:100%;
+  text-align:center;
+  font-size:12px;
+  opacity:.9;
+  background:rgba(0,0,0,.45);
+  border-radius:8px;
+  padding:6px 8px;
+}
+
+/* FOLDER */
+
+#folderView {
+  position:absolute;
+  inset:0;
+  z-index:40;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  background:rgba(0,0,0,.45);
+  backdrop-filter:blur(22px);
+}
+
+#folderView.open {
+  display:flex;
+}
+
+#folderTitle {
+  font-size:30px;
+  font-weight:700;
+  margin:calc(60px + var(--ui-top)) 0 26px;
+  align-self:flex-start;
+  padding-left:40px;
+}
+
+#folderBox {
+  width:300px;
+  min-height:300px;
+  border-radius:34px;
+  background:rgba(180,180,180,.18);
+  border:1px solid rgba(255,255,255,.18);
+  padding:26px 22px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:22px 18px;
+  justify-items:center;
+  align-content:start;
+}
+
+/* ICON MENU */
+
+#iconMenu {
+  position:absolute;
+  inset:0;
+  z-index:70;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.55);
+  backdrop-filter:blur(6px);
+}
+
+#iconMenu.open {
+  display:flex;
+}
+
+.im-card {
+  width:320px;
+  max-width:92%;
+  max-height:88%;
+  overflow-y:auto;
+  background:#1c1c1e;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:22px;
+  padding:18px;
+  box-shadow:0 12px 40px rgba(0,0,0,.6);
+}
+
+.im-head {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.im-prev {
+  width:48px;
+  height:48px;
+  border-radius:12px;
+  background:#444;
+  background-size:cover;
+  background-position:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  overflow:hidden;
+}
+
+.im-title {
+  flex:1;
+  font-size:16px;
+  font-weight:700;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.im-sub {
+  font-size:11px;
+  opacity:.55;
+  margin:2px 2px 8px;
+}
+
+.im-row {
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-bottom:9px;
+}
+
+.im-row input[type=text],
+.im-row input[type=number] {
+  flex:1;
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.2);
+  color:#fff;
+  border-radius:10px;
+  padding:11px 12px;
+  font-size:14px;
+  outline:none;
+}
+
+.im-row input[type=color] {
+  width:46px;
+  height:42px;
+  border:none;
+  background:none;
+}
+
+.im-ok {
+  background:rgba(48,209,88,.2);
+  border:1px solid #30d158;
+  color:#30d158;
+  border-radius:10px;
+  padding:11px 15px;
+}
+
+.im-btn,
+.im-close {
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:rgba(255,255,255,.08);
+  border:none;
+  color:#fff;
+  padding:13px 14px;
+  border-radius:12px;
+  font-size:14px;
+  cursor:pointer;
+  margin-bottom:9px;
+  text-align:left;
+}
+
+.im-btn.danger {
+  color:#ff453a;
+}
+
+.im-close {
+  display:block;
+  text-align:center;
+  background:rgba(255,255,255,.12);
+}
+
+/* HOME SETTINGS */
+
+#hsSettings {
+  position:absolute;
+  inset:0;
+  z-index:50;
+  display:none;
+  flex-direction:column;
+  padding:calc(40px + var(--ui-top)) 22px calc(60px + var(--ui-bottom));
+  overflow-y:auto;
+  background:rgba(0,0,0,.55);
+  backdrop-filter:blur(18px);
+}
+
+#hsSettings.open {
+  display:flex;
+}
+
+#hsSettings.tweak {
+  background:rgba(0,0,0,.04);
+  backdrop-filter:none;
+  pointer-events:none;
+}
+
+#hsSettings.tweak h2,
+#hsSettings.tweak .subtitle,
+#hsSettings.tweak .set-section,
+#hsSettings.tweak #closeSet {
+  opacity:.12;
+  pointer-events:none;
+}
+
+#hsSettings.tweak .tweak-panel {
+  display:block;
+  opacity:1;
+  pointer-events:auto;
+}
+
+#hsSettings h2 {
+  font-size:22px;
+  margin-bottom:4px;
+}
+
+.subtitle {
+  font-size:13px;
+  opacity:.65;
+  margin-bottom:22px;
+}
+
+.set-section {
+  margin-bottom:14px;
+}
+
+.set-section-head {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:rgba(255,255,255,.1);
+  border-radius:14px;
+  padding:14px 16px;
+  cursor:pointer;
+  font-size:15px;
+  font-weight:700;
+}
+
+.sec-chevron {
+  transition:.25s;
+  opacity:.6;
+}
+
+.set-section.open .sec-chevron {
+  transform:rotate(90deg);
+}
+
+.set-section-body {
+  max-height:0;
+  overflow:hidden;
+  transition:max-height .3s ease;
+}
+
+.set-section.open .set-section-body {
+  max-height:6000px;
+}
+
+.set-section-body-inner {
+  padding-top:10px;
+}
+
+.set-group {
+  background:rgba(255,255,255,.08);
+  border-radius:16px;
+  overflow:hidden;
+  margin-bottom:12px;
+}
+
+.set-row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:15px 16px;
+  font-size:15px;
+  cursor:pointer;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.set-row:last-child {
+  border-bottom:none;
+}
+
+.set-row .ic {
+  font-size:18px;
+  margin-right:12px;
+}
+
+.set-row .txt {
+  flex:1;
+}
+
+.arrow {
+  opacity:.45;
+}
+
+.toggle {
+  width:48px;
+  height:28px;
+  border-radius:14px;
+  background:rgba(255,255,255,.25);
+  position:relative;
+  flex-shrink:0;
+}
+
+.toggle::after {
+  content:"";
+  position:absolute;
+  top:2px;
+  left:2px;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  background:#fff;
+  transition:.2s;
+}
+
+.toggle.on {
+  background:#30d158;
+}
+
+.toggle.on::after {
+  left:22px;
+}
+
+.group-inner-block {
+  padding:14px 16px;
+}
+
+.divider-label {
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+  opacity:.55;
+  margin:14px 2px 8px;
+}
+
+.tweak-launch {
+  width:100%;
+  margin-top:6px;
+  color:#0a84ff;
+  background:rgba(10,132,255,.12);
+  border:1px solid rgba(10,132,255,.5);
+  padding:11px;
+  border-radius:12px;
+}
+
+#closeSet {
+  margin-top:10px;
+  align-self:center;
+  background:rgba(255,255,255,.15);
+  color:#fff;
+  border:none;
+  border-radius:14px;
+  padding:13px 40px;
+  font-size:16px;
+}
+
+.tweak-panel {
+  display:none;
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:300;
+  background:rgba(20,20,20,.94);
+  backdrop-filter:blur(14px);
+  border-radius:18px 18px 0 0;
+  padding:16px 16px calc(16px + var(--ui-bottom));
+}
+
+.tp-title {
+  font-size:14px;
+  font-weight:700;
+  margin-bottom:12px;
+}
+
+.tp-done {
+  width:100%;
+  margin-top:8px;
+  background:rgba(48,209,88,.25);
+  border:1px solid #30d158;
+  color:#fff;
+  border-radius:12px;
+  padding:12px;
+  font-size:15px;
+}
+
+#chooseHint {
+  display:none;
+  position:absolute;
+  bottom:calc(20px + var(--ui-bottom));
+  left:50%;
+  transform:translateX(-50%);
+  z-index:400;
+  background:rgba(10,132,255,.92);
+  color:#fff;
+  padding:12px 18px;
+  border-radius:14px;
+  font-size:13px;
+  max-width:90%;
+  text-align:center;
+}
+
+#chooseHint.show {
+  display:block;
+}
+
+body.style-android .key,
+body.style-android .key-zero {
+  background:rgba(255,255,255,.08);
+  border:none;
+}
+
+body.style-android .top-label {
+  font-size:14px;
+  opacity:.85;
+}
 </style>
 </head>
+
 <body class="style-ios">
 <div id="device">
-<div class="wallpaper" id="wallpaper"></div>
-<input type="file" id="bgInput" accept="image/*" onchange="changeBg(event)">
+  <div class="wallpaper" id="wallpaper"></div>
 
-<div class="lock-screen" id="lockScreen">
-<div class="top-label" id="topLabel">Смахните вверх для Face ID<br>или введите код-пароль</div>
-<div class="dots-container" id="dotsContainer"></div>
-<div class="passcode-section">
-<div class="keyboard" id="keyboard">
-<div class="key" data-digit="1" onclick="pressKey('1',this)"><span class="key-number">1</span><span class="key-letters">&nbsp;</span></div>
-<div class="key" data-digit="2" onclick="pressKey('2',this)"><span class="key-number">2</span><span class="key-letters">АБВГ<br>ABC</span></div>
-<div class="key" data-digit="3" onclick="pressKey('3',this)"><span class="key-number">3</span><span class="key-letters">ДЕЖЗ<br>DEF</span></div>
-<div class="key" data-digit="4" onclick="pressKey('4',this)"><span class="key-number">4</span><span class="key-letters">ИЙКЛ<br>GHI</span></div>
-<div class="key" data-digit="5" onclick="pressKey('5',this)"><span class="key-number">5</span><span class="key-letters">МНОП<br>JKL</span></div>
-<div class="key" data-digit="6" onclick="pressKey('6',this)"><span class="key-number">6</span><span class="key-letters">РСТУ<br>MNO</span></div>
-<div class="key" data-digit="7" onclick="pressKey('7',this)"><span class="key-number">7</span><span class="key-letters">ФХЦЧ<br>PQRS</span></div>
-<div class="key" data-digit="8" onclick="pressKey('8',this)"><span class="key-number">8</span><span class="key-letters">ШЩЪЫ<br>TUV</span></div>
-<div class="key" data-digit="9" onclick="pressKey('9',this)"><span class="key-number">9</span><span class="key-letters">ЬЭЮЯ<br>WXYZ</span></div>
-</div>
-<div class="bottom-row">
-<button class="btn-sos" id="sosKey">SOS</button>
-<div class="key-zero" data-digit="0" onclick="pressKey('0',this)"><span class="key-number">0</span></div>
-<button class="btn-cancel" id="cancelKey">Отменить</button>
-</div>
-</div>
-</div>
-<div class="settings-overlay" id="settingsOverlay">
-<div class="settings-header"><div class="settings-title">⚙️ Настройки блокировки</div><button class="settings-close" onclick="closeSettings()">Готово</button></div>
-<div class="settings-block"><div class="settings-block-title">Размер кнопок ввода</div><input type="range" class="size-slider" id="sizeSlider" min="60" max="120" value="96" oninput="changeKeySize(this.value)"><div class="size-value" id="sizeValue">96 px</div></div>
-<div class="settings-block"><div class="settings-block-title">Смещение цифр (относительно «5»)</div>
-<div class="slider-row"><div class="sl-label"><span>По горизонтали</span><span id="pinXVal">0 px</span></div><input type="range" class="size-slider" id="pinXSlider" min="-40" max="40" value="0" oninput="changePinSpread('x',this.value)"></div>
-<div class="slider-row"><div class="sl-label"><span>По вертикали</span><span id="pinYVal">0 px</span></div><input type="range" class="size-slider" id="pinYSlider" min="-40" max="40" value="0" oninput="changePinSpread('y',this.value)"></div></div>
-<div class="settings-block"><div class="settings-block-title">Сдвиг блока цифр</div><div class="slider-row"><div class="sl-label"><span>Сдвиг</span><span id="pinBlockVal">0 px</span></div><input type="range" class="size-slider" id="pinBlockSlider" min="-200" max="100" value="0" oninput="changePinBlockY(this.value)"></div></div>
-<div class="settings-block"><div class="settings-block-title">Реальный код-пароль (для «Сразу»)</div><div class="slider-row" style="display:flex;gap:8px;align-items:center;"><input type="text" id="realPinInput" inputmode="numeric" maxlength="6" placeholder="1234" style="flex:1;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:#fff;border-radius:10px;padding:11px 12px;font-size:15px;outline:none;"><button class="settings-close" onclick="saveRealPin()">OK</button></div></div>
-<div class="settings-block"><div class="settings-block-title">Фон блокировки</div><button class="bg-pick-btn" onclick="document.getElementById('bgInput').click()">🖼 Выбрать с устройства</button><button class="bg-pick-btn" style="margin-top:10px;" onclick="openGallery('lockBg')">🗂 Из папки img</button><button class="bg-pick-btn" style="margin-top:10px;" onclick="resetBg()">↺ Сбросить</button></div>
-<div class="settings-block"><div class="settings-block-title">Метод разблокировки</div><div class="option-row"><button class="option-btn active" data-method="sos" onclick="setUnlockMethod('sos',this)">SOS</button><button class="option-btn" data-method="attempts" onclick="setUnlockMethod('attempts',this)">3 попытки</button><button class="option-btn" data-method="instant" onclick="setUnlockMethod('instant',this)">Сразу</button></div><div class="settings-hint" id="methodHint">Нажмите SOS, затем код</div></div>
-<div class="settings-block"><div class="settings-block-title">Стиль</div><div class="option-row"><button class="option-btn active" data-style="ios" onclick="setStyle('ios',this)">🍎 iOS</button><button class="option-btn" data-style="android" onclick="setStyle('android',this)">🤖 Android</button></div></div>
-<div class="settings-hint">Меню: удержание «Отменить» (2 сек)</div>
+  <input type="file" id="bgInput" accept="image/*">
+  <input type="file" id="homeBgInput" accept="image/*">
+  <input type="file" id="pageBgInput" accept="image/*">
+  <input type="file" id="iconPhotoInput" accept="image/*">
+
+  <div class="lock-screen" id="lockScreen">
+    <div class="top-label" id="topLabel">Смахните вверх для Face ID<br>или введите код-пароль</div>
+    <div class="dots-container" id="dotsContainer"></div>
+
+    <div class="passcode-section">
+      <div class="keyboard">
+        <div class="key" data-digit="1"><span class="key-number">1</span><span class="key-letters">&nbsp;</span></div>
+        <div class="key" data-digit="2"><span class="key-number">2</span><span class="key-letters">АБВГ<br>ABC</span></div>
+        <div class="key" data-digit="3"><span class="key-number">3</span><span class="key-letters">ДЕЖЗ<br>DEF</span></div>
+        <div class="key" data-digit="4"><span class="key-number">4</span><span class="key-letters">ИЙКЛ<br>GHI</span></div>
+        <div class="key" data-digit="5"><span class="key-number">5</span><span class="key-letters">МНОП<br>JKL</span></div>
+        <div class="key" data-digit="6"><span class="key-number">6</span><span class="key-letters">РСТУ<br>MNO</span></div>
+        <div class="key" data-digit="7"><span class="key-number">7</span><span class="key-letters">ФХЦЧ<br>PQRS</span></div>
+        <div class="key" data-digit="8"><span class="key-number">8</span><span class="key-letters">ШЩЪЫ<br>TUV</span></div>
+        <div class="key" data-digit="9"><span class="key-number">9</span><span class="key-letters">ЬЭЮЯ<br>WXYZ</span></div>
+      </div>
+
+      <div class="bottom-row">
+        <button class="btn-sos" id="sosKey">SOS</button>
+        <div class="key-zero" data-digit="0"><span class="key-number">0</span></div>
+        <button class="btn-cancel" id="cancelKey">Отменить</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-overlay" id="settingsOverlay">
+    <div class="settings-header">
+      <div class="settings-title">⚙️ Настройки блокировки</div>
+      <button class="settings-close" id="closeLockSettings">Готово</button>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title">Размер кнопок ввода</div>
+      <input type="range" class="size-slider" id="sizeSlider" min="60" max="120" value="96">
+      <div class="settings-hint" id="sizeValue">96 px</div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title">Смещение цифр относительно «5»</div>
+      <div class="slider-row">
+        <div class="sl-label"><span>По X</span><span id="pinXVal">0 px</span></div>
+        <input type="range" class="size-slider" id="pinXSlider" min="-60" max="60" value="0">
+      </div>
+      <div class="slider-row">
+        <div class="sl-label"><span>По Y</span><span id="pinYVal">0 px</span></div>
+        <input type="range" class="size-slider" id="pinYSlider" min="-60" max="60" value="0">
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title">Сдвиг блока цифр</div>
+      <div class="slider-row">
+        <div class="sl-label"><span>Сдвиг</span><span id="pinBlockVal">0 px</span></div>
+        <input type="range" class="size-slider" id="pinBlockSlider" min="-220" max="120" value="0">
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title">Реальный код-пароль для режима «Сразу»</div>
+      <div class="im-row">
+        <input type="text" id="realPinInput" inputmode="numeric" maxlength="6" placeholder="1234">
+        <button class="im-ok" id="savePinBtn">OK</button>
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title">Фон блокировки</div>
+      <button class="bg-pick-btn" id="pickLockBg">🖼 Выбрать с устройства</button>
+      <button class="bg-pick-btn" id="resetLockBg" style="margin-top:10px;">↺ Сбросить</button>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title">Метод разблокировки</div>
+      <div class="option-row">
+        <button class="option-btn active" data-method="sos">SOS</button>
+        <button class="option-btn" data-method="attempts">3 попытки</button>
+        <button class="option-btn" data-method="instant">Сразу</button>
+      </div>
+      <div class="settings-hint" id="methodHint">Нажмите SOS, затем код</div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title">Стиль</div>
+      <div class="option-row">
+        <button class="option-btn active" data-style="ios">🍎 iOS</button>
+        <button class="option-btn" data-style="android">🤖 Android</button>
+      </div>
+    </div>
+
+    <div class="settings-hint">Меню: удержание «Отменить» 2 секунды</div>
+  </div>
+
+  <div class="unlock-screen" id="unlockScreen">
+    <div id="phone">
+      <div id="homeWallpaper"></div>
+      <div id="pagesViewport"><div id="pagesTrack"></div></div>
+      <div id="pageDots"></div>
+      <div id="search">🔍 Поиск</div>
+      <div id="dock"></div>
+
+      <div id="editBar">
+        <div class="eb-info" id="ebInfo">Режим редактирования: нажмите пустую ячейку, чтобы создать иконку</div>
+        <button id="ebDone">✓ Готово</button>
+      </div>
+
+      <div id="folderView">
+        <div id="folderTitle"></div>
+        <div id="folderBox"></div>
+      </div>
+
+      <div id="iconMenu">
+        <div class="im-card" id="iconMenuCard">
+          <div class="im-head">
+            <div class="im-prev" id="imPrev">📱</div>
+            <div class="im-title" id="imTitle">Иконка</div>
+          </div>
+
+          <div class="im-sub">Название</div>
+          <div class="im-row">
+            <input type="text" id="imName" placeholder="Название">
+            <button class="im-ok" id="imNameOk">OK</button>
+          </div>
+
+          <div class="im-sub">Эмодзи / символ</div>
+          <div class="im-row">
+            <input type="text" id="imEmoji" maxlength="4" placeholder="📷 или T">
+            <button class="im-ok" id="imEmojiOk">OK</button>
+          </div>
+
+          <div class="im-sub">Цвет фона</div>
+          <div class="im-row">
+            <input type="color" id="imColor" value="#444444">
+            <input type="text" id="imColorText" placeholder="#444444">
+            <button class="im-ok" id="imColorOk">OK</button>
+          </div>
+
+          <div class="im-sub">Уведомление, 0 — убрать</div>
+          <div class="im-row">
+            <input type="number" id="imBadge" min="0" max="99999" placeholder="0">
+            <button class="im-ok" id="imBadgeOk">OK</button>
+          </div>
+
+          <button class="im-btn" id="imPhoto">🖼 Фото с устройства</button>
+          <button class="im-btn" id="imResetPhoto">🚫 Убрать фото</button>
+          <button class="im-btn" id="imMakeFolder">📁 Сделать папкой / открыть</button>
+          <button class="im-btn danger" id="imDelete">🗑 Удалить</button>
+          <button class="im-close" id="imClose">Закрыть</button>
+        </div>
+      </div>
+
+      <div id="hsSettings">
+        <h2>⚙️ Настройки рабочего стола</h2>
+        <div class="subtitle">Нажмите на заголовок группы</div>
+
+        <div class="set-section open">
+          <div class="set-section-head">
+            <span>🎨 Внешний вид</span><span class="sec-chevron">›</span>
+          </div>
+          <div class="set-section-body">
+            <div class="set-section-body-inner">
+
+              <div class="set-group">
+                <div class="set-row" data-act="homeBg"><span class="ic">🌄</span><span class="txt">Общий фон</span><span class="arrow">›</span></div>
+                <div class="set-row" data-act="homeBgReset"><span class="ic">↺</span><span class="txt">Удалить общий фон</span><span class="arrow">›</span></div>
+                <div class="set-row" data-act="pageBg"><span class="ic">🖼</span><span class="txt">Фон текущего экрана</span><span class="arrow">›</span></div>
+                <div class="set-row" data-act="pageBgReset"><span class="ic">↺</span><span class="txt">Сбросить фон экрана</span><span class="arrow">›</span></div>
+              </div>
+
+              <div class="divider-label">Сетка</div>
+              <div class="set-group group-inner-block">
+                <div class="slider-row">
+                  <div class="sl-label"><span>Колонок</span><span id="colsVal">4</span></div>
+                  <input type="range" class="size-slider" id="colsSlider" min="3" max="6" value="4">
+                </div>
+                <div class="slider-row">
+                  <div class="sl-label"><span>Отступ X</span><span id="gapXVal">10px</span></div>
+                  <input type="range" class="size-slider" id="gapXSlider" min="0" max="60" value="10">
+                </div>
+                <div class="slider-row">
+                  <div class="sl-label"><span>Отступ Y</span><span id="gapYVal">14px</span></div>
+                  <input type="range" class="size-slider" id="gapYSlider" min="0" max="80" value="14">
+                </div>
+              </div>
+
+              <div class="divider-label">Размер иконок</div>
+              <div class="set-group group-inner-block">
+                <div class="slider-row">
+                  <div class="sl-label"><span>Размер</span><span id="iconSizeVal">60px</span></div>
+                  <input type="range" class="size-slider" id="iconSizeSlider" min="36" max="110" value="60">
+                </div>
+                <div class="slider-row">
+                  <div class="sl-label"><span>Скругление</span><span id="iconRadiusVal">15px</span></div>
+                  <input type="range" class="size-slider" id="iconRadiusSlider" min="0" max="55" value="15">
+                </div>
+              </div>
+
+              <div class="divider-label">Положение иконок</div>
+              <div class="set-group group-inner-block">
+                <div class="slider-row">
+                  <div class="sl-label"><span>По X</span><span id="iconXVal">0 px</span></div>
+                  <input type="range" class="size-slider" id="iconXSlider" min="-220" max="220" step="1" value="0">
+                </div>
+                <div class="slider-row">
+                  <div class="sl-label"><span>По Y</span><span id="iconYVal">0 px</span></div>
+                  <input type="range" class="size-slider" id="iconYSlider" min="-220" max="220" step="1" value="0">
+                </div>
+              </div>
+
+              <div class="divider-label">Положение дока</div>
+              <div class="set-group group-inner-block">
+                <div class="slider-row">
+                  <div class="sl-label"><span>Док по Y</span><span id="dockYVal">0 px</span></div>
+                  <input type="range" class="size-slider" id="dockYSlider" min="-220" max="220" step="1" value="0">
+                </div>
+              </div>
+
+              <div class="divider-label">Прозрачность</div>
+              <div class="set-group group-inner-block">
+                <div class="slider-row">
+                  <div class="sl-label"><span>Прозрачность</span><span id="iconOpVal">100%</span></div>
+                  <input type="range" class="size-slider" id="iconOpSlider" min="0" max="100" value="100">
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="set-section open">
+          <div class="set-section-head">
+            <span>📲 Иконки</span><span class="sec-chevron">›</span>
+          </div>
+          <div class="set-section-body">
+            <div class="set-section-body-inner">
+              <div class="set-group">
+                <div class="set-row" id="rowEdit"><span class="ic">✏️</span><span class="txt">Режим редактирования</span><div class="toggle" id="tgEdit"></div></div>
+                <div class="set-row" id="rowBadges"><span class="ic">🔴</span><span class="txt">Показывать уведомления</span><div class="toggle on" id="tgBadges"></div></div>
+              </div>
+
+              <div class="divider-label">Действия</div>
+              <div class="set-group">
+                <div class="set-row" id="rowAddPage"><span class="ic">➕</span><span class="txt">Добавить экран</span><span class="arrow">›</span></div>
+              </div>
+
+              <div class="divider-label">Уведомления</div>
+              <div class="set-group group-inner-block">
+                <div class="slider-row">
+                  <div class="sl-label"><span>По X</span><span id="badgeXVal">30 px</span></div>
+                  <input type="range" class="size-slider" id="badgeXSlider" min="-80" max="100" value="30">
+                </div>
+                <div class="slider-row">
+                  <div class="sl-label"><span>По Y</span><span id="badgeYVal">-2 px</span></div>
+                  <input type="range" class="size-slider" id="badgeYSlider" min="-80" max="100" value="-2">
+                </div>
+                <div class="slider-row">
+                  <div class="sl-label"><span>Ширина</span><span id="badgeWVal">20 px</span></div>
+                  <input type="range" class="size-slider" id="badgeWSlider" min="10" max="70" value="20">
+                </div>
+                <div class="slider-row">
+                  <div class="sl-label"><span>Высота</span><span id="badgeHVal">20 px</span></div>
+                  <input type="range" class="size-slider" id="badgeHSlider" min="10" max="60" value="20">
+                </div>
+                <div class="slider-row">
+                  <div class="sl-label"><span>Шрифт</span><span id="badgeFsVal">12 px</span></div>
+                  <input type="range" class="size-slider" id="badgeFsSlider" min="7" max="30" value="12">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="set-section">
+          <div class="set-section-head">
+            <span>🚪 Вызов настроек</span><span class="sec-chevron">›</span>
+          </div>
+          <div class="set-section-body">
+            <div class="set-section-body-inner">
+              <div class="set-group">
+                <div class="set-row" id="rowHold"><span class="ic">⏱️</span><span class="txt">Долгое нажатие</span><div class="toggle on" id="tgHold"></div></div>
+                <div class="set-row" id="rowDouble"><span class="ic">👆</span><span class="txt">Двойное нажатие</span><div class="toggle" id="tgDouble"></div></div>
+                <div class="set-row" id="rowTriggerIcon"><span class="ic">🎯</span><span class="txt" id="triggerIconText">Иконка-триггер: не выбрана</span><span class="arrow">›</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="set-section">
+          <div class="set-section-head">
+            <span>🔒 Возврат к блокировке</span><span class="sec-chevron">›</span>
+          </div>
+          <div class="set-section-body">
+            <div class="set-section-body-inner">
+              <div class="set-group">
+                <div class="set-row" id="rowLockSwipe"><span class="ic">⬇️</span><span class="txt">Свайп вниз</span><div class="toggle on" id="tgLockSwipe"></div></div>
+                <div class="set-row" id="rowLockIcon"><span class="ic">🔐</span><span class="txt" id="lockIconText">Иконка блокировки: не выбрана</span><span class="arrow">›</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button id="closeSet">Готово</button>
+
+        <div class="tweak-panel" id="tweakPanel">
+          <div class="tp-title" id="tpTitle">Настройка</div>
+          <div id="tpContent"></div>
+          <button class="tp-done" id="tpDone">✓ Готово</button>
+        </div>
+      </div>
+
+      <div id="chooseHint">Выберите иконку</div>
+    </div>
+  </div>
 </div>
 
-<div class="unlock-screen" id="unlockScreen">
-<div id="phone">
-<div id="homeWallpaper"></div>
-<div id="pagesViewport"><div id="pagesTrack"></div></div>
-<div id="pageDots"></div>
-<div id="search">🔍 Поиск</div>
-<div id="dock"></div>
-<div id="editBar"><div class="eb-info" id="ebInfo">Режим редактирования</div><button class="primary" id="ebMerge">🔗 Объединить</button><button id="ebDone">✓ Готово</button></div>
-<div id="folderView"><div id="folderTitle"></div><div id="folderBox"></div></div>
-<div id="iconMenu"><div class="im-card" onclick="event.stopPropagation()">
-<div class="im-head"><div class="im-prev" id="imPrev">📱</div><div class="im-title" id="imTitle">Иконка</div></div>
-<div class="im-sub">Название</div><div class="im-row"><input type="text" id="imName" placeholder="Название"><button class="im-ok" id="imNameOk">OK</button></div>
-<div class="im-sub">Эмодзи / символ</div><div class="im-row"><input type="text" id="imEmoji" maxlength="4" placeholder="📷 или T"><button class="im-ok" id="imEmojiOk">OK</button></div>
-<div class="im-sub">Цвет фона</div><div class="im-row"><input type="color" id="imColor" value="#444444"><input type="text" id="imColorText" placeholder="#444444"><button class="im-ok" id="imColorOk">OK</button></div>
-<div class="im-sub">Уведомление (0 = убрать)</div><div class="im-row"><input type="number" id="imBadge" min="0" max="99999" placeholder="0"><button class="im-ok" id="imBadgeOk">OK</button></div>
-<button class="im-btn" id="imPhoto"><span class="imi">🖼</span> Фото с устройства</button><button class="im-btn" id="imPhotoGallery"><span class="imi">🗂</span> Фото из папки img</button><button class="im-btn" id="imResetPhoto"><span class="imi">🚫</span> Убрать фото</button><button class="im-btn" id="imMakeFolder"><span class="imi">📁</span> Папка / открыть</button><button class="im-btn danger" id="imDelete"><span class="imi">🗑</span> Удалить</button><button class="im-close" id="imClose">Закрыть</button>
-</div></div>
-<div id="hsSettings">
-<h2>⚙️ Настройки рабочего стола</h2><div class="subtitle">Нажмите на заголовок группы</div>
-<div class="set-section" data-sec="appear"><div class="set-section-head"><span><span class="sec-ic">🎨</span>Внешний вид</span><span class="sec-chevron">›</span></div><div class="set-section-body"><div class="set-section-body-inner">
-<div class="set-group"><div class="set-row" data-act="homeBg"><span class="ic">🌄</span><span class="txt">Общий фон (устройство)</span><span class="arrow">›</span></div><div class="set-row" data-act="homeBgGallery"><span class="ic">🗂</span><span class="txt">Общий фон (папка img)</span><span class="arrow">›</span></div><div class="set-row" data-act="homeBgReset"><span class="ic">↺</span><span class="txt">Удалить общий фон</span><span class="arrow">›</span></div><div class="set-row" data-act="pageBg"><span class="ic">🖼</span><span class="txt">Фон экрана (устройство)</span><span class="arrow">›</span></div><div class="set-row" data-act="pageBgGallery"><span class="ic">🗂</span><span class="txt">Фон экрана (папка img)</span><span class="arrow">›</span></div><div class="set-row" data-act="pageBgReset"><span class="ic">↺</span><span class="txt">Сбросить фон экрана</span><span class="arrow">›</span></div><div class="set-row" data-act="openGalleryManage"><span class="ic">🗂</span><span class="txt">Папка img (загрузить картинки)</span><span class="arrow">›</span></div></div>
-<div class="divider-label">Сетка</div><div class="set-group group-inner-block">
-<div class="slider-row"><div class="sl-label"><span>Колонок</span><span id="colsVal">4</span></div><input type="range" class="size-slider" id="colsSlider" min="3" max="6" value="4" oninput="changeCols(this.value)"></div>
-<div class="slider-row"><div class="sl-label"><span>Отступ X</span><span id="gapXVal">10px</span></div><input type="range" class="size-slider" id="gapXSlider" min="0" max="40" value="10" oninput="changeGapX(this.value)"></div>
-<div class="slider-row"><div class="sl-label"><span>Отступ Y</span><span id="gapYVal">14px</span></div><input type="range" class="size-slider" id="gapYSlider" min="0" max="50" value="14" oninput="changeGapY(this.value)"></div>
-<button class="tweak-launch" data-tweak="grid">👁 Поверх стола</button></div>
-<div class="divider-label">Размер иконок</div><div class="set-group group-inner-block">
-<div class="slider-row"><div class="sl-label"><span>Размер</span><span id="iconSizeVal">60px</span></div><input type="range" class="size-slider" id="iconSizeSlider" min="36" max="100" value="60" oninput="changeIconSize(this.value)"></div>
-<div class="slider-row"><div class="sl-label"><span>Скругление</span><span id="iconRadiusVal">15px</span></div><input type="range" class="size-slider" id="iconRadiusSlider" min="0" max="50" value="15" oninput="changeIconRadius(this.value)"></div>
-<button class="tweak-launch" data-tweak="iconsize">👁 Поверх стола</button></div>
-<div class="divider-label">Положение иконок</div><div class="set-group group-inner-block">
-<div class="slider-row"><div class="sl-label"><span>По X</span><span id="iconXVal">0 px</span></div><input type="range" class="size-slider" id="iconXSlider" min="-60" max="60" value="0" oninput="changeIconOffset('x',this.value)"></div>
-<div class="slider-row"><div class="sl-label"><span>По Y</span><span id="iconYVal">0 px</span></div><input type="range" class="size-slider" id="iconYSlider" min="-60" max="120" value="0" oninput="changeIconOffset('y',this.value)"></div>
-<button class="tweak-launch" data-tweak="iconpos">👁 Поверх стола</button></div>
-<div class="divider-label">Прозрачность</div><div class="set-group group-inner-block">
-<div class="slider-row"><div class="sl-label"><span>Прозрачность</span><span id="iconOpVal">100%</span></div><input type="range" class="size-slider" id="iconOpSlider" min="0" max="100" value="100" oninput="changeIconOpacity(this.value)"></div>
-<button class="tweak-launch" data-tweak="iconop">👁 Поверх стола</button></div>
-</div></div></div>
-<div class="set-section" data-sec="icons"><div class="set-section-head"><span>
-  <span class="sec-ic">📲</span>Иконки</span><span class="sec-chevron">›</span></div><div class="set-section-body"><div class="set-section-body-inner">
-<div class="set-group"><div class="set-row" id="rowEdit"><span class="ic">✏️</span><span class="txt">Режим редактирования</span><div class="toggle" id="tgEdit"></div></div><div class="set-row" id="rowBadges"><span class="ic">🔴</span><span class="txt">Показывать уведомления</span><div class="toggle on" id="tgBadges"></div></div></div>
-<div class="divider-label">Действия</div><div class="set-group"><div class="set-row" id="rowAddIcon"><span class="ic">➕</span><span class="txt">Добавить иконку</span><span class="arrow">›</span></div><div class="set-row" id="rowAddDock"><span class="ic">➕</span><span class="txt">Добавить в док</span><span class="arrow">›</span></div><div class="set-row" id="rowMerge"><span class="ic">🔗</span><span class="txt">Объединить в папку</span><span class="arrow">›</span></div><div class="set-row" id="rowAddPage"><span class="ic">➕</span><span class="txt">Добавить экран</span><span class="arrow">›</span></div><div class="set-row" id="rowDelPage"><span class="ic">🗑</span><span class="txt">Удалить экран</span><span class="arrow">›</span></div></div>
-<div class="divider-label">Уведомления (бейджи)</div><div class="set-group group-inner-block">
-<div class="slider-row"><div class="sl-label"><span>По X</span><span id="bgBxVal">30 px</span></div><input type="range" class="size-slider" id="bgBx" min="-40" max="60" value="30" oninput="changeBadgeCfg('bx',this.value)"></div>
-<div class="slider-row"><div class="sl-label"><span>По Y</span><span id="bgByVal">-2 px</span></div><input type="range" class="size-slider" id="bgBy" min="-30" max="60" value="-2" oninput="changeBadgeCfg('by',this.value)"></div>
-<div class="slider-row"><div class="sl-label"><span>Ширина</span><span id="bgBwVal">20 px</span></div><input type="range" class="size-slider" id="bgBw" min="10" max="60" value="20" oninput="changeBadgeCfg('bw',this.value)"></div>
-<div class="slider-row"><div class="sl-label"><span>Высота</span><span id="bgBhVal">20 px</span></div><input type="range" class="size-slider" id="bgBh" min="10" max="50" value="20" oninput="changeBadgeCfg('bh',this.value)"></div>
-<div class="slider-row"><div class="sl-label"><span>Шрифт</span><span id="bgBfsVal">12 px</span></div><input type="range" class="size-slider" id="bgBfs" min="7" max="30" value="12" oninput="changeBadgeCfg('bfs',this.value)"></div>
-<button class="tweak-launch" data-tweak="badge">👁 Поверх стола</button></div>
-</div></div></div>
-<div class="set-section" data-sec="trigger"><div class="set-section-head"><span><span class="sec-ic">🚪</span>Вызов настроек</span><span class="sec-chevron">›</span></div><div class="set-section-body"><div class="set-section-body-inner">
-<div class="set-group" id="triggerGroup">
-<div class="set-row trigger-opt" data-mode="hold"><span class="ic">⏱️</span><span class="txt">Долгое нажатие<br><small style="opacity:.55" id="holdDuration">2 сек</small></span><div class="toggle" id="tgHold"></div></div>
-<div class="config-inline" id="cfgHold"><div class="ci-label">Длительность (сек)</div><div class="ci-row"><input type="number" id="inHold" step="0.1" min="0.5" max="5" value="2"><span class="ci-unit">сек</span><button class="ci-save" data-save="hold">OK</button></div></div>
-<div class="set-row trigger-opt" data-mode="double"><span class="ic">👆</span><span class="txt">Множественное нажатие<br><small style="opacity:.55" id="tapCount">2 нажатия</small></span><div class="toggle" id="tgDouble"></div></div>
-<div class="config-inline" id="cfgDouble"><div class="ci-label">Кол-во быстрых нажатий</div><div class="ci-row"><input type="number" id="inDouble" step="1" min="2" max="5" value="2"><span class="ci-unit">раз</span><button class="ci-save" data-save="double">OK</button></div></div>
-<div class="set-row" id="rowDoubleOnIcons" style="display:none;"><span class="ic">📲</span><span class="txt">Реагировать на иконки<br><small style="opacity:.55">тапы считаются и поверх значков</small></span><div class="toggle on" id="tgDoubleIcons"></div></div>
-<div class="set-row trigger-opt" data-mode="corner"><span class="ic">🎯</span><span class="txt">Нажатия по иконке<br><small style="opacity:.55" id="iconTapCount">3 нажатия</small></span><div class="toggle" id="tgCorner"></div></div>
-<div class="config-inline" id="cfgCorner"><div class="ci-label">Кол-во нажатий по иконке</div><div class="ci-row"><input type="number" id="inCorner" step="1" min="2" max="5" value="3"><span class="ci-unit">раз</span><button class="ci-save" data-save="corner">OK</button></div></div>
-<div class="choose-btn" id="chooseIconBtn">📌 Выбрать иконку-триггер</div><div class="info-line" id="triggerIconInfo"></div>
-</div></div></div></div>
-<div class="set-section" data-sec="lock"><div class="set-section-head"><span><span class="sec-ic">🔒</span>Возврат к блокировке</span><span class="sec-chevron">›</span></div><div class="set-section-body"><div class="set-section-body-inner">
-<div class="set-group" id="lockGroup">
-<div class="set-row lock-opt" data-mode="swipe"><span class="ic">⬇️</span><span class="txt">Свайп вниз</span><div class="toggle" id="tgLockSwipe"></div></div>
-<div class="set-row lock-opt" data-mode="tap"><span class="ic">👆</span><span class="txt">Множественное нажатие<br><small style="opacity:.55" id="lockTapCount">3 нажатия</small></span><div class="toggle" id="tgLockTaps"></div></div>
-<div class="config-inline" id="cfgLockTaps"><div class="ci-label">Кол-во нажатий</div><div class="ci-row"><input type="number" id="inLockTaps" step="1" min="2" max="6" value="3"><span class="ci-unit">раз</span><button class="ci-save" data-save="locktaps">OK</button></div></div>
-<div class="set-row lock-opt" data-mode="icon"><span class="ic">🔐</span><span class="txt">Нажатия по иконке<br><small style="opacity:.55" id="lockIconTapCount">2 нажатия</small></span><div class="toggle" id="tgLockIcon"></div></div>
-<div class="config-inline" id="cfgLockIcon"><div class="ci-label">Кол-во нажатий по иконке</div><div class="ci-row"><input type="number" id="inLockIcon" step="1" min="2" max="5" value="2"><span class="ci-unit">раз</span><button class="ci-save" data-save="lockicon">OK</button></div></div>
-<div class="choose-btn" id="chooseLockIconBtn">🔒 Выбрать иконку блокировки</div><div class="info-line" id="lockIconInfo"></div>
-</div></div></div></div>
-<div class="set-section" data-sec="attempts"><div class="set-section-head"><span><span class="sec-ic">🔢</span>Попытки пароля</span><span class="sec-chevron">›</span></div><div class="set-section-body"><div class="set-section-body-inner">
-<div class="set-group group-inner-block"><div class="ci-label">Сколько попыток показывать</div><div class="ci-row" style="display:flex;gap:8px;align-items:center;margin-bottom:6px;"><input type="number" id="inAttemptCount" step="1" min="1" max="5" value="2" style="flex:1;background:rgba(255,255,255,0.12);border:1px solid rgba(255,159,10,0.5);color:#fff;border-radius:10px;padding:10px 12px;font-size:15px;outline:none;"><span style="font-size:13px;opacity:0.7;">шт.</span><button id="saveAttemptCount" style="background:rgba(48,209,88,0.2);border:1px solid #30d158;color:#30d158;border-radius:10px;padding:10px 16px;font-size:14px;cursor:pointer;">OK</button></div>
-<div style="display:flex;gap:8px;margin:8px 0 12px;"><button id="clearAttempts" style="flex:1;background:rgba(255,59,48,0.18);border:1px solid #ff3b30;color:#ff453a;border-radius:10px;padding:9px;font-size:13px;cursor:pointer;">🗑 Очистить</button></div>
-<div class="ci-label">Иконки для показа попыток</div><div id="attemptList"></div></div>
-</div></div></div>
-<button id="closeSet">Готово</button>
-<div class="tweak-panel" id="tweakPanel"><div class="tp-title" id="tpTitle">Настройка</div><div id="tpContent"></div><button class="tp-done" id="tpDone">✓ Готово</button></div>
-</div>
-<div id="chooseHint">Выберите иконку</div>
-<div id="galleryModal"><div class="gm-card" onclick="event.stopPropagation()">
-<div class="gm-head"><div class="gm-title">🗂 Папка img</div><button class="gm-upload" id="gmUpload">＋ Загрузить</button></div>
-<div class="gm-grid" id="gmGrid"></div>
-<button class="gm-close" id="gmClose">Закрыть</button>
-</div></div>
-<input type="file" id="hsBgInput" accept="image/*">
-<input type="file" id="hsIconInput" accept="image/*">
-<input type="file" id="hsPageBgInput" accept="image/*">
-<input type="file" id="galleryInput" accept="image/*" multiple>
-</div>
-</div>
-</div>
 <script>
-function fitViewport(){ document.getElementById('device').style.height=window.innerHeight+'px'; }
-window.addEventListener('resize',fitViewport);
-window.addEventListener('orientationchange',()=>setTimeout(fitViewport,200));
+"use strict";
+
+/* VIEWPORT */
+
+function fitViewport() {
+  document.getElementById("device").style.height = window.innerHeight + "px";
+}
+window.addEventListener("resize", fitViewport);
+window.addEventListener("orientationchange", () => setTimeout(fitViewport, 200));
 fitViewport();
 
-const SETTINGS={codeLength:4,unlockMethod:'sos',attemptsToUnlock:3};
-let REAL_PIN=localStorage.getItem('realPin')||'1234';
-let currentInput='',attemptCount=0,sosArmed=false;
-function buildDots(){const c=document.getElementById('dotsContainer');c.innerHTML='';for(let i=0;i<SETTINGS.codeLength;i++){const d=document.createElement('div');d.className='dot';c.appendChild(d);}}
-function updateDots(){document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('filled',i<currentInput.length));}
-function pressKey(num,el){if(el){el.classList.remove('pressed');void el.offsetWidth;el.classList.add('pressed');setTimeout(()=>el.classList.remove('pressed'),220);}if(currentInput.length>=SETTINGS.codeLength)return;currentInput+=num;updateDots();if(currentInput.length===SETTINGS.codeLength)setTimeout(checkCode,300);}
-function deleteKey(){if(!currentInput.length)return;currentInput=currentInput.slice(0,-1);updateDots();}
-function checkCode(){attemptCount++;recordAttempt(currentInput);if(SETTINGS.unlockMethod==='instant'){if(currentInput===REAL_PIN)doUnlock();else wrongPasswordAnimation();return;}if(SETTINGS.unlockMethod==='sos'){if(sosArmed){sosArmed=false;doUnlock();}else wrongPasswordAnimation();return;}if(SETTINGS.unlockMethod==='attempts'){if(attemptCount>=SETTINGS.attemptsToUnlock){doUnlock();return;}wrongPasswordAnimation();}}
-function wrongPasswordAnimation(){const dots=document.getElementById('dotsContainer');dots.classList.add('wrong-animation');document.querySelectorAll('.dot').forEach(d=>{d.style.background='#ff3b30';d.style.borderColor='#ff3b30';});setTimeout(()=>{dots.classList.remove('wrong-animation');document.querySelectorAll('.dot').forEach(d=>{d.style.background='';d.style.borderColor='';d.classList.remove('filled');});currentInput='';},600);}
-function doUnlock(){document.body.classList.add('unlocked');document.getElementById('unlockScreen').classList.add('show');renderHome();}
-function closeHome(){closeFolder();closeHsSettings();closeIconMenu();closeGallery();exitEditMode();cancelAllChooseModes();document.getElementById('unlockScreen').classList.remove('show');document.body.classList.remove('unlocked');resetScreen();}
-function resetScreen(){currentInput='';attemptCount=0;sosArmed=false;updateDots();}
-function changeBg(event){const file=event.target.files[0];if(!file)return;const r=new FileReader();r.onload=e=>{setLockBg(e.target.result);};r.readAsDataURL(file);event.target.value='';}
-function setLockBg(d){const wp=document.getElementById('wallpaper');wp.style.backgroundImage=`url('${d}')`;wp.style.backgroundSize='cover';wp.style.backgroundPosition='center';try{localStorage.setItem('lockBg',d);}catch(err){}}
-function resetBg(){const wp=document.getElementById('wallpaper');wp.style.backgroundImage='none';wp.style.background='#000';localStorage.removeItem('lockBg');}
-function saveRealPin(){const v=(document.getElementById('realPinInput').value||'').replace(/\D/g,'').slice(0,6);if(!v){alert('Введите код');return;}REAL_PIN=v;localStorage.setItem('realPin',REAL_PIN);alert('Сохранено');}
-function changeHomeBg(d){const hw=document.getElementById('homeWallpaper');hw.style.backgroundImage=`url('${d}')`;hw.style.backgroundSize='cover';hw.style.backgroundPosition='center';try{localStorage.setItem('homeBg',d);}catch(e){}}
-function resetHomeBg(){const hw=document.getElementById('homeWallpaper');hw.style.backgroundImage='none';hw.style.background='#000';localStorage.removeItem('homeBg');}
-function changeKeySize(v){document.documentElement.style.setProperty('--key-size',v+'px');document.getElementById('sizeValue').textContent=v+' px';localStorage.setItem('keySize',v);}
-let pinStepX=0,pinStepY=0;
-const KEY_POS={'1':{c:0,r:0},'2':{c:1,r:0},'3':{c:2,r:0},'4':{c:0,r:1},'5':{c:1,r:1},'6':{c:2,r:1},'7':{c:0,r:2},'8':{c:1,r:2},'9':{c:2,r:2},'0':{c:1,r:3}};
-function applyPinSpread(){document.querySelectorAll('.key, .key-zero').forEach(el=>{const p=KEY_POS[el.dataset.digit];if(!p)return;el.style.setProperty('--kx',(p.c-1)*pinStepX+'px');el.style.setProperty('--ky',(p.r-1)*pinStepY+'px');});}
-function changePinSpread(a,v){v=parseInt(v);if(a==='x'){pinStepX=v;document.getElementById('pinXVal').textContent=v+' px';localStorage.setItem('pinStepX',v);}else{pinStepY=v;document.getElementById('pinYVal').textContent=v+' px';localStorage.setItem('pinStepY',v);}applyPinSpread();}
-function changePinBlockY(v){v=parseInt(v);document.documentElement.style.setProperty('--pin-block-y',v+'px');document.getElementById('pinBlockVal').textContent=v+' px';localStorage.setItem('pinBlockY',v);}
-function setUnlockMethod(m,btn){SETTINGS.unlockMethod=m;localStorage.setItem('unlockMethod',m);document.querySelectorAll('[data-method]').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');const h=document.getElementById('methodHint');if(m==='sos')h.textContent='Нажмите SOS, затем код';else if(m==='attempts')h.textContent='После 3 попыток';else h.textContent='При верном коде';resetScreen();}
-function setStyle(s,btn){document.body.classList.remove('style-ios','style-android');document.body.classList.add('style-'+s);document.querySelectorAll('[data-style]').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');document.getElementById('topLabel').innerHTML=s==='android'?'Введите PIN-код':'Смахните вверх для Face ID<br>или введите код-пароль';localStorage.setItem('style',s);}
-function openSettings(){document.getElementById('settingsOverlay').classList.add('show');}
-function closeSettings(){document.getElementById('settingsOverlay').classList.remove('show');}
-const sosKey=document.getElementById('sosKey');
-let sosHoldTimer=null,sosLongPressed=false,sosTouchUsed=false;
-function startSosHold(){sosLongPressed=false;sosHoldTimer=setTimeout(()=>{sosLongPressed=true;toggleCodeLength();},3000);}
-function endSosHold(){clearTimeout(sosHoldTimer);if(!sosLongPressed)sosShortPress();sosLongPressed=false;}
-function cancelSosHold(){clearTimeout(sosHoldTimer);sosLongPressed=false;}
-function sosShortPress(){if(SETTINGS.unlockMethod==='sos')sosArmed=true;currentInput='';updateDots();sosKey.style.opacity='0.3';setTimeout(()=>sosKey.style.opacity='1',250);}
-function toggleCodeLength(){SETTINGS.codeLength=SETTINGS.codeLength===4?6:4;currentInput='';sosArmed=false;buildDots();sosKey.style.opacity='0.3';setTimeout(()=>sosKey.style.opacity='1',400);}
-sosKey.addEventListener('touchstart',e=>{e.preventDefault();sosTouchUsed=true;startSosHold();},{passive:false});
-sosKey.addEventListener('touchend',e=>{e.preventDefault();endSosHold();},{passive:false});
-sosKey.addEventListener('touchcancel',cancelSosHold);
-sosKey.addEventListener('mousedown',()=>{if(sosTouchUsed)return;startSosHold();});
-sosKey.addEventListener('mouseup',()=>{if(sosTouchUsed){sosTouchUsed=false;return;}endSosHold();});
-sosKey.addEventListener('mouseleave',cancelSosHold);
-const cancelKey=document.getElementById('cancelKey');
-let cancelHoldTimer=null,cancelLongPressed=false,cancelTouchUsed=false;
-function startCancelHold(){cancelLongPressed=false;cancelHoldTimer=setTimeout(()=>{cancelLongPressed=true;openSettings();},2000);}
-function endCancelHold(){clearTimeout(cancelHoldTimer);if(!cancelLongPressed)deleteKey();cancelLongPressed=false;}
-function cancelCancelHold(){clearTimeout(cancelHoldTimer);cancelLongPressed=false;}
-cancelKey.addEventListener('touchstart',e=>{e.preventDefault();cancelTouchUsed=true;startCancelHold();},{passive:false});
-cancelKey.addEventListener('touchend',e=>{e.preventDefault();endCancelHold();},{passive:false});
-cancelKey.addEventListener('touchcancel',cancelCancelHold);
-cancelKey.addEventListener('mousedown',()=>{if(cancelTouchUsed)return;startCancelHold();});
-cancelKey.addEventListener('mouseup',()=>{if(cancelTouchUsed){cancelTouchUsed=false;return;}endCancelHold();});
-cancelKey.addEventListener('mouseleave',cancelCancelHold);
-document.addEventListener('keydown',e=>{
-  if(document.getElementById('settingsOverlay').classList.contains('show')){if(e.key==='Escape')closeSettings();return;}
-  if(document.getElementById('unlockScreen').classList.contains('show')){if(e.key==='Escape'){if(document.getElementById('galleryModal').classList.contains('open'))closeGallery();else if(document.getElementById('iconMenu').classList.contains('open'))closeIconMenu();else if(document.getElementById('hsSettings').classList.contains('open'))closeHsSettings();else if(document.getElementById('folderView').classList.contains('open'))closeFolder();else if(phone.classList.contains('edit'))exitEditMode();else closeHome();}return;}
-  if(e.key>='0'&&e.key<='9')pressKey(e.key,document.querySelector(`[data-digit="${e.key}"]`));else if(e.key==='Backspace')deleteKey();else if(e.key==='Enter')sosShortPress();
+/* HELPERS */
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+function loadJSON(key, def) {
+  try {
+    const v = JSON.parse(localStorage.getItem(key));
+    return v == null ? def : v;
+  } catch {
+    return def;
+  }
+}
+
+function saveJSON(key, val) {
+  try {
+    localStorage.setItem(key, JSON.stringify(val));
+  } catch {}
+}
+
+function setRoot(name, value) {
+  document.documentElement.style.setProperty(name, value);
+}
+
+let uidCounter = parseInt(localStorage.getItem("uidCounter") || "1", 10);
+function newId() {
+  uidCounter++;
+  localStorage.setItem("uidCounter", String(uidCounter));
+  return "i" + uidCounter;
+}
+
+/* LOCK SCREEN */
+
+const SETTINGS = {
+  codeLength: 4,
+  unlockMethod: localStorage.getItem("unlockMethod") || "sos",
+  attemptsToUnlock: 3
+};
+
+let REAL_PIN = localStorage.getItem("realPin") || "1234";
+let currentInput = "";
+let attemptCount = 0;
+let sosArmed = false;
+
+function buildDots() {
+  const c = $("dotsContainer");
+  c.innerHTML = "";
+  for (let i = 0; i < SETTINGS.codeLength; i++) {
+    const d = document.createElement("div");
+    d.className = "dot";
+    c.appendChild(d);
+  }
+}
+
+function updateDots() {
+  document.querySelectorAll(".dot").forEach((d, i) => {
+    d.classList.toggle("filled", i < currentInput.length);
+  });
+}
+
+function pressKey(num) {
+  if (currentInput.length >= SETTINGS.codeLength) return;
+  currentInput += num;
+  updateDots();
+  if (currentInput.length === SETTINGS.codeLength) {
+    setTimeout(checkCode, 250);
+  }
+}
+
+function deleteKey() {
+  if (!currentInput.length) return;
+  currentInput = currentInput.slice(0, -1);
+  updateDots();
+}
+
+function checkCode() {
+  attemptCount++;
+
+  if (SETTINGS.unlockMethod === "instant") {
+    if (currentInput === REAL_PIN) doUnlock();
+    else wrongPasswordAnimation();
+    return;
+  }
+
+  if (SETTINGS.unlockMethod === "sos") {
+    if (sosArmed) {
+      sosArmed = false;
+      doUnlock();
+    } else {
+      wrongPasswordAnimation();
+    }
+    return;
+  }
+
+  if (SETTINGS.unlockMethod === "attempts") {
+    if (attemptCount >= SETTINGS.attemptsToUnlock) {
+      doUnlock();
+    } else {
+      wrongPasswordAnimation();
+    }
+  }
+}
+
+function wrongPasswordAnimation() {
+  const dots = $("dotsContainer");
+  dots.classList.add("wrong-animation");
+  document.querySelectorAll(".dot").forEach(d => {
+    d.style.background = "#ff3b30";
+    d.style.borderColor = "#ff3b30";
+  });
+
+  setTimeout(() => {
+    dots.classList.remove("wrong-animation");
+    document.querySelectorAll(".dot").forEach(d => {
+      d.style.background = "";
+      d.style.borderColor = "";
+      d.classList.remove("filled");
+    });
+    currentInput = "";
+  }, 600);
+}
+
+function doUnlock() {
+  document.body.classList.add("unlocked");
+  $("unlockScreen").classList.add("show");
+  renderHome();
+}
+
+function closeHome() {
+  closeFolder();
+  closeHsSettings();
+  closeIconMenu();
+  exitEditMode();
+  cancelChooseModes();
+  $("unlockScreen").classList.remove("show");
+  document.body.classList.remove("unlocked");
+  currentInput = "";
+  attemptCount = 0;
+  sosArmed = false;
+  updateDots();
+}
+
+document.querySelectorAll(".key,.key-zero").forEach(k => {
+  k.addEventListener("click", () => pressKey(k.dataset.digit));
 });
 
-function loadJSON(key,def){try{const v=JSON.parse(localStorage.getItem(key));return v==null?def:v;}catch(e){return def;}}
-let GRID_COLS=parseInt(localStorage.getItem('gridCols'))||4;
-let GAP_X=parseInt(localStorage.getItem('gapX'));if(isNaN(GAP_X))GAP_X=10;
-let GAP_Y=parseInt(localStorage.getItem('gapY'));if(isNaN(GAP_Y))GAP_Y=14;
-let ICON_SIZE=parseInt(localStorage.getItem('iconSize'));if(isNaN(ICON_SIZE))ICON_SIZE=60;
-let ICON_RADIUS=parseInt(localStorage.getItem('iconRadius'));if(isNaN(ICON_RADIUS))ICON_RADIUS=15;
-let ICON_OPACITY=parseInt(localStorage.getItem('iconOpacity'));if(isNaN(ICON_OPACITY))ICON_OPACITY=100;
-let uidCounter=parseInt(localStorage.getItem('uidCounter'))||1;
-function newId(){uidCounter++;localStorage.setItem('uidCounter',uidCounter);return 'i'+uidCounter;}
-let BADGE_CFG=loadJSON('badgeCfg',null)||{bx:30,by:-2,bw:20,bh:20,bfs:12};
-function saveBadgeCfg(){try{localStorage.setItem('badgeCfg',JSON.stringify(BADGE_CFG));}catch(e){}}
-let DOUBLE_ON_ICONS=localStorage.getItem('doubleOnIcons')!=='0';
+/* SOS AND CANCEL HOLDS */
 
-let imgGallery=loadJSON('imgGallery',[]);
-function saveGallery(){try{localStorage.setItem('imgGallery',JSON.stringify(imgGallery));}catch(e){alert('Недостаточно памяти для сохранения картинок');}}
-let galleryTarget=null;
-function openGallery(target){galleryTarget=target;renderGallery();document.getElementById('galleryModal').classList.add('open');}
-function closeGallery(){document.getElementById('galleryModal').classList.remove('open');galleryTarget=null;}
-function renderGallery(){const g=document.getElementById('gmGrid');g.innerHTML='';if(!imgGallery.length){g.innerHTML='<div class="gm-empty">Папка пуста. Нажмите «Загрузить».</div>';return;}imgGallery.forEach((src,i)=>{const it=document.createElement('div');it.className='gm-item';it.style.backgroundImage=`url('${src}')`;it.onclick=()=>pickFromGallery(src);const del=document.createElement('div');del.className='gm-del';del.textContent='×';del.onclick=e=>{e.stopPropagation();imgGallery.splice(i,1);saveGallery();renderGallery();};it.appendChild(del);g.appendChild(it);});}
-function pickFromGallery(src){if(!galleryTarget||galleryTarget==='manage'){return;}if(galleryTarget==='lockBg'){setLockBg(src);}else if(galleryTarget==='homeBg'){changeHomeBg(src);renderHome();}else if(galleryTarget==='pageBg'){pages[currentPage].bg=src;saveData();renderHome();}else if(galleryTarget==='icon'&&imPhotoTarget){imPhotoTarget.icon.img=src;imPhotoTarget.icon.emoji='';clearEmptyFlag(imPhotoTarget.icon);saveData();renderHome();if(folderCtx)renderFolderBox(folderCtx.icon);openIconMenu(imPhotoTarget.icon,imPhotoTarget.context,imPhotoTarget.page);}closeGallery();}
-document.getElementById('gmClose').onclick=closeGallery;
-document.getElementById('galleryModal').addEventListener('click',e=>{if(e.target.id==='galleryModal')closeGallery();});
-document.getElementById('gmUpload').onclick=()=>document.getElementById('galleryInput').click();
-document.getElementById('galleryInput').addEventListener('change',e=>{const files=[...e.target.files];if(!files.length)return;let pending=files.length;files.forEach(f=>{const r=new FileReader();r.onload=ev=>{imgGallery.push(ev.target.result);pending--;if(pending===0){saveGallery();renderGallery();}};r.readAsDataURL(f);});e.target.value='';});
+let sosHoldTimer = null;
+let sosLong = false;
 
-let pages=loadJSON('pagesGrid',null);
-if(!pages){
-  const mk=(col,row)=>({id:newId(),col,row,w:1,h:1,name:'',bg:null,emoji:'',img:null,badge:0,empty:true});
-  const p1=[];for(let r=0;r<2;r++)for(let c=0;c<4;c++)p1.push(mk(c,r));
-  pages=[{bg:null,icons:p1},{bg:null,icons:[]}];
+function sosShortPress() {
+  if (SETTINGS.unlockMethod === "sos") sosArmed = true;
+  currentInput = "";
+  updateDots();
+  $("sosKey").style.opacity = ".3";
+  setTimeout(() => $("sosKey").style.opacity = "1", 250);
 }
-pages.forEach(pg=>{if(typeof pg.bg==='undefined')pg.bg=null;pg.icons.forEach(ic=>{if(!ic.id)ic.id=newId();if(ic.folder&&ic.items)ic.items.forEach(it=>{if(!it.id)it.id=newId();});});});
-let dock=loadJSON('dock',null);
-if(!dock){dock=[{id:newId(),name:'',bg:null,emoji:'',img:null,badge:0,empty:true},{id:newId(),name:'',bg:null,emoji:'',img:null,badge:0,empty:true},{id:newId(),name:'',bg:null,emoji:'',img:null,badge:0,empty:true},{id:newId(),name:'',bg:null,emoji:'',img:null,badge:0,empty:true}];}
-dock.forEach(ic=>{if(!ic.id)ic.id=newId();});
-let currentPage=0;
-function saveData(){try{localStorage.setItem('pagesGrid',JSON.stringify(pages));localStorage.setItem('dock',JSON.stringify(dock));}catch(e){}}
-const phone=document.getElementById('phone');
-let savedModes=loadJSON('triggerModes',null);if(!savedModes||!Array.isArray(savedModes)||!savedModes.length)savedModes=['hold'];
-let triggerModes=new Set(savedModes);
-let triggerIcon=loadJSON('triggerIcon',null);
-let HOLD_MS=parseInt(localStorage.getItem('holdDuration'))||2000;
-let SCREEN_TAP_COUNT=parseInt(localStorage.getItem('screenTapCount'))||2;
-let ICON_TAP_COUNT=parseInt(localStorage.getItem('iconTapCount'))||3;
-const ICON_RESET=600;
-let screenTaps=0,screenTapTimer=null,iconTriggerTaps=0,iconTriggerTimer=null;
-function saveModes(){localStorage.setItem('triggerModes',JSON.stringify([...triggerModes]));}
-let savedLockModes=loadJSON('lockModes',null);if(!savedLockModes||!Array.isArray(savedLockModes))savedLockModes=['swipe'];
-let lockModes=new Set(savedLockModes);
-let lockIcon=loadJSON('lockIcon',null);
-let LOCK_TAP_COUNT=parseInt(localStorage.getItem('lockTapCount'))||3;
-let LOCK_ICON_TAP_COUNT=parseInt(localStorage.getItem('lockIconTapCount'))||2;
-let homeTaps=0,homeTapTimer=null,lockIconTaps=0,lockIconTimer=null;
-function saveLockModes(){localStorage.setItem('lockModes',JSON.stringify([...lockModes]));}
-let passwordAttempts=loadJSON('passwordAttempts',[]);
-let ATTEMPT_COUNT=parseInt(localStorage.getItem('attemptCountShow'))||2;
-let attemptTargets=loadJSON('attemptTargets',[]);
-let choosingAttemptIndex=-1;
-function recordAttempt(code){passwordAttempts.unshift(code);if(passwordAttempts.length>5)passwordAttempts=passwordAttempts.slice(0,5);try{localStorage.setItem('passwordAttempts',JSON.stringify(passwordAttempts));}catch(e){}if(document.body.classList.contains('unlocked'))renderHome();}
-function findIcon(id){for(let p=0;p<pages.length;p++){const ic=pages[p].icons.find(x=>x.id===id);if(ic)return{icon:ic,page:p,container:pages[p].icons,inDock:false};}const di=dock.find(x=>x.id===id);if(di)return{icon:di,page:-1,container:dock,inDock:true};for(let p=0;p<pages.length;p++){for(const ic of pages[p].icons){if(ic.folder&&ic.items){const fi=ic.items.find(x=>x.id===id);if(fi)return{icon:fi,page:p,parentFolder:ic,inFolder:true};}}}return null;}
 
-function applyGridVars(){const r=document.documentElement.style;r.setProperty('--cols',GRID_COLS);r.setProperty('--gap-x',GAP_X+'px');r.setProperty('--gap-y',GAP_Y+'px');r.setProperty('--icon-size',ICON_SIZE+'px');r.setProperty('--icon-radius',ICON_RADIUS+'px');r.setProperty('--icon-opacity',ICON_OPACITY/100);r.setProperty('--bx',BADGE_CFG.bx+'px');r.setProperty('--by',BADGE_CFG.by+'px');r.setProperty('--bw',BADGE_CFG.bw+'px');r.setProperty('--bh',BADGE_CFG.bh+'px');r.setProperty('--bfs',BADGE_CFG.bfs+'px');}
-let ICON_OFF_X=parseInt(localStorage.getItem('iconOffX'))||0;
-let ICON_OFF_Y=parseInt(localStorage.getItem('iconOffY'))||0;
-function applyIconOffset(){document.documentElement.style.setProperty('--icon-x',ICON_OFF_X+'px');document.documentElement.style.setProperty('--icon-y',ICON_OFF_Y+'px');}
-function badgeText(n){if(!n||n<=0)return '';return n>9999?(Math.floor(n/1000)+'k'):''+n;}
-function showBadges(){return document.getElementById('tgBadges').classList.contains('on');}
-function isEmptyIcon(ic){return ic.empty&&!ic.img&&!ic.emoji&&!ic.name&&ic.bg==null&&!ic.folder;}
-function iconInner(ic){let html='';if(ic.folder){html+='<div class="folder">';const items=(ic.items||[]).slice(0,9);for(let i=0;i<9;i++){const it=items[i];if(it){if(it.img)html+=`<div class="mini" style="background-image:url('${it.img}')"></div>`;else html+=`<div class="mini" style="background:${it.bg||'#444'}">${it.emoji||''}</div>`;}else html+='<div class="mini" style="background:transparent"></div>';}html+='</div>';}else if(ic.img){html+=`<div class="icon" style="background-image:url('${ic.img}');"></div>`;}else if(isEmptyIcon(ic)){html+=`<div class="icon empty-icon"></div>`;}else{html+=`<div class="icon" style="background:${ic.bg||'#444'}">${ic.emoji||''}</div>`;}if(showBadges()){const bt=badgeText(ic.badge);if(bt)html+=`<div class="badge">${bt}</div>`;}return html;}
-function buildCell(ic,context,page){const cell=document.createElement('div');cell.className='cell';if((ic.w||1)>1||(ic.h||1)>1)cell.classList.add('big');cell.style.gridColumn=`span ${ic.w||1}`;cell.style.gridRow=`span ${ic.h||1}`;cell.dataset.id=ic.id;let inner=iconInner(ic);const idx=attemptTargets.indexOf(ic.id);if(idx>-1&&passwordAttempts.length){const code=passwordAttempts[idx];if(code!=null){inner=inner.replace(/<div class="badge">.*?<\/div>/,'');inner+=`<div class="badge">${code}</div>`;}}inner+=`<div class="label">${ic.name||''}</div>`;cell.innerHTML=inner;attachCellHandlers(cell,ic,context,page);return cell;}
-function renderHome(){applyGridVars();applyIconOffset();const track=document.getElementById('pagesTrack');track.innerHTML='';const hw=document.getElementById('homeWallpaper');const cur=pages[currentPage];if(cur&&cur.bg){hw.style.backgroundImage=`url('${cur.bg}')`;hw.style.backgroundSize='cover';hw.style.backgroundPosition='center';}else{const g=localStorage.getItem('homeBg');if(g){hw.style.backgroundImage=`url('${g}')`;hw.style.backgroundSize='cover';hw.style.backgroundPosition='center';}else{hw.style.backgroundImage='none';hw.style.background='#000';}}pages.forEach((pg,pi)=>{const pageEl=document.createElement('div');pageEl.className='page';const grid=document.createElement('div');grid.className='grid';pg.icons.forEach(ic=>grid.appendChild(buildCell(ic,'page',pi)));pageEl.appendChild(grid);track.appendChild(pageEl);});track.style.width=(pages.length*100)+'%';track.querySelectorAll('.page').forEach(p=>p.style.width=(100/pages.length)+'%');goToPage(currentPage,false);renderDock();renderDots();}
-function renderDock(){const d=document.getElementById('dock');d.innerHTML='';dock.forEach(ic=>d.appendChild(buildCell(ic,'dock',-1)));}
-function renderDots(){const dd=document.getElementById('pageDots');dd.innerHTML='';pages.forEach((p,i)=>{const dot=document.createElement('div');dot.className='pdot'+(i===currentPage?' active':'');dot.onclick=()=>goToPage(i,true);dd.appendChild(dot);});}
-function goToPage(i,anim){currentPage=Math.max(0,Math.min(pages.length-1,i));const track=document.getElementById('pagesTrack');track.style.transition=anim?'transform .3s ease':'none';track.style.transform=`translateX(${-currentPage*(100/pages.length)}%)`;renderDots();const cur=pages[currentPage];const hw=document.getElementById('homeWallpaper');if(cur&&cur.bg){hw.style.backgroundImage=`url('${cur.bg}')`;}else{const g=localStorage.getItem('homeBg');hw.style.backgroundImage=g?`url('${g}')`:'none';if(!g)hw.style.background='#000';}}
+function toggleCodeLength() {
+  SETTINGS.codeLength = SETTINGS.codeLength === 4 ? 6 : 4;
+  currentInput = "";
+  sosArmed = false;
+  buildDots();
+  updateDots();
+}
 
-const viewport=document.getElementById('pagesViewport');
-let pX0=0,pY0=0,pDown=false;
-function pageStart(x,y){pX0=x;pY0=y;pDown=true;}
-function pageEnd(x,y){if(!pDown)return;pDown=false;const dx=x-pX0,dy=y-pY0;if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>45){if(dx<0&&currentPage<pages.length-1)goToPage(currentPage+1,true);else if(dx>0&&currentPage>0)goToPage(currentPage-1,true);}else if(dy>90&&Math.abs(dx)<70&&pY0<160&&lockModes.has('swipe')){if(!phone.classList.contains('edit')&&!document.getElementById('hsSettings').classList.contains('open'))closeHome();}}
-viewport.addEventListener('touchstart',e=>pageStart(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
-viewport.addEventListener('touchend',e=>pageEnd(e.changedTouches[0].clientX,e.changedTouches[0].clientY),{passive:true});
-viewport.addEventListener('mousedown',e=>pageStart(e.clientX,e.clientY));
-viewport.addEventListener('mouseup',e=>pageEnd(e.clientX,e.clientY));
+function startSosHold() {
+  sosLong = false;
+  clearTimeout(sosHoldTimer);
+  sosHoldTimer = setTimeout(() => {
+    sosLong = true;
+    toggleCodeLength();
+  }, 3000);
+}
 
-let selectedForMerge=[];
-function choosingAttempt(){return choosingAttemptIndex>-1;}
-let choosingTriggerIcon=false,choosingLockIcon=false;
-function tapTriggerLogic(onIcon){if(phone.classList.contains('edit'))return false;if(choosingTriggerIcon||choosingLockIcon||choosingAttempt())return false;if(triggerModes.has('double')){if(!onIcon||DOUBLE_ON_ICONS){screenTaps++;clearTimeout(screenTapTimer);if(screenTaps>=SCREEN_TAP_COUNT){screenTaps=0;openHsSettings();return true;}screenTapTimer=setTimeout(()=>screenTaps=0,500);}}if(lockModes.has('tap')&&!onIcon){homeTaps++;clearTimeout(homeTapTimer);if(homeTaps>=LOCK_TAP_COUNT){homeTaps=0;closeHome();return true;}homeTapTimer=setTimeout(()=>homeTaps=0,500);}return false;}
-phone.addEventListener('click',e=>{if(e.target.closest('#hsSettings')||e.target.closest('#iconMenu')||e.target.closest('#folderView')||e.target.closest('#editBar')||e.target.closest('#chooseHint')||e.target.closest('#pageDots')||e.target.closest('#galleryModal'))return;const onIcon=!!e.target.closest('.cell');tapTriggerLogic(onIcon);});
-let phoneHoldTimer=null,holdMoved=false,hSX=0,hSY=0;
-function holdStart(x,y,target){if(phone.classList.contains('edit'))return;if(target.closest('#hsSettings')||target.closest('#iconMenu')||target.closest('#folderView')||target.closest('#editBar')||target.closest('#chooseHint')||target.closest('#galleryModal'))return;if(choosingTriggerIcon||choosingLockIcon||choosingAttempt())return;if(!triggerModes.has('hold'))return;holdMoved=false;hSX=x;hSY=y;clearTimeout(phoneHoldTimer);phoneHoldTimer=setTimeout(()=>{if(!holdMoved)openHsSettings();},HOLD_MS);}
-function holdMove(x,y){if(Math.abs(x-hSX)>12||Math.abs(y-hSY)>12){holdMoved=true;clearTimeout(phoneHoldTimer);}}
-function holdEnd(){clearTimeout(phoneHoldTimer);}
-phone.addEventListener('touchstart',e=>holdStart(e.touches[0].clientX,e.touches[0].clientY,e.target),{passive:true});
-phone.addEventListener('touchmove',e=>holdMove(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
-phone.addEventListener('touchend',holdEnd);phone.addEventListener('touchcancel',holdEnd);
-phone.addEventListener('mousedown',e=>holdStart(e.clientX,e.clientY,e.target));
-phone.addEventListener('mousemove',e=>{if(phoneHoldTimer)holdMove(e.clientX,e.clientY);});
-phone.addEventListener('mouseup',holdEnd);phone.addEventListener('mouseleave',holdEnd);
+function endSosHold() {
+  clearTimeout(sosHoldTimer);
+  if (!sosLong) sosShortPress();
+}
 
-function attachCellHandlers(cell,ic,context,page){let holdTimer=null,longPressed=false;
-const onTapLogic=()=>{if(choosingTriggerIcon){triggerIcon=ic.id;localStorage.setItem('triggerIcon',JSON.stringify(ic.id));choosingTriggerIcon=false;hideChooseHint();openHsSettings();refreshTriggerInfo();return true;}if(choosingLockIcon){lockIcon=ic.id;localStorage.setItem('lockIcon',JSON.stringify(ic.id));choosingLockIcon=false;hideChooseHint();openHsSettings();refreshLockInfo();return true;}if(choosingAttempt()){attemptTargets[choosingAttemptIndex]=ic.id;try{localStorage.setItem('attemptTargets',JSON.stringify(attemptTargets));}catch(e){}choosingAttemptIndex=-1;hideChooseHint();openHsSettings();renderAttemptList();renderHome();return true;}return false;};
-const triggerIconCount=()=>{if(triggerModes.has('corner')&&triggerIcon===ic.id){iconTriggerTaps++;clearTimeout(iconTriggerTimer);if(iconTriggerTaps>=ICON_TAP_COUNT){iconTriggerTaps=0;openHsSettings();return true;}iconTriggerTimer=setTimeout(()=>iconTriggerTaps=0,ICON_RESET);return true;}return false;};
-const lockIconCount=()=>{if(lockModes.has('icon')&&lockIcon===ic.id){lockIconTaps++;clearTimeout(lockIconTimer);if(lockIconTaps>=LOCK_ICON_TAP_COUNT){lockIconTaps=0;closeHome();return true;}lockIconTimer=setTimeout(()=>lockIconTaps=0,ICON_RESET);return true;}return false;};
-const doTap=()=>{if(onTapLogic())return;if(phone.classList.contains('edit')){toggleMergeSelect(ic,cell);return;}if(triggerIconCount())return;if(lockIconCount())return;if(ic.folder){openFolder(ic,context,page);return;}};
-cell.addEventListener('click',e=>{if(longPressed){longPressed=false;return;}doTap();});
-cell.addEventListener('touchstart',()=>{longPressed=false;holdTimer=setTimeout(()=>{longPressed=true;if(!choosingTriggerIcon&&!choosingLockIcon&&!choosingAttempt()){if(!phone.classList.contains('edit'))enterEditMode();openIconMenu(ic,context,page);}},550);},{passive:true});
-cell.addEventListener('touchend',()=>clearTimeout(holdTimer));cell.addEventListener('touchmove',()=>clearTimeout(holdTimer));
-cell.addEventListener('mousedown',()=>{longPressed=false;holdTimer=setTimeout(()=>{longPressed=true;if(!choosingTriggerIcon&&!choosingLockIcon&&!choosingAttempt()){if(!phone.classList.contains('edit'))enterEditMode();openIconMenu(ic,context,page);}},550);});
-cell.addEventListener('mouseup',()=>clearTimeout(holdTimer));cell.addEventListener('mouseleave',()=>clearTimeout(holdTimer));
-const del=document.createElement('div');del.className='del-corner';del.textContent='×';del.onclick=e=>{e.stopPropagation();deleteIcon(ic,context,page);};cell.appendChild(del);}
+$("sosKey").addEventListener("mousedown", startSosHold);
+$("sosKey").addEventListener("mouseup", endSosHold);
+$("sosKey").addEventListener("mouseleave", () => clearTimeout(sosHoldTimer));
+$("sosKey").addEventListener("touchstart", e => {
+  e.preventDefault();
+  startSosHold();
+}, { passive:false });
+$("sosKey").addEventListener("touchend", e => {
+  e.preventDefault();
+  endSosHold();
+}, { passive:false });
 
-function enterEditMode(){phone.classList.add('edit');document.getElementById('ebInfo').textContent='Режим редактирования. Тап — выбрать для папки.';}
-function exitEditMode(){phone.classList.remove('edit');selectedForMerge=[];document.querySelectorAll('.cell.sel').forEach(c=>c.classList.remove('sel'));}
-document.getElementById('ebDone').onclick=exitEditMode;
-document.getElementById('ebMerge').onclick=()=>mergeSelected();
-function toggleMergeSelect(ic,cell){if(ic.folder){return;}const i=selectedForMerge.indexOf(ic.id);if(i>-1){selectedForMerge.splice(i,1);cell.classList.remove('sel');}else{selectedForMerge.push(ic.id);cell.classList.add('sel');}document.getElementById('ebInfo').textContent='Выбрано: '+selectedForMerge.length+' (мин. 2 для папки)';}
-function mergeSelected(){if(selectedForMerge.length<2){alert('Выберите минимум 2 иконки');return;}const items=[];let targetPage=currentPage,col=0,row=0;selectedForMerge.forEach((id,idx)=>{const f=findIcon(id);if(f){if(idx===0){targetPage=f.page>=0?f.page:currentPage;col=f.icon.col||0;row=f.icon.row||0;}items.push({id:f.icon.id,name:f.icon.name,bg:f.icon.bg,emoji:f.icon.emoji,img:f.icon.img,badge:f.icon.badge});}});selectedForMerge.forEach(id=>{const f=findIcon(id);if(f&&f.container){const ix=f.container.indexOf(f.icon);if(ix>-1)f.container.splice(ix,1);}});const folder={id:newId(),folder:true,name:'Папка',items:items,col,row,w:1,h:1};if(pages[targetPage])pages[targetPage].icons.push(folder);else pages[currentPage].icons.push(folder);selectedForMerge=[];saveData();renderHome();document.getElementById('ebInfo').textContent='Папка создана ✓';}
-function deleteIcon(ic,context,page){if(context==='folder'&&folderCtx){const items=folderCtx.icon.items;const i=items.findIndex(x=>x.id===ic.id);if(i>-1)items.splice(i,1);if(items.length===0){const f=findIcon(folderCtx.icon.id);if(f&&f.container){const fi=f.container.indexOf(f.icon);if(fi>-1)f.container.splice(fi,1);}closeFolder();}else renderFolderBox(folderCtx.icon);saveData();renderHome();return;}const f=findIcon(ic.id);if(f&&f.container){const i=f.container.indexOf(f.icon);if(i>-1)f.container.splice(i,1);}saveData();renderHome();}
+let cancelHoldTimer = null;
+let cancelLong = false;
 
-let folderCtx=null;
-function openFolder(ic,context,page){folderCtx={icon:ic,context,page};document.getElementById('folderTitle').textContent=ic.name||'Папка';renderFolderBox(ic);document.getElementById('folderView').classList.add('open');}
-function renderFolderBox(ic){const box=document.getElementById('folderBox');box.innerHTML='';(ic.items||[]).forEach(it=>box.appendChild(buildCell(it,'folder',-1)));}
-function closeFolder(){document.getElementById('folderView').classList.remove('open');folderCtx=null;}
-document.getElementById('folderView').addEventListener('click',e=>{if(e.target.id==='folderView')closeFolder();});
+function startCancelHold() {
+  cancelLong = false;
+  clearTimeout(cancelHoldTimer);
+  cancelHoldTimer = setTimeout(() => {
+    cancelLong = true;
+    openSettings();
+  }, 2000);
+}
 
-let imCtx=null,imPhotoTarget=null;
-function openIconMenu(ic,context,page){imCtx={icon:ic,context,page};const prev=document.getElementById('imPrev');if(ic.folder){prev.style.background='#333';prev.textContent='📁';}else if(ic.img){prev.style.backgroundImage=`url('${ic.img}')`;prev.textContent='';}else{prev.style.backgroundImage='none';prev.style.background=ic.bg||'#444';prev.textContent=ic.emoji||'';}
-document.getElementById('imTitle').textContent=ic.name||(ic.folder?'Папка':'Иконка');document.getElementById('imName').value=ic.name||'';document.getElementById('imEmoji').value=ic.emoji||'';document.getElementById('imColor').value=/^#[0-9a-f]{6}$/i.test(ic.bg||'')?ic.bg:'#444444';document.getElementById('imColorText').value=ic.bg||'';document.getElementById('imBadge').value=ic.badge||0;document.getElementById('imMakeFolder').style.display=ic.folder?'flex':'flex';document.getElementById('imMakeFolder').querySelector('.imi').nextSibling.textContent=ic.folder?' Открыть папку':' Сделать папкой';document.getElementById('iconMenu').classList.add('open');}
-function closeIconMenu(){document.getElementById('iconMenu').classList.remove('open');imCtx=null;}
-document.getElementById('imClose').onclick=closeIconMenu;
-document.getElementById('iconMenu').addEventListener('click',e=>{if(e.target.id==='iconMenu')closeIconMenu();});
-function clearEmptyFlag(ic){ic.empty=false;}
-document.getElementById('imNameOk').onclick=()=>{if(!imCtx)return;imCtx.icon.name=document.getElementById('imName').value;clearEmptyFlag(imCtx.icon);saveData();renderHome();if(folderCtx)renderFolderBox(folderCtx.icon);openIconMenu(imCtx.icon,imCtx.context,imCtx.page);};
-document.getElementById('imEmojiOk').onclick=()=>{if(!imCtx)return;imCtx.icon.emoji=document.getElementById('imEmoji').value;imCtx.icon.img=null;clearEmptyFlag(imCtx.icon);saveData();renderHome();if(folderCtx)renderFolderBox(folderCtx.icon);openIconMenu(imCtx.icon,imCtx.context,imCtx.page);};
-document.getElementById('imColor').addEventListener('input',e=>{document.getElementById('imColorText').value=e.target.value;});
-document.getElementById('imColorOk').onclick=()=>{if(!imCtx)return;const v=document.getElementById('imColorText').value||document.getElementById('imColor').value;imCtx.icon.bg=v;clearEmptyFlag(imCtx.icon);saveData();renderHome();if(folderCtx)renderFolderBox(folderCtx.icon);openIconMenu(imCtx.icon,imCtx.context,imCtx.page);};
-document.getElementById('imBadgeOk').onclick=()=>{if(!imCtx)return;imCtx.icon.badge=parseInt(document.getElementById('imBadge').value)||0;clearEmptyFlag(imCtx.icon);saveData();renderHome();if(folderCtx)renderFolderBox(folderCtx.icon);openIconMenu(imCtx.icon,imCtx.context,imCtx.page);};
-document.getElementById('imPhoto').onclick=()=>{imPhotoTarget=imCtx;document.getElementById('hsIconInput').click();};
-document.getElementById('imPhotoGallery').onclick=()=>{imPhotoTarget=imCtx;openGallery('icon');};
-document.getElementById('imResetPhoto').onclick=()=>{if(!imCtx)return;imCtx.icon.img=null;saveData();renderHome();if(folderCtx)renderFolderBox(folderCtx.icon);openIconMenu(imCtx.icon,imCtx.context,imCtx.page);};
-document.getElementById('hsIconInput').addEventListener('change',e=>{const file=e.target.files[0];if(!file||!imPhotoTarget)return;const r=new FileReader();r.onload=ev=>{imPhotoTarget.icon.img=ev.target.result;imPhotoTarget.icon.emoji='';clearEmptyFlag(imPhotoTarget.icon);saveData();renderHome();if(folderCtx)renderFolderBox(folderCtx.icon);openIconMenu(imPhotoTarget.icon,imPhotoTarget.context,imPhotoTarget.page);};r.readAsDataURL(file);e.target.value='';});
-document.getElementById('imMakeFolder').onclick=()=>{if(!imCtx)return;const ic=imCtx.icon;if(ic.folder){closeIconMenu();openFolder(ic,imCtx.context,imCtx.page);return;}ic.folder=true;ic.items=[{id:newId(),name:ic.name,bg:ic.bg,emoji:ic.emoji,img:ic.img,badge:0}];ic.img=null;ic.emoji='';clearEmptyFlag(ic);saveData();renderHome();closeIconMenu();};
-document.getElementById('imDelete').onclick=()=>{if(!imCtx)return;deleteIcon(imCtx.icon,imCtx.context,imCtx.page);closeIconMenu();};
+function endCancelHold() {
+  clearTimeout(cancelHoldTimer);
+  if (!cancelLong) deleteKey();
+}
 
-function blankIcon(){return {id:newId(),name:'',bg:null,emoji:'',img:null,badge:0,empty:true,col:0,row:0,w:1,h:1};}
-function openHsSettings(){document.getElementById('hsSettings').classList.add('open');syncSettingsUI();}
-function closeHsSettings(){document.getElementById('hsSettings').classList.remove('open');closeTweak();}
-document.getElementById('closeSet').onclick=closeHsSettings;
-document.querySelectorAll('.set-section-head').forEach(h=>{h.onclick=()=>h.parentElement.classList.toggle('open');});
+$("cancelKey").addEventListener("mousedown", startCancelHold);
+$("cancelKey").addEventListener("mouseup", endCancelHold);
+$("cancelKey").addEventListener("mouseleave", () => clearTimeout(cancelHoldTimer));
+$("cancelKey").addEventListener("touchstart", e => {
+  e.preventDefault();
+  startCancelHold();
+}, { passive:false });
+$("cancelKey").addEventListener("touchend", e => {
+  e.preventDefault();
+  endCancelHold();
+}, { passive:false });
 
-function changeCols(v){GRID_COLS=parseInt(v);localStorage.setItem('gridCols',v);document.getElementById('colsVal').textContent=v;applyGridVars();}
-function changeGapX(v){GAP_X=parseInt(v);localStorage.setItem('gapX',v);document.getElementById('gapXVal').textContent=v+'px';applyGridVars();}
-function changeGapY(v){GAP_Y=parseInt(v);localStorage.setItem('gapY',v);document.getElementById('gapYVal').textContent=v+'px';applyGridVars();}
-function changeIconSize(v){ICON_SIZE=parseInt(v);localStorage.setItem('iconSize',v);document.getElementById('iconSizeVal').textContent=v+'px';applyGridVars();}
-function changeIconRadius(v){ICON_RADIUS=parseInt(v);localStorage.setItem('iconRadius',v);document.getElementById('iconRadiusVal').textContent=v+'px';applyGridVars();}
-function changeIconOpacity(v){ICON_OPACITY=parseInt(v);localStorage.setItem('iconOpacity',v);document.getElementById('iconOpVal').textContent=v+'%';applyGridVars();}
-function changeIconOffset(a,v){v=parseInt(v);if(a==='x'){ICON_OFF_X=v;localStorage.setItem('iconOffX',v);document.getElementById('iconXVal').textContent=v+' px';}else{ICON_OFF_Y=v;localStorage.setItem('iconOffY',v);document.getElementById('iconYVal').textContent=v+' px';}applyIconOffset();}
-function changeBadgeCfg(k,v){BADGE_CFG[k]=parseInt(v);saveBadgeCfg();document.getElementById('bg'+k.charAt(0).toUpperCase()+k.slice(1)+'Val').textContent=v+' px';applyGridVars();renderHome();}
+/* LOCK SETTINGS */
 
-const tweakPanel=document.getElementById('tweakPanel'),hsSet=document.getElementById('hsSettings');
-function openTweak(type){const cfgs={grid:{title:'Сетка',html:`<div class="slider-row"><div class="sl-label"><span>Колонок</span><span id="t_cols">${GRID_COLS}</span></div><input type="range" class="size-slider" min="3" max="6" value="${GRID_COLS}" oninput="changeCols(this.value);document.getElementById('t_cols').textContent=this.value"></div><div class="slider-row"><div class="sl-label"><span>Отступ X</span><span id="t_gx">${GAP_X}px</span></div><input type="range" class="size-slider" min="0" max="40" value="${GAP_X}" oninput="changeGapX(this.value);document.getElementById('t_gx').textContent=this.value+'px'"></div><div class="slider-row"><div class="sl-label"><span>Отступ Y</span><span id="t_gy">${GAP_Y}px</span></div><input type="range" class="size-slider" min="0" max="50" value="${GAP_Y}" oninput="changeGapY(this.value);document.getElementById('t_gy').textContent=this.value+'px'"></div>`},iconsize:{title:'Размер иконок',html:`<div class="slider-row"><div class="sl-label"><span>Размер</span><span id="t_is">${ICON_SIZE}px</span></div><input type="range" class="size-slider" min="36" max="100" value="${ICON_SIZE}" oninput="changeIconSize(this.value);document.getElementById('t_is').textContent=this.value+'px'"></div><div class="slider-row"><div class="sl-label"><span>Скругление</span><span id="t_ir">${ICON_RADIUS}px</span></div><input type="range" class="size-slider" min="0" max="50" value="${ICON_RADIUS}" oninput="changeIconRadius(this.value);document.getElementById('t_ir').textContent=this.value+'px'"></div>`},iconpos:{title:'Положение иконок',html:`<div class="slider-row"><div class="sl-label"><span>По X</span><span id="t_ix">${ICON_OFF_X} px</span></div><input type="range" class="size-slider" min="-60" max="60" value="${ICON_OFF_X}" oninput="changeIconOffset('x',this.value);document.getElementById('t_ix').textContent=this.value+' px'"></div><div class="slider-row"><div class="sl-label"><span>По Y</span><span id="t_iy">${ICON_OFF_Y} px</span></div><input type="range" class="size-slider" min="-60" max="120" value="${ICON_OFF_Y}" oninput="changeIconOffset('y',this.value);document.getElementById('t_iy').textContent=this.value+' px'"></div>`},iconop:{title:'Прозрачность',html:`<div class="slider-row"><div class="sl-label"><span>Прозрачность</span><span id="t_op">${ICON_OPACITY}%</span></div><input type="range" class="size-slider" min="0" max="100" value="${ICON_OPACITY}" oninput="changeIconOpacity(this.value);document.getElementById('t_op').textContent=this.value+'%'"></div>`},badge:{title:'Уведомления',html:`<div class="slider-row"><div class="sl-label"><span>X</span><span id="t_bx">${BADGE_CFG.bx} px</span></div><input type="range" class="size-slider" min="-40" max="60" value="${BADGE_CFG.bx}" oninput="changeBadgeCfg('bx',this.value);document.getElementById('t_bx').textContent=this.value+' px'"></div><div class="slider-row"><div class="sl-label"><span>Y</span><span id="t_by">${BADGE_CFG.by} px</span></div><input type="range" class="size-slider" min="-30" max="60" value="${BADGE_CFG.by}" oninput="changeBadgeCfg('by',this.value);document.getElementById('t_by').textContent=this.value+' px'"></div><div class="slider-row"><div class="sl-label"><span>Ширина</span><span id="t_bw">${BADGE_CFG.bw} px</span></div><input type="range" class="size-slider" min="10" max="60" value="${BADGE_CFG.bw}" oninput="changeBadgeCfg('bw',this.value);document.getElementById('t_bw').textContent=this.value+' px'"></div><div class="slider-row"><div class="sl-label"><span>Высота</span><span id="t_bh">${BADGE_CFG.bh} px</span></div><input type="range" class="size-slider" min="10" max="50" value="${BADGE_CFG.bh}" oninput="changeBadgeCfg('bh',this.value);document.getElementById('t_bh').textContent=this.value+' px'"></div><div class="slider-row"><div class="sl-label"><span>Шрифт</span><span id="t_bfs">${BADGE_CFG.bfs} px</span></div><input type="range" class="size-slider" min="7" max="30" value="${BADGE_CFG.bfs}" oninput="changeBadgeCfg('bfs',this.value);document.getElementById('t_bfs').textContent=this.value+' px'"></div>`}};const c=cfgs[type];if(!c)return;document.getElementById('tpTitle').textContent=c.title;document.getElementById('tpContent').innerHTML=c.html;hsSet.classList.add('tweak');}
-function closeTweak(){hsSet.classList.remove('tweak');}
-document.getElementById('tpDone').onclick=closeTweak;
-document.querySelectorAll('.tweak-launch').forEach(b=>{b.onclick=()=>openTweak(b.dataset.tweak);});
+function openSettings() {
+  $("settingsOverlay").classList.add("show");
+}
 
-document.getElementById('rowAddIcon').onclick=()=>{const ic=blankIcon();pages[currentPage].icons.push(ic);saveData();renderHome();};
-document.getElementById('rowAddDock').onclick=()=>{dock.push(blankIcon());saveData();renderHome();};
-document.getElementById('rowMerge').onclick=()=>{enterEditMode();document.getElementById('ebInfo').textContent='Выберите иконки (тап), затем «Объединить»';closeHsSettings();};
-document.getElementById('rowAddPage').onclick=()=>{pages.push({bg:null,icons:[]});saveData();renderHome();goToPage(pages.length-1,true);};
-document.getElementById('rowDelPage').onclick=()=>{if(pages.length<=1){alert('Нельзя удалить единственный экран');return;}if(!confirm('Удалить текущий экран со всеми иконками?'))return;pages.splice(currentPage,1);if(currentPage>=pages.length)currentPage=pages.length-1;saveData();renderHome();};
+function closeSettings() {
+  $("settingsOverlay").classList.remove("show");
+}
 
-function setupToggleRow(rowId,tgId,onToggle){const row=document.getElementById(rowId),tg=document.getElementById(tgId);if(!row)return;row.onclick=e=>{if(e.target.closest('input,button'))return;const on=!tg.classList.contains('on');tg.classList.toggle('on',on);onToggle(on);};}
-setupToggleRow('rowEdit','tgEdit',on=>{if(on){enterEditMode();}else exitEditMode();});
-setupToggleRow('rowBadges','tgBadges',on=>{document.body.classList.toggle('hide-badges',!on);localStorage.setItem('showBadges',on?'1':'0');renderHome();});
-setupToggleRow('rowDoubleOnIcons','tgDoubleIcons',on=>{DOUBLE_ON_ICONS=on;localStorage.setItem('doubleOnIcons',on?'1':'0');});
+$("closeLockSettings").onclick = closeSettings;
 
-function refreshTriggerToggles(){document.getElementById('tgHold').classList.toggle('on',triggerModes.has('hold'));document.getElementById('tgDouble').classList.toggle('on',triggerModes.has('double'));document.getElementById('tgCorner').classList.toggle('on',triggerModes.has('corner'));document.getElementById('cfgHold').classList.toggle('show',triggerModes.has('hold'));document.getElementById('cfgDouble').classList.toggle('show',triggerModes.has('double'));document.getElementById('cfgCorner').classList.toggle('show',triggerModes.has('corner'));document.getElementById('rowDoubleOnIcons').style.display=triggerModes.has('double')?'flex':'none';document.getElementById('chooseIconBtn').classList.toggle('show',triggerModes.has('corner'));document.getElementById('holdDuration').textContent=(HOLD_MS/1000)+' сек';document.getElementById('tapCount').textContent=SCREEN_TAP_COUNT+' нажатия';document.getElementById('iconTapCount').textContent=ICON_TAP_COUNT+' нажатия';refreshTriggerInfo();}
-document.querySelectorAll('.trigger-opt').forEach(row=>{row.onclick=e=>{if(e.target.closest('input,button'))return;const m=row.dataset.mode;if(triggerModes.has(m))triggerModes.delete(m);else triggerModes.add(m);saveModes();refreshTriggerToggles();};});
-function refreshTriggerInfo(){const info=document.getElementById('triggerIconInfo');if(triggerModes.has('corner')){const f=triggerIcon?findIcon(triggerIcon):null;info.textContent=f?('Триггер: '+(f.icon.name||'без названия')):'Иконка-триггер не выбрана';}else info.textContent='';}
-document.getElementById('chooseIconBtn').onclick=()=>{choosingTriggerIcon=true;closeHsSettings();phone.classList.add('choosing-trigger');showChooseHint('👆 Выберите иконку-триггер для настроек');};
+$("sizeSlider").oninput = e => {
+  const v = e.target.value;
+  setRoot("--key-size", v + "px");
+  $("sizeValue").textContent = v + " px";
+  localStorage.setItem("keySize", v);
+};
 
-function refreshLockToggles(){document.getElementById('tgLockSwipe').classList.toggle('on',lockModes.has('swipe'));document.getElementById('tgLockTaps').classList.toggle('on',lockModes.has('tap'));document.getElementById('tgLockIcon').classList.toggle('on',lockModes.has('icon'));document.getElementById('cfgLockTaps').classList.toggle('show',lockModes.has('tap'));document.getElementById('cfgLockIcon').classList.toggle('show',lockModes.has('icon'));document.getElementById('chooseLockIconBtn').classList.toggle('show',lockModes.has('icon'));document.getElementById('lockTapCount').textContent=LOCK_TAP_COUNT+' нажатия';document.getElementById('lockIconTapCount').textContent=LOCK_ICON_TAP_COUNT+' нажатия';refreshLockInfo();}
-document.querySelectorAll('.lock-opt').forEach(row=>{row.onclick=e=>{if(e.target.closest('input,button'))return;const m=row.dataset.mode;if(lockModes.has(m))lockModes.delete(m);else lockModes.add(m);saveLockModes();refreshLockToggles();};});
-function refreshLockInfo(){const info=document.getElementById('lockIconInfo');if(lockModes.has('icon')){const f=lockIcon?findIcon(lockIcon):null;info.textContent=f?('Блокировка: '+(f.icon.name||'без названия')):'Иконка блокировки не выбрана';}else info.textContent='';}
-document.getElementById('chooseLockIconBtn').onclick=()=>{choosingLockIcon=true;closeHsSettings();phone.classList.add('choosing-trigger');showChooseHint('🔒 Выберите иконку для блокировки');};
+let pinStepX = parseInt(localStorage.getItem("pinStepX") || "0", 10);
+let pinStepY = parseInt(localStorage.getItem("pinStepY") || "0", 10);
 
-document.querySelectorAll('.ci-save').forEach(b=>{b.onclick=()=>{const t=b.dataset.save;if(t==='hold'){const v=parseFloat(document.getElementById('inHold').value);if(v>=0.5&&v<=5){HOLD_MS=Math.round(v*1000);localStorage.setItem('holdDuration',HOLD_MS);}}else if(t==='double'){const v=parseInt(document.getElementById('inDouble').value);if(v>=2&&v<=5){SCREEN_TAP_COUNT=v;localStorage.setItem('screenTapCount',v);}}else if(t==='corner'){const v=parseInt(document.getElementById('inCorner').value);if(v>=2&&v<=5){ICON_TAP_COUNT=v;localStorage.setItem('iconTapCount',v);}}refreshTriggerToggles();
-  if(t==='locktaps'){const v=parseInt(document.getElementById('inLockTaps').value);if(v>=2&&v<=6){LOCK_TAP_COUNT=v;localStorage.setItem('lockTapCount',v);}}else if(t==='lockicon'){const v=parseInt(document.getElementById('inLockIcon').value);if(v>=2&&v<=5){LOCK_ICON_TAP_COUNT=v;localStorage.setItem('lockIconTapCount',v);}}refreshLockToggles();};});
+const KEY_POS = {
+  "1": { c:0, r:0 }, "2": { c:1, r:0 }, "3": { c:2, r:0 },
+  "4": { c:0, r:1 }, "5": { c:1, r:1 }, "6": { c:2, r:1 },
+  "7": { c:0, r:2 }, "8": { c:1, r:2 }, "9": { c:2, r:2 },
+  "0": { c:1, r:3 }
+};
 
-function showChooseHint(txt){const h=document.getElementById('chooseHint');h.textContent=txt;h.classList.add('show');h.onclick=()=>{cancelAllChooseModes();hideChooseHint();openHsSettings();};}
-function hideChooseHint(){const h=document.getElementById('chooseHint');h.classList.remove('show');phone.classList.remove('choosing-trigger');}
-function cancelAllChooseModes(){choosingTriggerIcon=false;choosingLockIcon=false;choosingAttemptIndex=-1;phone.classList.remove('choosing-trigger');}
+function applyPinSpread() {
+  document.querySelectorAll(".key,.key-zero").forEach(el => {
+    const p = KEY_POS[el.dataset.digit];
+    if (!p) return;
+    el.style.setProperty("--kx", (p.c - 1) * pinStepX + "px");
+    el.style.setProperty("--ky", (p.r - 1) * pinStepY + "px");
+  });
+}
 
-document.getElementById('saveAttemptCount').onclick=()=>{const v=parseInt(document.getElementById('inAttemptCount').value);if(v>=1&&v<=5){ATTEMPT_COUNT=v;localStorage.setItem('attemptCountShow',v);if(attemptTargets.length>v)attemptTargets=attemptTargets.slice(0,v);try{localStorage.setItem('attemptTargets',JSON.stringify(attemptTargets));}catch(e){}renderAttemptList();renderHome();}};
-document.getElementById('clearAttempts').onclick=()=>{passwordAttempts=[];localStorage.setItem('passwordAttempts','[]');renderAttemptList();renderHome();};
-function renderAttemptList(){const list=document.getElementById('attemptList');list.innerHTML='';for(let i=0;i<ATTEMPT_COUNT;i++){const row=document.createElement('div');row.className='set-row';row.style.cursor='pointer';const f=attemptTargets[i]?findIcon(attemptTargets[i]):null;const name=f?(f.icon.name||'без названия'):'не выбрана';const code=passwordAttempts[i]!=null?passwordAttempts[i]:'—';row.innerHTML=`<span class="ic">🔢</span><span class="txt">Попытка ${i+1}: <b>${code}</b><br><small style="opacity:.55">на иконке: ${name}</small></span><span class="arrow">›</span>`;row.onclick=()=>{choosingAttemptIndex=i;closeHsSettings();phone.classList.add('choosing-trigger');showChooseHint('🔢 Выберите иконку для попытки '+(i+1));};list.appendChild(row);}}
-
-document.querySelectorAll('.set-row[data-act]').forEach(r=>{r.onclick=()=>{const a=r.dataset.act;if(a==='homeBg'){hsBgTarget='homeBg';document.getElementById('hsBgInput').click();}else if(a==='homeBgGallery'){openGallery('homeBg');}else if(a==='homeBgReset'){resetHomeBg();renderHome();}else if(a==='pageBg'){hsBgTarget='pageBg';document.getElementById('hsPageBgInput').click();}else if(a==='pageBgGallery'){openGallery('pageBg');}else if(a==='pageBgReset'){pages[currentPage].bg=null;saveData();renderHome();}else if(a==='openGalleryManage'){openGallery('manage');}};});
-let hsBgTarget=null;
-document.getElementById('hsBgInput').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{changeHomeBg(ev.target.result);renderHome();};r.readAsDataURL(f);e.target.value='';});
-document.getElementById('hsPageBgInput').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{pages[currentPage].bg=ev.target.result;saveData();renderHome();};r.readAsDataURL(f);e.target.value='';});
-
-function syncSettingsUI(){document.getElementById('colsSlider').value=GRID_COLS;document.getElementById('colsVal').textContent=GRID_COLS;document.getElementById('gapXSlider').value=GAP_X;document.getElementById('gapXVal').textContent=GAP_X+'px';document.getElementById('gapYSlider').value=GAP_Y;document.getElementById('gapYVal').textContent=GAP_Y+'px';document.getElementById('iconSizeSlider').value=ICON_SIZE;document.getElementById('iconSizeVal').textContent=ICON_SIZE+'px';document.getElementById('iconRadiusSlider').value=ICON_RADIUS;document.getElementById('iconRadiusVal').textContent=ICON_RADIUS+'px';document.getElementById('iconOpSlider').value=ICON_OPACITY;document.getElementById('iconOpVal').textContent=ICON_OPACITY+'%';document.getElementById('iconXSlider').value=ICON_OFF_X;document.getElementById('iconXVal').textContent=ICON_OFF_X+' px';document.getElementById('iconYSlider').value=ICON_OFF_Y;document.getElementById('iconYVal').textContent=ICON_OFF_Y+' px';document.getElementById('bgBx').value=BADGE_CFG.bx;document.getElementById('bgBxVal').textContent=BADGE_CFG.bx+' px';document.getElementById('bgBy').value=BADGE_CFG.by;document.getElementById('bgByVal').textContent=BADGE_CFG.by+' px';document.getElementById('bgBw').value=BADGE_CFG.bw;document.getElementById('bgBwVal').textContent=BADGE_CFG.bw+' px';document.getElementById('bgBh').value=BADGE_CFG.bh;document.getElementById('bgBhVal').textContent=BADGE_CFG.bh+' px';document.getElementById('bgBfs').value=BADGE_CFG.bfs;document.getElementById('bgBfsVal').textContent=BADGE_CFG.bfs+' px';document.getElementById('inHold').value=HOLD_MS/1000;document.getElementById('inDouble').value=SCREEN_TAP_COUNT;document.getElementById('inCorner').value=ICON_TAP_COUNT;document.getElementById('inLockTaps').value=LOCK_TAP_COUNT;document.getElementById('inLockIcon').value=LOCK_ICON_TAP_COUNT;document.getElementById('inAttemptCount').value=ATTEMPT_COUNT;document.getElementById('tgEdit').classList.toggle('on',phone.classList.contains('edit'));document.getElementById('tgBadges').classList.toggle('on',localStorage.getItem('showBadges')!=='0');document.getElementById('tgDoubleIcons').classList.toggle('on',DOUBLE_ON_ICONS);refreshTriggerToggles();refreshLockToggles();renderAttemptList();}
-
-(function init(){
-  const ls=localStorage;
-  const ks=ls.getItem('keySize');if(ks)changeKeySize(ks);
-  pinStepX=parseInt(ls.getItem('pinStepX'))||0;pinStepY=parseInt(ls.getItem('pinStepY'))||0;
-  document.getElementById('pinXSlider').value=pinStepX;document.getElementById('pinXVal').textContent=pinStepX+' px';
-  document.getElementById('pinYSlider').value=pinStepY;document.getElementById('pinYVal').textContent=pinStepY+' px';
+$("pinXSlider").oninput = e => {
+  pinStepX = parseInt(e.target.value, 10);
+  $("pinXVal").textContent = pinStepX + " px";
+  localStorage.setItem("pinStepX", String(pinStepX));
   applyPinSpread();
-  const pby=parseInt(ls.getItem('pinBlockY'))||0;document.getElementById('pinBlockSlider').value=pby;changePinBlockY(pby);
-  const lb=ls.getItem('lockBg');if(lb){const wp=document.getElementById('wallpaper');wp.style.backgroundImage=`url('${lb}')`;wp.style.backgroundSize='cover';wp.style.backgroundPosition='center';}
-  const um=ls.getItem('unlockMethod');if(um){SETTINGS.unlockMethod=um;const b=document.querySelector(`[data-method="${um}"]`);if(b)setUnlockMethod(um,b);}
-  const st=ls.getItem('style');if(st){const b=document.querySelector(`[data-style="${st}"]`);setStyle(st,b);}
-  document.getElementById('realPinInput').value=REAL_PIN;
-  if(ls.getItem('showBadges')==='0')document.body.classList.add('hide-badges');
-  buildDots();updateDots();
+};
+
+$("pinYSlider").oninput = e => {
+  pinStepY = parseInt(e.target.value, 10);
+  $("pinYVal").textContent = pinStepY + " px";
+  localStorage.setItem("pinStepY", String(pinStepY));
+  applyPinSpread();
+};
+
+$("pinBlockSlider").oninput = e => {
+  const v = parseInt(e.target.value, 10);
+  setRoot("--pin-block-y", v + "px");
+  $("pinBlockVal").textContent = v + " px";
+  localStorage.setItem("pinBlockY", String(v));
+};
+
+$("savePinBtn").onclick = () => {
+  const v = $("realPinInput").value.replace(/\D/g, "").slice(0, 6);
+  if (!v) {
+    alert("Введите код");
+    return;
+  }
+  REAL_PIN = v;
+  localStorage.setItem("realPin", v);
+  alert("Сохранено");
+};
+
+$("pickLockBg").onclick = () => $("bgInput").click();
+$("bgInput").onchange = e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    $("wallpaper").style.backgroundImage = `url('${ev.target.result}')`;
+    localStorage.setItem("lockBg", ev.target.result);
+  };
+  r.readAsDataURL(file);
+  e.target.value = "";
+};
+
+$("resetLockBg").onclick = () => {
+  $("wallpaper").style.backgroundImage = "none";
+  localStorage.removeItem("lockBg");
+};
+
+document.querySelectorAll("[data-method]").forEach(btn => {
+  btn.onclick = () => {
+    SETTINGS.unlockMethod = btn.dataset.method;
+    localStorage.setItem("unlockMethod", SETTINGS.unlockMethod);
+    document.querySelectorAll("[data-method]").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    if (SETTINGS.unlockMethod === "sos") $("methodHint").textContent = "Нажмите SOS, затем код";
+    if (SETTINGS.unlockMethod === "attempts") $("methodHint").textContent = "После 3 попыток";
+    if (SETTINGS.unlockMethod === "instant") $("methodHint").textContent = "При верном коде";
+
+    currentInput = "";
+    attemptCount = 0;
+    sosArmed = false;
+    updateDots();
+  };
+});
+
+document.querySelectorAll("[data-style]").forEach(btn => {
+  btn.onclick = () => {
+    const s = btn.dataset.style;
+    document.body.classList.remove("style-ios", "style-android");
+    document.body.classList.add("style-" + s);
+    localStorage.setItem("style", s);
+
+    document.querySelectorAll("[data-style]").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    $("topLabel").innerHTML = s === "android"
+      ? "Введите PIN-код"
+      : "Смахните вверх для Face ID<br>или введите код-пароль";
+  };
+});
+
+/* HOME DATA */
+
+function blankIcon() {
+  return {
+    id:newId(),
+    name:"",
+    bg:"#444444",
+    emoji:"",
+    img:null,
+    badge:0,
+    folder:false,
+    items:[],
+    empty:false
+  };
+}
+
+function emptySlot() {
+  return null;
+}
+
+let GRID_COLS = parseInt(localStorage.getItem("gridCols") || "4", 10);
+let GAP_X = parseInt(localStorage.getItem("gapX") || "10", 10);
+let GAP_Y = parseInt(localStorage.getItem("gapY") || "14", 10);
+let ICON_SIZE = parseInt(localStorage.getItem("iconSize") || "60", 10);
+let ICON_RADIUS = parseInt(localStorage.getItem("iconRadius") || "15", 10);
+let ICON_OPACITY = parseInt(localStorage.getItem("iconOpacity") || "100", 10);
+let ICON_OFF_X = parseInt(localStorage.getItem("iconOffX") || "0", 10);
+let ICON_OFF_Y = parseInt(localStorage.getItem("iconOffY") || "0", 10);
+let DOCK_Y = parseInt(localStorage.getItem("dockY") || "0", 10);
+
+let BADGE = loadJSON("badgeCfg", {
+  x:30,
+  y:-2,
+  w:20,
+  h:20,
+  fs:12
+});
+
+let pages = loadJSON("pagesGrid", null);
+if (!pages) {
+  pages = [
+    {
+      bg:null,
+      icons:[
+        { ...blankIcon(), name:"Фото", emoji:"🌄", bg:"#ff9f0a" },
+        { ...blankIcon(), name:"Музыка", emoji:"🎵", bg:"#ff2d55" },
+        { ...blankIcon(), name:"Карты", emoji:"🗺", bg:"#34c759" },
+        { ...blankIcon(), name:"Safari", emoji:"🌐", bg:"#007aff" }
+      ]
+    }
+  ];
+}
+
+let dock = loadJSON("dock", null);
+if (!dock) {
+  dock = [
+    { ...blankIcon(), name:"Телефон", emoji:"☎️", bg:"#30d158" },
+    { ...blankIcon(), name:"Почта", emoji:"✉️", bg:"#0a84ff" },
+    { ...blankIcon(), name:"Камера", emoji:"📷", bg:"#8e8e93" },
+    { ...blankIcon(), name:"Сообщения", emoji:"💬", bg:"#30d158" }
+  ];
+}
+
+let currentPage = 0;
+const PAGE_SLOTS = 30;
+const DOCK_SLOTS = 4;
+
+function normalizeData() {
+  pages.forEach(pg => {
+    if (!Array.isArray(pg.icons)) pg.icons = [];
+    pg.icons.forEach(ic => {
+      if (ic && !ic.id) ic.id = newId();
+      if (ic && ic.folder && !Array.isArray(ic.items)) ic.items = [];
+    });
+  });
+
+  dock.forEach(ic => {
+    if (ic && !ic.id) ic.id = newId();
+    if (ic && ic.folder && !Array.isArray(ic.items)) ic.items = [];
+  });
+}
+
+normalizeData();
+
+function saveData() {
+  normalizeData();
+  saveJSON("pagesGrid", pages);
+  saveJSON("dock", dock);
+}
+
+function applyHomeVars() {
+  setRoot("--cols", GRID_COLS);
+  setRoot("--gap-x", GAP_X + "px");
+  setRoot("--gap-y", GAP_Y + "px");
+  setRoot("--icon-size", ICON_SIZE + "px");
+  setRoot("--icon-radius", ICON_RADIUS + "px");
+  setRoot("--icon-opacity", ICON_OPACITY / 100);
+  setRoot("--icon-x", ICON_OFF_X + "px");
+  setRoot("--icon-y", ICON_OFF_Y + "px");
+  setRoot("--dock-y", DOCK_Y + "px");
+
+  setRoot("--badge-x", BADGE.x + "px");
+  setRoot("--badge-y", BADGE.y + "px");
+  setRoot("--badge-w", BADGE.w + "px");
+  setRoot("--badge-h", BADGE.h + "px");
+  setRoot("--badge-fs", BADGE.fs + "px");
+}
+
+/* RENDER ICONS */
+
+function isEdit() {
+  return $("phone").classList.contains("edit");
+}
+
+function badgeText(n) {
+  n = parseInt(n || 0, 10);
+  if (n <= 0) return "";
+  return n > 9999 ? Math.floor(n / 1000) + "k" : String(n);
+}
+
+function iconHTML(ic) {
+  if (!ic) {
+    return `
+      <div class="icon empty-icon">＋</div>
+      <div class="label empty-label">Пусто</div>
+    `;
+  }
+
+  let html = "";
+
+  if (ic.folder) {
+    html += `<div class="folder">`;
+    const items = (ic.items || []).slice(0, 9);
+    for (let i = 0; i < 9; i++) {
+      const it = items[i];
+      if (!it) {
+        html += `<div class="mini" style="background:transparent"></div>`;
+      } else if (it.img) {
+        html += `<div class="mini" style="background-image:url('${it.img}')"></div>`;
+      } else {
+        html += `<div class="mini" style="background:${it.bg || "#444"}">${it.emoji || ""}</div>`;
+      }
+    }
+    html += `</div>`;
+  } else if (ic.img) {
+    html += `<div class="icon" style="background-image:url('${ic.img}')"></div>`;
+  } else {
+    html += `<div class="icon" style="background:${ic.bg || "#444"}">${ic.emoji || ""}</div>`;
+  }
+
+  const bt = badgeText(ic.badge);
+  if (bt) html += `<div class="badge">${bt}</div>`;
+
+  html += `<div class="label">${ic.name || ""}</div>`;
+  return html;
+}
+
+function buildCell(ic, context, index, pageIndex = currentPage) {
+  const cell = document.createElement("div");
+  cell.className = "cell";
+  if (!ic) cell.classList.add("empty-cell");
+  cell.innerHTML = iconHTML(ic);
+  attachCellHandlers(cell, ic, context, index, pageIndex);
+  return cell;
+}
+
+function renderHome() {
+  applyHomeVars();
+
+  const hw = $("homeWallpaper");
+  const curPage = pages[currentPage];
+
+  if (curPage && curPage.bg) {
+    hw.style.backgroundImage = `url('${curPage.bg}')`;
+  } else {
+    const g = localStorage.getItem("homeBg");
+    hw.style.backgroundImage = g ? `url('${g}')` : "none";
+    if (!g) hw.style.background = "#000";
+  }
+
+  const track = $("pagesTrack");
+  track.innerHTML = "";
+
+  pages.forEach((pg, pi) => {
+    const pageEl = document.createElement("div");
+    pageEl.className = "page";
+
+    const grid = document.createElement("div");
+    grid.className = "grid";
+
+    const count = isEdit() ? Math.max(PAGE_SLOTS, pg.icons.length + 4) : pg.icons.length;
+
+    for (let i = 0; i < count; i++) {
+      grid.appendChild(buildCell(pg.icons[i] || null, "page", i, pi));
+    }
+
+    pageEl.appendChild(grid);
+    track.appendChild(pageEl);
+  });
+
+  goToPage(currentPage, false);
+  renderDock();
+  renderDots();
+}
+
+function renderDock() {
+  const d = $("dock");
+  d.innerHTML = "";
+  const count = isEdit() ? DOCK_SLOTS : dock.length;
+
+  for (let i = 0; i < count; i++) {
+    d.appendChild(buildCell(dock[i] || null, "dock", i, -1));
+  }
+}
+
+function renderDots() {
+  const dd = $("pageDots");
+  dd.innerHTML = "";
+  pages.forEach((_, i) => {
+    const dot = document.createElement("div");
+    dot.className = "pdot" + (i === currentPage ? " active" : "");
+    dot.onclick = () => goToPage(i, true);
+    dd.appendChild(dot);
+  });
+}
+
+function goToPage(i, anim = true) {
+  currentPage = Math.max(0, Math.min(pages.length - 1, i));
+  const track = $("pagesTrack");
+  track.style.transition = anim ? "transform .3s ease" : "none";
+  track.style.transform = `translateX(${-currentPage * 100}%)`;
+  renderDots();
+}
+
+/* CELL HANDLERS */
+
+let imCtx = null;
+let iconPhotoTarget = null;
+let folderCtx = null;
+
+let choosingTriggerIcon = false;
+let choosingLockIcon = false;
+let triggerIconId = localStorage.getItem("triggerIconId") || "";
+let lockIconId = localStorage.getItem("lockIconId") || "";
+
+function findIcon(id) {
+  for (let p = 0; p < pages.length; p++) {
+    const i = pages[p].icons.findIndex(x => x && x.id === id);
+    if (i >= 0) return { icon:pages[p].icons[i], context:"page", page:p, index:i };
+  }
+
+  const d = dock.findIndex(x => x && x.id === id);
+  if (d >= 0) return { icon:dock[d], context:"dock", page:-1, index:d };
+
+  for (let p = 0; p < pages.length; p++) {
+    for (let i = 0; i < pages[p].icons.length; i++) {
+      const ic = pages[p].icons[i];
+      if (ic && ic.folder) {
+        const fi = ic.items.findIndex(x => x && x.id === id);
+        if (fi >= 0) return { icon:ic.items[fi], context:"folder", parent:ic, page:p, index:fi };
+      }
+    }
+  }
+
+  return null;
+}
+
+function createIconAt(context, index, pageIndex) {
+  const ic = blankIcon();
+
+  if (context === "dock") {
+    dock[index] = ic;
+  } else if (context === "page") {
+    pages[pageIndex].icons[index] = ic;
+  } else if (context === "folder" && folderCtx) {
+    folderCtx.icon.items[index] = ic;
+  }
+
+  saveData();
+  renderHome();
+  if (folderCtx) renderFolderBox(folderCtx.icon);
+  openIconMenu(ic, context, index, pageIndex);
+}
+
+function attachCellHandlers(cell, ic, context, index, pageIndex) {
+  cell.onclick = e => {
+    e.stopPropagation();
+
+    if (!ic) {
+      if (isEdit()) createIconAt(context, index, pageIndex);
+      return;
+    }
+
+    if (choosingTriggerIcon) {
+      triggerIconId = ic.id;
+      localStorage.setItem("triggerIconId", triggerIconId);
+      cancelChooseModes();
+      openHsSettings();
+      syncTriggerTexts();
+      return;
+    }
+
+    if (choosingLockIcon) {
+      lockIconId = ic.id;
+      localStorage.setItem("lockIconId", lockIconId);
+      cancelChooseModes();
+      openHsSettings();
+      syncTriggerTexts();
+      return;
+    }
+
+    if (isEdit()) {
+      openIconMenu(ic, context, index, pageIndex);
+      return;
+    }
+
+    if (triggerIconId === ic.id) {
+      openHsSettings();
+      return;
+    }
+
+    if (lockIconId === ic.id) {
+      closeHome();
+      return;
+    }
+
+    if (ic.folder) {
+      openFolder(ic, context, index, pageIndex);
+    }
+  };
+
+  let holdTimer = null;
+
+  cell.addEventListener("mousedown", () => {
+    if (!ic) return;
+    holdTimer = setTimeout(() => {
+      if (!isEdit()) enterEditMode();
+      openIconMenu(ic, context, index, pageIndex);
+    }, 550);
+  });
+
+  cell.addEventListener("mouseup", () => clearTimeout(holdTimer));
+  cell.addEventListener("mouseleave", () => clearTimeout(holdTimer));
+
+  cell.addEventListener("touchstart", () => {
+    if (!ic) return;
+    holdTimer = setTimeout(() => {
+      if (!isEdit()) enterEditMode();
+      openIconMenu(ic, context, index, pageIndex);
+    }, 550);
+  }, { passive:true });
+
+  cell.addEventListener("touchend", () => clearTimeout(holdTimer));
+  cell.addEventListener("touchmove", () => clearTimeout(holdTimer));
+
+  if (ic) {
+    const del = document.createElement("div");
+    del.className = "del-corner";
+    del.textContent = "×";
+    del.onclick = e => {
+      e.stopPropagation();
+      deleteIcon(context, index, pageIndex);
+    };
+    cell.appendChild(del);
+  }
+}
+
+function deleteIcon(context, index, pageIndex) {
+  if (context === "dock") {
+    dock[index] = null;
+  } else if (context === "page") {
+    pages[pageIndex].icons[index] = null;
+  } else if (context === "folder" && folderCtx) {
+    folderCtx.icon.items[index] = null;
+  }
+
+  saveData();
+  renderHome();
+  if (folderCtx) renderFolderBox(folderCtx.icon);
+}
+
+function enterEditMode() {
+  $("phone").classList.add("edit");
+  $("tgEdit").classList.add("on");
+  $("ebInfo").textContent = "Режим редактирования: нажмите пустую ячейку, чтобы создать иконку";
+  renderHome();
+}
+
+function exitEditMode() {
+  $("phone").classList.remove("edit");
+  $("tgEdit").classList.remove("on");
+  renderHome();
+}
+
+$("ebDone").onclick = exitEditMode;
+
+/* FOLDERS */
+
+function openFolder(ic, context, index, pageIndex) {
+  folderCtx = { icon:ic, context, index, pageIndex };
+  $("folderTitle").textContent = ic.name || "Папка";
+  renderFolderBox(ic);
+  $("folderView").classList.add("open");
+}
+
+function closeFolder() {
+  $("folderView").classList.remove("open");
+  folderCtx = null;
+}
+
+function renderFolderBox(ic) {
+  const box = $("folderBox");
+  box.innerHTML = "";
+  const count = isEdit() ? Math.max(9, ic.items.length + 3) : ic.items.length;
+  for (let i = 0; i < count; i++) {
+    box.appendChild(buildCell(ic.items[i] || null, "folder", i, currentPage));
+  }
+}
+
+$("folderView").onclick = e => {
+  if (e.target.id === "folderView") closeFolder();
+};
+
+/* ICON MENU */
+
+function openIconMenu(ic, context, index, pageIndex) {
+  imCtx = { icon:ic, context, index, pageIndex };
+
+  const prev = $("imPrev");
+  prev.style.backgroundImage = "none";
+  prev.textContent = "";
+
+  if (ic.folder) {
+    prev.style.background = "#333";
+    prev.textContent = "📁";
+  } else if (ic.img) {
+    prev.style.backgroundImage = `url('${ic.img}')`;
+  } else {
+    prev.style.background = ic.bg || "#444";
+    prev.textContent = ic.emoji || "";
+  }
+
+  $("imTitle").textContent = ic.name || (ic.folder ? "Папка" : "Иконка");
+  $("imName").value = ic.name || "";
+  $("imEmoji").value = ic.emoji || "";
+  $("imColor").value = /^#[0-9a-f]{6}$/i.test(ic.bg || "") ? ic.bg : "#444444";
+  $("imColorText").value = ic.bg || "#444444";
+  $("imBadge").value = ic.badge || 0;
+  $("imMakeFolder").textContent = ic.folder ? "📁 Открыть папку" : "📁 Сделать папкой";
+  $("iconMenu").classList.add("open");
+}
+
+function closeIconMenu() {
+  $("iconMenu").classList.remove("open");
+  imCtx = null;
+}
+
+$("iconMenu").onclick = e => {
+  if (e.target.id === "iconMenu") closeIconMenu();
+};
+
+$("iconMenuCard").onclick = e => e.stopPropagation();
+$("imClose").onclick = closeIconMenu;
+
+function refreshAfterIconEdit() {
+  saveData();
+  renderHome();
+  if (folderCtx) renderFolderBox(folderCtx.icon);
+  if (imCtx) openIconMenu(imCtx.icon, imCtx.context, imCtx.index, imCtx.pageIndex);
+}
+
+$("imNameOk").onclick = () => {
+  if (!imCtx) return;
+  imCtx.icon.name = $("imName").value;
+  refreshAfterIconEdit();
+};
+
+$("imEmojiOk").onclick = () => {
+  if (!imCtx) return;
+  imCtx.icon.emoji = $("imEmoji").value;
+  imCtx.icon.img = null;
+  refreshAfterIconEdit();
+};
+
+$("imColor").oninput = e => {
+  $("imColorText").value = e.target.value;
+};
+
+$("imColorOk").onclick = () => {
+  if (!imCtx) return;
+  imCtx.icon.bg = $("imColorText").value || $("imColor").value;
+  refreshAfterIconEdit();
+};
+
+$("imBadgeOk").onclick = () => {
+  if (!imCtx) return;
+  imCtx.icon.badge = parseInt($("imBadge").value || "0", 10);
+  refreshAfterIconEdit();
+};
+
+$("imPhoto").onclick = () => {
+  iconPhotoTarget = imCtx;
+  $("iconPhotoInput").click();
+};
+
+$("iconPhotoInput").onchange = e => {
+  const file = e.target.files[0];
+  if (!file || !iconPhotoTarget) return;
+
+  const r = new FileReader();
+  r.onload = ev => {
+    iconPhotoTarget.icon.img = ev.target.result;
+    iconPhotoTarget.icon.emoji = "";
+    saveData();
+    renderHome();
+    if (folderCtx) renderFolderBox(folderCtx.icon);
+    openIconMenu(iconPhotoTarget.icon, iconPhotoTarget.context, iconPhotoTarget.index, iconPhotoTarget.pageIndex);
+  };
+  r.readAsDataURL(file);
+  e.target.value = "";
+};
+
+$("imResetPhoto").onclick = () => {
+  if (!imCtx) return;
+  imCtx.icon.img = null;
+  refreshAfterIconEdit();
+};
+
+$("imMakeFolder").onclick = () => {
+  if (!imCtx) return;
+
+  const ic = imCtx.icon;
+
+  if (ic.folder) {
+    closeIconMenu();
+    openFolder(ic, imCtx.context, imCtx.index, imCtx.pageIndex);
+    return;
+  }
+
+  ic.folder = true;
+  ic.items = [];
+  ic.emoji = "";
+  ic.img = null;
+  if (!ic.name) ic.name = "Папка";
+
+  refreshAfterIconEdit();
+};
+
+$("imDelete").onclick = () => {
+  if (!imCtx) return;
+  deleteIcon(imCtx.context, imCtx.index, imCtx.pageIndex);
+  closeIconMenu();
+};
+
+/* HOME SETTINGS */
+
+function openHsSettings() {
+  $("hsSettings").classList.add("open");
+  syncSettingsUI();
+}
+
+function closeHsSettings() {
+  $("hsSettings").classList.remove("open");
+}
+
+$("closeSet").onclick = closeHsSettings;
+
+document.querySelectorAll(".set-section-head").forEach(h => {
+  h.onclick = () => h.parentElement.classList.toggle("open");
+});
+
+function setupSlider(id, valId, getter, setter, suffix = "px") {
+  const el = $(id);
+  const lab = $(valId);
+
+  el.value = getter();
+  lab.textContent = getter() + suffix;
+
+  el.oninput = () => {
+    const v = parseInt(el.value, 10);
+    setter(v);
+    lab.textContent = v + suffix;
+    applyHomeVars();
+    saveHomeSettings();
+  };
+}
+
+function saveHomeSettings() {
+  localStorage.setItem("gridCols", GRID_COLS);
+  localStorage.setItem("gapX", GAP_X);
+  localStorage.setItem("gapY", GAP_Y);
+  localStorage.setItem("iconSize", ICON_SIZE);
+  localStorage.setItem("iconRadius", ICON_RADIUS);
+  localStorage.setItem("iconOpacity", ICON_OPACITY);
+  localStorage.setItem("iconOffX", ICON_OFF_X);
+  localStorage.setItem("iconOffY", ICON_OFF_Y);
+  localStorage.setItem("dockY", DOCK_Y);
+  saveJSON("badgeCfg", BADGE);
+}
+
+function syncSettingsUI() {
+  setupSlider("colsSlider", "colsVal", () => GRID_COLS, v => GRID_COLS = v, "");
+  setupSlider("gapXSlider", "gapXVal", () => GAP_X, v => GAP_X = v);
+  setupSlider("gapYSlider", "gapYVal", () => GAP_Y, v => GAP_Y = v);
+  setupSlider("iconSizeSlider", "iconSizeVal", () => ICON_SIZE, v => ICON_SIZE = v);
+  setupSlider("iconRadiusSlider", "iconRadiusVal", () => ICON_RADIUS, v => ICON_RADIUS = v);
+  setupSlider("iconXSlider", "iconXVal", () => ICON_OFF_X, v => ICON_OFF_X = v);
+  setupSlider("iconYSlider", "iconYVal", () => ICON_OFF_Y, v => ICON_OFF_Y = v);
+  setupSlider("dockYSlider", "dockYVal", () => DOCK_Y, v => DOCK_Y = v);
+
+  setupSlider("iconOpSlider", "iconOpVal", () => ICON_OPACITY, v => ICON_OPACITY = v, "%");
+
+  setupSlider("badgeXSlider", "badgeXVal", () => BADGE.x, v => BADGE.x = v);
+  setupSlider("badgeYSlider", "badgeYVal", () => BADGE.y, v => BADGE.y = v);
+  setupSlider("badgeWSlider", "badgeWVal", () => BADGE.w, v => BADGE.w = v);
+  setupSlider("badgeHSlider", "badgeHVal", () => BADGE.h, v => BADGE.h = v);
+  setupSlider("badgeFsSlider", "badgeFsVal", () => BADGE.fs, v => BADGE.fs = v);
+
+  $("tgEdit").classList.toggle("on", isEdit());
+  $("tgBadges").classList.toggle("on", localStorage.getItem("showBadges") !== "0");
+  syncTriggerTexts();
+}
+
+function toggleRow(rowId, tgId, cb) {
+  $(rowId).onclick = e => {
+    if (e.target.closest("input,button")) return;
+    const tg = $(tgId);
+    const on = !tg.classList.contains("on");
+    tg.classList.toggle("on", on);
+    cb(on);
+  };
+}
+
+toggleRow("rowEdit", "tgEdit", on => {
+  if (on) enterEditMode();
+  else exitEditMode();
+});
+
+toggleRow("rowBadges", "tgBadges", on => {
+  document.body.classList.toggle("hide-badges", !on);
+  localStorage.setItem("showBadges", on ? "1" : "0");
+  renderHome();
+});
+
+$("rowAddPage").onclick = () => {
+  pages.push({ bg:null, icons:[] });
+  currentPage = pages.length - 1;
+  saveData();
+  renderHome();
+};
+
+document.querySelectorAll(".set-row[data-act]").forEach(row => {
+  row.onclick = () => {
+    const act = row.dataset.act;
+
+    if (act === "homeBg") $("homeBgInput").click();
+    if (act === "homeBgReset") {
+      localStorage.removeItem("homeBg");
+      renderHome();
+    }
+
+    if (act === "pageBg") $("pageBgInput").click();
+    if (act === "pageBgReset") {
+      pages[currentPage].bg = null;
+      saveData();
+      renderHome();
+    }
+  };
+});
+
+$("homeBgInput").onchange = e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const r = new FileReader();
+  r.onload = ev => {
+    localStorage.setItem("homeBg", ev.target.result);
+    renderHome();
+  };
+  r.readAsDataURL(file);
+  e.target.value = "";
+};
+
+$("pageBgInput").onchange = e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const r = new FileReader();
+  r.onload = ev => {
+    pages[currentPage].bg = ev.target.result;
+    saveData();
+    renderHome();
+  };
+  r.readAsDataURL(file);
+  e.target.value = "";
+};
+
+/* TRIGGERS */
+
+let holdEnabled = localStorage.getItem("holdEnabled") !== "0";
+let doubleEnabled = localStorage.getItem("doubleEnabled") === "1";
+let lockSwipeEnabled = localStorage.getItem("lockSwipeEnabled") !== "0";
+
+$("rowHold").onclick = () => {
+  holdEnabled = !holdEnabled;
+  $("tgHold").classList.toggle("on", holdEnabled);
+  localStorage.setItem("holdEnabled", holdEnabled ? "1" : "0");
+};
+
+$("rowDouble").onclick = () => {
+  doubleEnabled = !doubleEnabled;
+  $("tgDouble").classList.toggle("on", doubleEnabled);
+  localStorage.setItem("doubleEnabled", doubleEnabled ? "1" : "0");
+};
+
+$("rowLockSwipe").onclick = () => {
+  lockSwipeEnabled = !lockSwipeEnabled;
+  $("tgLockSwipe").classList.toggle("on", lockSwipeEnabled);
+  localStorage.setItem("lockSwipeEnabled", lockSwipeEnabled ? "1" : "0");
+};
+
+$("rowTriggerIcon").onclick = () => {
+  choosingTriggerIcon = true;
+  closeHsSettings();
+  showChooseHint("Выберите иконку-триггер для настроек");
+};
+
+$("rowLockIcon").onclick = () => {
+  choosingLockIcon = true;
+  closeHsSettings();
+  showChooseHint("Выберите иконку для возврата к блокировке");
+};
+
+function syncTriggerTexts() {
+  const tr = triggerIconId ? findIcon(triggerIconId) : null;
+  const li = lockIconId ? findIcon(lockIconId) : null;
+
+  $("triggerIconText").textContent = "Иконка-триггер: " + (tr ? (tr.icon.name || "без названия") : "не выбрана");
+  $("lockIconText").textContent = "Иконка блокировки: " + (li ? (li.icon.name || "без названия") : "не выбрана");
+
+  $("tgHold").classList.toggle("on", holdEnabled);
+  $("tgDouble").classList.toggle("on", doubleEnabled);
+  $("tgLockSwipe").classList.toggle("on", lockSwipeEnabled);
+}
+
+function showChooseHint(text) {
+  $("chooseHint").textContent = text;
+  $("chooseHint").classList.add("show");
+}
+
+function cancelChooseModes() {
+  choosingTriggerIcon = false;
+  choosingLockIcon = false;
+  $("chooseHint").classList.remove("show");
+}
+
+$("chooseHint").onclick = () => {
+  cancelChooseModes();
+  openHsSettings();
+};
+
+/* HOME GESTURES */
+
+let holdTimer = null;
+let holdStartX = 0;
+let holdStartY = 0;
+let moved = false;
+
+$("phone").addEventListener("mousedown", e => {
+  if (!holdEnabled || isEdit()) return;
+  if (e.target.closest("#hsSettings,#iconMenu,#folderView,#editBar,#chooseHint")) return;
+
+  moved = false;
+  holdStartX = e.clientX;
+  holdStartY = e.clientY;
+
+  clearTimeout(holdTimer);
+  holdTimer = setTimeout(() => {
+    if (!moved) openHsSettings();
+  }, 900);
+});
+
+$("phone").addEventListener("mousemove", e => {
+  if (Math.abs(e.clientX - holdStartX) > 12 || Math.abs(e.clientY - holdStartY) > 12) {
+    moved = true;
+    clearTimeout(holdTimer);
+  }
+});
+
+$("phone").addEventListener("mouseup", () => clearTimeout(holdTimer));
+$("phone").addEventListener("mouseleave", () => clearTimeout(holdTimer));
+
+$("phone").addEventListener("touchstart", e => {
+  if (!holdEnabled || isEdit()) return;
+  if (e.target.closest("#hsSettings,#iconMenu,#folderView,#editBar,#chooseHint")) return;
+
+  const t = e.touches[0];
+  moved = false;
+  holdStartX = t.clientX;
+  holdStartY = t.clientY;
+
+  clearTimeout(holdTimer);
+  holdTimer = setTimeout(() => {
+    if (!moved) openHsSettings();
+  }, 900);
+}, { passive:true });
+
+$("phone").addEventListener("touchmove", e => {
+  const t = e.touches[0];
+  if (Math.abs(t.clientX - holdStartX) > 12 || Math.abs(t.clientY - holdStartY) > 12) {
+    moved = true;
+    clearTimeout(holdTimer);
+  }
+}, { passive:true });
+
+$("phone").addEventListener("touchend", () => clearTimeout(holdTimer));
+
+let tapCount = 0;
+let tapTimer = null;
+
+$("phone").addEventListener("click", e => {
+  if (e.target.closest("#hsSettings,#iconMenu,#folderView,#editBar,#chooseHint,#pageDots,.cell")) return;
+  if (!doubleEnabled) return;
+
+  tapCount++;
+  clearTimeout(tapTimer);
+
+  if (tapCount >= 2) {
+    tapCount = 0;
+    openHsSettings();
+  } else {
+    tapTimer = setTimeout(() => tapCount = 0, 450);
+  }
+});
+
+/* PAGE SWIPE */
+
+let sx = 0;
+let sy = 0;
+let down = false;
+
+function pageStart(x, y) {
+  sx = x;
+  sy = y;
+  down = true;
+}
+
+function pageEnd(x, y) {
+  if (!down) return;
+  down = false;
+
+  const dx = x - sx;
+  const dy = y - sy;
+
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 45) {
+    if (dx < 0 && currentPage < pages.length - 1) goToPage(currentPage + 1, true);
+    if (dx > 0 && currentPage > 0) goToPage(currentPage - 1, true);
+  } else if (dy > 90 && Math.abs(dx) < 70 && sy < 170 && lockSwipeEnabled && !isEdit()) {
+    closeHome();
+  }
+}
+
+$("pagesViewport").addEventListener("mousedown", e => pageStart(e.clientX, e.clientY));
+$("pagesViewport").addEventListener("mouseup", e => pageEnd(e.clientX, e.clientY));
+$("pagesViewport").addEventListener("touchstart", e => pageStart(e.touches[0].clientX, e.touches[0].clientY), { passive:true });
+$("pagesViewport").addEventListener("touchend", e => pageEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY), { passive:true });
+
+/* KEYBOARD */
+
+document.addEventListener("keydown", e => {
+  if ($("settingsOverlay").classList.contains("show")) {
+    if (e.key === "Escape") closeSettings();
+    return;
+  }
+
+  if ($("unlockScreen").classList.contains("show")) {
+    if (e.key === "Escape") {
+      if ($("iconMenu").classList.contains("open")) closeIconMenu();
+      else if ($("hsSettings").classList.contains("open")) closeHsSettings();
+      else if ($("folderView").classList.contains("open")) closeFolder();
+      else if (isEdit()) exitEditMode();
+      else closeHome();
+    }
+    return;
+  }
+
+  if (e.key >= "0" && e.key <= "9") pressKey(e.key);
+  if (e.key === "Backspace") deleteKey();
+  if (e.key === "Enter") sosShortPress();
+});
+
+/* INIT */
+
+(function init() {
+  buildDots();
+  updateDots();
+
+  const keySize = localStorage.getItem("keySize");
+  if (keySize) {
+    setRoot("--key-size", keySize + "px");
+    $("sizeSlider").value = keySize;
+    $("sizeValue").textContent = keySize + " px";
+  }
+
+  $("pinXSlider").value = pinStepX;
+  $("pinYSlider").value = pinStepY;
+  $("pinXVal").textContent = pinStepX + " px";
+  $("pinYVal").textContent = pinStepY + " px";
+  applyPinSpread();
+
+  const pby = parseInt(localStorage.getItem("pinBlockY") || "0", 10);
+  $("pinBlockSlider").value = pby;
+  $("pinBlockVal").textContent = pby + " px";
+  setRoot("--pin-block-y", pby + "px");
+
+  const lockBg = localStorage.getItem("lockBg");
+  if (lockBg) $("wallpaper").style.backgroundImage = `url('${lockBg}')`;
+
+  $("realPinInput").value = REAL_PIN;
+
+  const methodBtn = document.querySelector(`[data-method="${SETTINGS.unlockMethod}"]`);
+  if (methodBtn) methodBtn.click();
+
+  const style = localStorage.getItem("style") || "ios";
+  const styleBtn = document.querySelector(`[data-style="${style}"]`);
+  if (styleBtn) styleBtn.click();
+
+  if (localStorage.getItem("showBadges") === "0") {
+    document.body.classList.add("hide-badges");
+  }
+
+  syncTriggerTexts();
+  applyHomeVars();
 })();
 </script>
 </body>
