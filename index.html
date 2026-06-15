@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,maximum-scale=1.0,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -11,19 +11,25 @@
 <title>Lock Screen</title>
 
 <style>
-* {
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-  user-select:none;
-}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+:root{
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --safe-left:env(safe-area-inset-left,0px);
+  --safe-right:env(safe-area-inset-right,0px);
 
-:root {
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-left: env(safe-area-inset-left, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
+  --bg-bleed-top:64px;
+  --bg-bleed-bottom:34px;
+  --bg-pos-y:center;
+
+  --work-top-extra:0px;
+  --work-bottom-extra:0px;
+  --work-left-extra:0px;
+  --work-right-extra:0px;
+
+  --lock-title-y:70px;
+  --lock-dots-y:145px;
+  --lock-pin-bottom:18px;
 
   --key-size:96px;
   --pin-y:0px;
@@ -48,8 +54,7 @@
   --badge-fs:12px;
 }
 
-html,
-body {
+html,body{
   width:100%;
   height:100%;
   min-height:100vh;
@@ -58,24 +63,15 @@ body {
   background:#000;
   position:fixed;
   inset:0;
-  font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", Arial, sans-serif;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;
   overscroll-behavior:none;
 }
 
-body {
-  padding:0 !important;
-}
+body{padding:0!important}
+button,input{font-family:inherit}
+button{cursor:pointer}
 
-button,
-input {
-  font-family:inherit;
-}
-
-button {
-  cursor:pointer;
-}
-
-#device {
+#device{
   position:fixed;
   inset:0;
   width:100vw;
@@ -87,102 +83,105 @@ button {
   background:#000;
 }
 
-.wallpaper,
-#homeWallpaper {
+.wallpaper,#homeWallpaper{
   position:absolute;
-  inset:0;
+  left:0;
+  right:0;
+  top:calc(-1 * var(--bg-bleed-top));
+  bottom:calc(-1 * var(--bg-bleed-bottom));
   width:100%;
-  height:100%;
+  height:auto;
   background:#000;
   background-size:cover;
-  background-position:center;
+  background-position:center var(--bg-pos-y);
   background-repeat:no-repeat;
   z-index:0;
+  pointer-events:none;
 }
 
-input[type=file] {
-  display:none;
-}
+input[type=file]{display:none}
 
 /* LOCK SCREEN */
 
-.lock-screen {
-  position:relative;
+.lock-screen{
+  position:absolute;
+  inset:0;
   z-index:2;
   width:100%;
   height:100%;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
   color:#fff;
+  overflow:hidden;
 }
 
-body.unlocked .lock-screen {
-  display:none;
-}
+body.unlocked .lock-screen{display:none}
 
-.top-label {
-  margin-top:calc(22vh + var(--safe-top) * .15);
+.top-label{
+  position:absolute;
+  left:0;
+  right:0;
+  top:calc(var(--safe-top) + var(--lock-title-y));
   text-align:center;
   font-size:16px;
   line-height:1.45;
-  padding:0 30px;
+  padding:
+    0
+    calc(30px + var(--safe-right) + var(--work-right-extra))
+    0
+    calc(30px + var(--safe-left) + var(--work-left-extra));
   text-shadow:0 1px 8px rgba(0,0,0,.65);
 }
 
-.dots {
+.dots{
+  position:absolute;
+  left:0;
+  right:0;
+  top:calc(var(--safe-top) + var(--lock-dots-y));
   display:flex;
+  justify-content:center;
   gap:18px;
-  margin-top:18px;
+  margin-top:0;
   height:16px;
   align-items:center;
 }
 
-.dot {
+.dot{
   width:13px;
   height:13px;
   border-radius:50%;
   border:1.5px solid rgba(255,255,255,.85);
 }
+.dot.filled{background:#fff}
+.dots.wrong{animation:shake .45s ease}
 
-.dot.filled {
-  background:#fff;
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-12px)}
+  40%{transform:translateX(12px)}
+  60%{transform:translateX(-8px)}
+  80%{transform:translateX(8px)}
 }
 
-.dots.wrong {
-  animation:shake .45s ease;
-}
-
-@keyframes shake {
-  0%,100% { transform:translateX(0); }
-  20% { transform:translateX(-12px); }
-  40% { transform:translateX(12px); }
-  60% { transform:translateX(-8px); }
-  80% { transform:translateX(8px); }
-}
-
-.passcode {
+.passcode{
   position:absolute;
-  left:0;
-  right:0;
-  bottom:0;
+  left:calc(var(--safe-left) + var(--work-left-extra));
+  right:calc(var(--safe-right) + var(--work-right-extra));
+  bottom:calc(var(--safe-bottom) + var(--lock-pin-bottom) + var(--work-bottom-extra));
   display:flex;
   flex-direction:column;
   align-items:center;
   transform:translateY(var(--pin-y));
 }
 
-.keyboard {
+.keyboard{
   width:92%;
   max-width:340px;
   display:grid;
-  grid-template-columns:repeat(3, 1fr);
+  grid-template-columns:repeat(3,1fr);
   gap:12px;
   justify-items:center;
 }
 
-.key,
-.key-zero {
+.key,.key-zero{
   width:100%;
   aspect-ratio:1;
   max-width:var(--key-size);
@@ -196,40 +195,24 @@ body.unlocked .lock-screen {
   justify-content:center;
   align-items:center;
   backdrop-filter:blur(8px);
-  transform:translate(var(--kx,0px), var(--ky,0px));
+  transform:translate(var(--kx,0px),var(--ky,0px));
 }
 
-.key:active,
-.key-zero:active {
-  background:rgba(255,255,255,.35);
-}
+.key:active,.key-zero:active{background:rgba(255,255,255,.35)}
+.key-number{font-size:calc(var(--key-size) * .33);font-weight:300;line-height:1}
+.key-letters{margin-top:2px;font-size:8px;opacity:.68;line-height:1.25;letter-spacing:1px;text-align:center}
 
-.key-number {
-  font-size:calc(var(--key-size) * .33);
-  font-weight:300;
-  line-height:1;
-}
-
-.key-letters {
-  margin-top:2px;
-  font-size:8px;
-  opacity:.68;
-  line-height:1.25;
-  letter-spacing:1px;
-  text-align:center;
-}
-
-.bottom-row {
+.bottom-row{
   width:92%;
   max-width:340px;
   display:grid;
-  grid-template-columns:repeat(3, 1fr);
+  grid-template-columns:repeat(3,1fr);
   gap:12px;
   align-items:center;
-  padding:12px 0 calc(36px + var(--safe-bottom));
+  padding:12px 0 0;
 }
 
-.btn-text {
+.btn-text{
   color:#fff;
   background:none;
   border:none;
@@ -237,9 +220,9 @@ body.unlocked .lock-screen {
   padding:10px 0;
 }
 
-/* COMMON SETTINGS UI */
+/* SETTINGS COMMON */
 
-.overlay {
+.overlay{
   position:absolute;
   inset:0;
   z-index:200;
@@ -251,63 +234,28 @@ body.unlocked .lock-screen {
   overflow-y:auto;
   color:#fff;
 }
-
-.overlay.show {
-  display:flex;
-}
-
-.header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:24px;
-}
-
-.title {
-  font-size:22px;
-  font-weight:700;
-}
-
-.close-btn,
-.small-btn {
+.overlay.show{display:flex}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.title{font-size:22px;font-weight:700}
+.close-btn,.small-btn{
   color:#fff;
   background:rgba(255,255,255,.15);
   border:none;
   border-radius:20px;
   padding:8px 16px;
 }
-
-.block {
+.block{
   background:rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.12);
   border-radius:16px;
   padding:16px;
   margin-bottom:16px;
 }
-
-.block-title {
-  font-size:15px;
-  font-weight:700;
-  margin-bottom:12px;
-}
-
-.slider-row {
-  margin-bottom:14px;
-}
-
-.slider-row:last-child {
-  margin-bottom:0;
-}
-
-.sl-label {
-  display:flex;
-  justify-content:space-between;
-  font-size:13px;
-  opacity:.85;
-  margin-bottom:6px;
-}
-
-.slider {
+.block-title{font-size:15px;font-weight:700;margin-bottom:12px}
+.slider-row{margin-bottom:14px}
+.slider-row:last-child{margin-bottom:0}
+.sl-label{display:flex;justify-content:space-between;font-size:13px;opacity:.85;margin-bottom:6px}
+.slider{
   width:100%;
   appearance:none;
   height:6px;
@@ -315,22 +263,15 @@ body.unlocked .lock-screen {
   background:rgba(255,255,255,.25);
   outline:none;
 }
-
-.slider::-webkit-slider-thumb {
+.slider::-webkit-slider-thumb{
   appearance:none;
   width:22px;
   height:22px;
   border-radius:50%;
   background:#fff;
 }
-
-.row {
-  display:flex;
-  gap:8px;
-  align-items:center;
-}
-
-.text-input {
+.row{display:flex;gap:8px;align-items:center}
+.text-input{
   flex:1;
   min-width:0;
   color:#fff;
@@ -342,14 +283,8 @@ body.unlocked .lock-screen {
   font-size:15px;
   user-select:text;
 }
-
-.option-row {
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-
-.option {
+.option-row{display:flex;gap:8px;flex-wrap:wrap}
+.option{
   flex:1;
   min-width:80px;
   color:#fff;
@@ -358,14 +293,8 @@ body.unlocked .lock-screen {
   border-radius:12px;
   padding:12px 10px;
 }
-
-.option.active {
-  background:#fff;
-  color:#111;
-  font-weight:700;
-}
-
-.full-btn {
+.option.active{background:#fff;color:#111;font-weight:700}
+.full-btn{
   width:100%;
   color:#fff;
   background:rgba(255,255,255,.15);
@@ -373,29 +302,19 @@ body.unlocked .lock-screen {
   border-radius:12px;
   padding:14px;
 }
-
-.hint {
-  color:#fff;
-  opacity:.55;
-  font-size:12px;
-  text-align:center;
-  margin-top:8px;
-}
+.hint{color:#fff;opacity:.55;font-size:12px;text-align:center;margin-top:8px}
 
 /* HOME */
 
-.unlock-screen {
+.unlock-screen{
   position:absolute;
   inset:0;
   z-index:100;
   display:none;
 }
+.unlock-screen.show{display:block}
 
-.unlock-screen.show {
-  display:block;
-}
-
-#phone {
+#phone{
   position:relative;
   width:100%;
   height:100%;
@@ -406,49 +325,34 @@ body.unlocked .lock-screen {
   flex-direction:column;
 }
 
-#pagesViewport,
-#pageDots,
-#search,
-#dock {
-  position:relative;
-  z-index:1;
-}
+#pagesViewport,#pageDots,#search,#dock{position:relative;z-index:1}
+#pagesViewport{flex:1;overflow:hidden}
+#pagesTrack{height:100%;display:flex;transition:transform .3s ease}
 
-#pagesViewport {
-  flex:1;
-  overflow:hidden;
-}
-
-#pagesTrack {
-  height:100%;
-  display:flex;
-  transition:transform .3s ease;
-}
-
-.page {
+.page{
   flex:0 0 100%;
   width:100%;
   height:100%;
   overflow:hidden;
   padding:
-    calc(24px + var(--safe-top))
-    calc(16px + var(--safe-right))
+    calc(24px + var(--safe-top) + var(--work-top-extra))
+    calc(16px + var(--safe-right) + var(--work-right-extra))
     0
-    calc(16px + var(--safe-left));
+    calc(16px + var(--safe-left) + var(--work-left-extra));
 }
 
-.grid {
+.grid{
   width:100%;
   display:grid;
-  grid-template-columns:repeat(var(--cols), 1fr);
+  grid-template-columns:repeat(var(--cols),1fr);
   grid-auto-rows:calc(var(--icon-size) + 22px);
   column-gap:var(--gap-x);
   row-gap:var(--gap-y);
   justify-items:center;
-  transform:translate(var(--icon-x), var(--icon-y));
+  transform:translate(var(--icon-x),var(--icon-y));
 }
 
-.cell {
+.cell{
   position:relative;
   width:var(--icon-size);
   height:calc(var(--icon-size) + 22px);
@@ -458,8 +362,7 @@ body.unlocked .lock-screen {
   justify-content:flex-start;
 }
 
-.icon,
-.folder {
+.icon,.folder{
   width:var(--icon-size);
   height:var(--icon-size);
   border-radius:var(--icon-radius);
@@ -476,17 +379,17 @@ body.unlocked .lock-screen {
   opacity:var(--icon-opacity);
 }
 
-.folder {
+.folder{
   background:rgba(30,30,30,.65);
   backdrop-filter:blur(8px);
   display:grid;
-  grid-template-columns:repeat(3, 1fr);
-  grid-template-rows:repeat(3, 1fr);
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(3,1fr);
   gap:2px;
   padding:5px;
 }
 
-.mini {
+.mini{
   border-radius:4px;
   background:#555;
   background-size:cover;
@@ -498,19 +401,16 @@ body.unlocked .lock-screen {
   overflow:hidden;
 }
 
-.empty-icon {
+.empty-icon{
   display:none;
-  background:rgba(255,255,255,.08) !important;
+  background:rgba(255,255,255,.08)!important;
   border:1px dashed rgba(255,255,255,.35);
   box-shadow:none;
   color:rgba(255,255,255,.6);
 }
+#phone.edit .empty-icon{display:flex}
 
-#phone.edit .empty-icon {
-  display:flex;
-}
-
-.label {
+.label{
   margin-top:4px;
   height:18px;
   line-height:18px;
@@ -524,16 +424,10 @@ body.unlocked .lock-screen {
   opacity:var(--icon-opacity);
 }
 
-.empty-label {
-  display:none;
-}
+.empty-label{display:none}
+#phone.edit .empty-label{display:block;opacity:.35}
 
-#phone.edit .empty-label {
-  display:block;
-  opacity:.35;
-}
-
-.badge {
+.badge{
   position:absolute;
   z-index:4;
   left:50%;
@@ -550,14 +444,11 @@ body.unlocked .lock-screen {
   align-items:center;
   justify-content:center;
   line-height:1;
-  transform:translate(calc(-50% + var(--badge-x)), calc(-50% + var(--badge-y)));
+  transform:translate(calc(-50% + var(--badge-x)),calc(-50% + var(--badge-y)));
 }
+body.hide-badges .badge{display:none!important}
 
-body.hide-badges .badge {
-  display:none !important;
-}
-
-.del {
+.del{
   display:none;
   position:absolute;
   top:-8px;
@@ -574,27 +465,12 @@ body.hide-badges .badge {
   justify-content:center;
   box-shadow:0 2px 6px rgba(0,0,0,.45);
 }
+#phone.edit .cell:not(.empty-cell) .del{display:flex}
+#phone.edit .cell{animation:wiggle .32s infinite alternate}
+#phone.moving .empty-icon{display:flex;border-color:#30d158;color:#30d158}
+@keyframes wiggle{from{transform:rotate(-1deg)}to{transform:rotate(1deg)}}
 
-#phone.edit .cell:not(.empty-cell) .del {
-  display:flex;
-}
-
-#phone.edit .cell {
-  animation:wiggle .32s infinite alternate;
-}
-
-#phone.moving .empty-icon {
-  display:flex;
-  border-color:#30d158;
-  color:#30d158;
-}
-
-@keyframes wiggle {
-  from { transform:rotate(-1deg); }
-  to { transform:rotate(1deg); }
-}
-
-#pageDots {
+#pageDots{
   min-height:20px;
   display:flex;
   justify-content:center;
@@ -602,20 +478,15 @@ body.hide-badges .badge {
   gap:8px;
   padding:6px 0 2px;
 }
-
-.pdot {
+.pdot{
   width:7px;
   height:7px;
   border-radius:50%;
   background:rgba(255,255,255,.35);
 }
+.pdot.active{background:#fff;transform:scale(1.15)}
 
-.pdot.active {
-  background:#fff;
-  transform:scale(1.15);
-}
-
-#search {
+#search{
   align-self:center;
   margin:6px 0 12px;
   padding:7px 18px;
@@ -624,32 +495,26 @@ body.hide-badges .badge {
   backdrop-filter:blur(12px);
   font-size:14px;
 }
+#phone:not(.edit) #search{opacity:0}
 
-#phone:not(.edit) #search {
-  opacity:0;
-}
-
-#dock {
+#dock{
   margin:
     0
-    calc(12px + var(--safe-right))
-    calc(16px + var(--safe-bottom))
-    calc(12px + var(--safe-left));
+    calc(12px + var(--safe-right) + var(--work-right-extra))
+    calc(16px + var(--safe-bottom) + var(--work-bottom-extra))
+    calc(12px + var(--safe-left) + var(--work-left-extra));
   padding:12px 14px;
   display:grid;
-  grid-template-columns:repeat(4, 1fr);
+  grid-template-columns:repeat(4,1fr);
   justify-items:center;
   gap:8px;
-  transform:translate(var(--dock-x), var(--dock-y));
+  transform:translate(var(--dock-x),var(--dock-y));
 }
-
-#phone.edit #dock {
-  margin-bottom:calc(86px + var(--safe-bottom));
-}
+#phone.edit #dock{margin-bottom:calc(86px + var(--safe-bottom))}
 
 /* EDIT BAR */
 
-#editBar {
+#editBar{
   display:none;
   position:absolute;
   left:0;
@@ -661,17 +526,10 @@ body.hide-badges .badge {
   gap:8px;
   pointer-events:none;
 }
+#phone.edit #editBar{display:flex}
+#editBar>*{pointer-events:auto}
 
-#phone.edit #editBar {
-  display:flex;
-}
-
-#editBar > * {
-  pointer-events:auto;
-}
-
-#editDone,
-#cancelMove {
+#editDone,#cancelMove{
   background:rgba(20,20,20,.82);
   border:1px solid rgba(255,255,255,.25);
   color:#fff;
@@ -679,18 +537,12 @@ body.hide-badges .badge {
   padding:11px 18px;
   font-size:15px;
 }
-
-#cancelMove {
-  display:none;
-}
-
-#phone.moving #cancelMove {
-  display:block;
-}
+#cancelMove{display:none}
+#phone.moving #cancelMove{display:block}
 
 /* FOLDER */
 
-#folderView {
+#folderView{
   position:absolute;
   inset:0;
   z-index:40;
@@ -700,12 +552,8 @@ body.hide-badges .badge {
   background:rgba(0,0,0,.45);
   backdrop-filter:blur(22px);
 }
-
-#folderView.open {
-  display:flex;
-}
-
-#folderTitle {
+#folderView.open{display:flex}
+#folderTitle{
   align-self:flex-start;
   margin:calc(60px + var(--safe-top)) 0 26px;
   padding-left:40px;
@@ -713,8 +561,7 @@ body.hide-badges .badge {
   font-weight:700;
   text-shadow:0 1px 8px rgba(0,0,0,.7);
 }
-
-#folderBox {
+#folderBox{
   width:300px;
   min-height:300px;
   padding:26px 22px;
@@ -722,13 +569,12 @@ body.hide-badges .badge {
   background:rgba(180,180,180,.18);
   border:1px solid rgba(255,255,255,.18);
   display:grid;
-  grid-template-columns:repeat(3, 1fr);
+  grid-template-columns:repeat(3,1fr);
   gap:22px 18px;
   justify-items:center;
   align-content:start;
 }
-
-.folder-empty-hint {
+.folder-empty-hint{
   color:#fff;
   opacity:.55;
   font-size:13px;
@@ -738,7 +584,7 @@ body.hide-badges .badge {
 
 /* ICON MENU */
 
-#iconMenu {
+#iconMenu{
   position:absolute;
   inset:0;
   z-index:70;
@@ -748,12 +594,8 @@ body.hide-badges .badge {
   background:rgba(0,0,0,.55);
   backdrop-filter:blur(8px);
 }
-
-#iconMenu.open {
-  display:flex;
-}
-
-.menu-card {
+#iconMenu.open{display:flex}
+.menu-card{
   width:320px;
   max-width:92%;
   max-height:88%;
@@ -764,15 +606,8 @@ body.hide-badges .badge {
   border:1px solid rgba(255,255,255,.12);
   box-shadow:0 12px 40px rgba(0,0,0,.65);
 }
-
-.menu-head {
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin-bottom:16px;
-}
-
-.preview {
+.menu-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.preview{
   width:48px;
   height:48px;
   border-radius:12px;
@@ -785,8 +620,7 @@ body.hide-badges .badge {
   font-size:24px;
   overflow:hidden;
 }
-
-.menu-title {
+.menu-title{
   flex:1;
   font-size:16px;
   font-weight:700;
@@ -794,22 +628,9 @@ body.hide-badges .badge {
   overflow:hidden;
   text-overflow:ellipsis;
 }
-
-.sub {
-  font-size:11px;
-  opacity:.55;
-  margin:2px 2px 8px;
-}
-
-.menu-row {
-  display:flex;
-  gap:8px;
-  align-items:center;
-  margin-bottom:9px;
-}
-
-.menu-row input[type=text],
-.menu-row input[type=number] {
+.sub{font-size:11px;opacity:.55;margin:2px 2px 8px}
+.menu-row{display:flex;gap:8px;align-items:center;margin-bottom:9px}
+.menu-row input[type=text],.menu-row input[type=number]{
   flex:1;
   min-width:0;
   background:rgba(255,255,255,.1);
@@ -821,24 +642,15 @@ body.hide-badges .badge {
   outline:none;
   user-select:text;
 }
-
-.menu-row input[type=color] {
-  width:46px;
-  height:42px;
-  border:none;
-  background:none;
-}
-
-.ok {
+.menu-row input[type=color]{width:46px;height:42px;border:none;background:none}
+.ok{
   background:rgba(48,209,88,.2);
   border:1px solid #30d158;
   color:#30d158;
   border-radius:10px;
   padding:11px 15px;
 }
-
-.menu-btn,
-.menu-close {
+.menu-btn,.menu-close{
   width:100%;
   display:flex;
   align-items:center;
@@ -852,20 +664,12 @@ body.hide-badges .badge {
   margin-bottom:9px;
   text-align:left;
 }
-
-.menu-btn.danger {
-  color:#ff453a;
-}
-
-.menu-close {
-  display:block;
-  text-align:center;
-  background:rgba(255,255,255,.12);
-}
+.menu-btn.danger{color:#ff453a}
+.menu-close{display:block;text-align:center;background:rgba(255,255,255,.12)}
 
 /* HOME SETTINGS */
 
-#homeSettings {
+#homeSettings{
   position:absolute;
   inset:0;
   z-index:50;
@@ -877,28 +681,11 @@ body.hide-badges .badge {
   backdrop-filter:blur(18px);
   color:#fff;
 }
-
-#homeSettings.open {
-  display:flex;
-}
-
-.home-title {
-  font-size:22px;
-  font-weight:700;
-  margin-bottom:4px;
-}
-
-.subtitle {
-  font-size:13px;
-  opacity:.65;
-  margin-bottom:22px;
-}
-
-.section {
-  margin-bottom:14px;
-}
-
-.section-head {
+#homeSettings.open{display:flex}
+.home-title{font-size:22px;font-weight:700;margin-bottom:4px}
+.subtitle{font-size:13px;opacity:.65;margin-bottom:22px}
+.section{margin-bottom:14px}
+.section-head{
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -908,38 +695,18 @@ body.hide-badges .badge {
   font-size:15px;
   font-weight:700;
 }
-
-.chev {
-  opacity:.6;
-  transition:.25s;
-}
-
-.section.open .chev {
-  transform:rotate(90deg);
-}
-
-.section-body {
-  max-height:0;
-  overflow:hidden;
-  transition:max-height .25s ease;
-}
-
-.section.open .section-body {
-  max-height:6000px;
-}
-
-.section-inner {
-  padding-top:10px;
-}
-
-.set-group {
+.chev{opacity:.6;transition:.25s}
+.section.open .chev{transform:rotate(90deg)}
+.section-body{max-height:0;overflow:hidden;transition:max-height .25s ease}
+.section.open .section-body{max-height:6000px}
+.section-inner{padding-top:10px}
+.set-group{
   background:rgba(255,255,255,.08);
   border-radius:16px;
   overflow:hidden;
   margin-bottom:12px;
 }
-
-.set-row {
+.set-row{
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -947,25 +714,11 @@ body.hide-badges .badge {
   font-size:15px;
   border-bottom:1px solid rgba(255,255,255,.08);
 }
-
-.set-row:last-child {
-  border-bottom:none;
-}
-
-.set-row .txt {
-  flex:1;
-}
-
-.set-row .ic {
-  font-size:18px;
-  margin-right:12px;
-}
-
-.arrow {
-  opacity:.4;
-}
-
-.toggle {
+.set-row:last-child{border-bottom:none}
+.set-row .txt{flex:1}
+.set-row .ic{font-size:18px;margin-right:12px}
+.arrow{opacity:.4}
+.toggle{
   width:48px;
   height:28px;
   border-radius:14px;
@@ -973,8 +726,7 @@ body.hide-badges .badge {
   position:relative;
   flex-shrink:0;
 }
-
-.toggle::after {
+.toggle::after{
   content:"";
   position:absolute;
   top:2px;
@@ -985,28 +737,17 @@ body.hide-badges .badge {
   background:#fff;
   transition:.2s;
 }
-
-.toggle.on {
-  background:#30d158;
-}
-
-.toggle.on::after {
-  left:22px;
-}
-
-.group-pad {
-  padding:14px 16px;
-}
-
-.divider {
+.toggle.on{background:#30d158}
+.toggle.on::after{left:22px}
+.group-pad{padding:14px 16px}
+.divider{
   font-size:12px;
   text-transform:uppercase;
   letter-spacing:.5px;
   opacity:.55;
   margin:14px 2px 8px;
 }
-
-#closeHomeSettings {
+#closeHomeSettings{
   margin-top:10px;
   align-self:center;
   background:rgba(255,255,255,.15);
@@ -1016,8 +757,7 @@ body.hide-badges .badge {
   padding:13px 40px;
   font-size:16px;
 }
-
-#chooseHint {
+#chooseHint{
   display:none;
   position:absolute;
   bottom:calc(20px + var(--safe-bottom));
@@ -1032,18 +772,14 @@ body.hide-badges .badge {
   max-width:90%;
   text-align:center;
 }
-
-#chooseHint.show {
-  display:block;
-}
+#chooseHint.show{display:block}
 
 body.style-android .key,
-body.style-android .key-zero {
+body.style-android .key-zero{
   background:rgba(255,255,255,.08);
   border:none;
 }
-
-body.style-android .top-label {
+body.style-android .top-label{
   opacity:.85;
   font-size:14px;
 }
@@ -1115,6 +851,37 @@ body.style-android .top-label {
         <div class="sl-label"><span>Сдвиг</span><span id="pinBlockVal">0 px</span></div>
         <input class="slider" id="pinBlockSlider" type="range" min="-240" max="140" value="0">
       </div>
+    </div>
+
+    <div class="block">
+      <div class="block-title">Фон и рабочая область</div>
+
+      <div class="slider-row">
+        <div class="sl-label"><span>Фон вверх под остров</span><span id="bgBleedTopVal">64 px</span></div>
+        <input class="slider" id="bgBleedTopSlider" type="range" min="0" max="160" value="64">
+      </div>
+
+      <div class="slider-row">
+        <div class="sl-label"><span>Фон вниз</span><span id="bgBleedBottomVal">34 px</span></div>
+        <input class="slider" id="bgBleedBottomSlider" type="range" min="0" max="120" value="34">
+      </div>
+
+      <div class="slider-row">
+        <div class="sl-label"><span>Текст блокировки</span><span id="lockTitleYVal">70 px</span></div>
+        <input class="slider" id="lockTitleYSlider" type="range" min="0" max="220" value="70">
+      </div>
+
+      <div class="slider-row">
+        <div class="sl-label"><span>Точки пароля</span><span id="lockDotsYVal">145 px</span></div>
+        <input class="slider" id="lockDotsYSlider" type="range" min="40" max="300" value="145">
+      </div>
+
+      <div class="slider-row">
+        <div class="sl-label"><span>Клавиатура снизу</span><span id="lockPinBottomVal">18 px</span></div>
+        <input class="slider" id="lockPinBottomSlider" type="range" min="-40" max="120" value="18">
+      </div>
+
+      <div class="hint">Фон может заходить под Dynamic Island, а кнопки остаются в безопасной рабочей области.</div>
     </div>
 
     <div class="block">
@@ -1217,7 +984,7 @@ body.style-android .top-label {
 
       <div id="homeSettings">
         <div class="home-title">⚙️ Настройки рабочего стола</div>
-        <div class="subtitle">Фон занимает весь фактический экран, включая область за статус-баром</div>
+        <div class="subtitle">Фон отдельно выходит под верхнюю системную область, а иконки остаются в safe-area.</div>
 
         <div class="section open">
           <div class="section-head"><span>🎨 Внешний вид</span><span class="chev">›</span></div>
@@ -1263,11 +1030,11 @@ body.style-android .top-label {
               <div class="set-group group-pad">
                 <div class="slider-row">
                   <div class="sl-label"><span>По X</span><span id="iconXVal">0 px</span></div>
-                  <input class="slider" id="iconXSlider" type="range" min="-240" max="240" step="1" value="0">
+                  <input class="slider" id="iconXSlider" type="range" min="-240" max="240" value="0">
                 </div>
                 <div class="slider-row">
                   <div class="sl-label"><span>По Y</span><span id="iconYVal">0 px</span></div>
-                  <input class="slider" id="iconYSlider" type="range" min="-240" max="240" step="1" value="0">
+                  <input class="slider" id="iconYSlider" type="range" min="-240" max="240" value="0">
                 </div>
               </div>
 
@@ -1275,11 +1042,11 @@ body.style-android .top-label {
               <div class="set-group group-pad">
                 <div class="slider-row">
                   <div class="sl-label"><span>Док по X</span><span id="dockXVal">0 px</span></div>
-                  <input class="slider" id="dockXSlider" type="range" min="-240" max="240" step="1" value="0">
+                  <input class="slider" id="dockXSlider" type="range" min="-240" max="240" value="0">
                 </div>
                 <div class="slider-row">
                   <div class="sl-label"><span>Док по Y</span><span id="dockYVal">0 px</span></div>
-                  <input class="slider" id="dockYSlider" type="range" min="-240" max="240" step="1" value="0">
+                  <input class="slider" id="dockYSlider" type="range" min="-240" max="240" value="0">
                 </div>
               </div>
 
@@ -1374,1224 +1141,970 @@ body.style-android .top-label {
 <script>
 "use strict";
 
-/* ---------- HELPERS ---------- */
+const DATA_VERSION=3;
 
-const DATA_VERSION = 3;
+function $(id){return document.getElementById(id)}
+function rootSet(name,value){document.documentElement.style.setProperty(name,value)}
+function safeSet(key,value){try{localStorage.setItem(key,value);return true}catch(e){alert("Недостаточно памяти для сохранения данных.");return false}}
+function safeRemove(key){try{localStorage.removeItem(key)}catch{}}
+function loadJSON(key,def){try{const raw=localStorage.getItem(key);if(!raw)return def;const parsed=JSON.parse(raw);return parsed==null?def:parsed}catch{return def}}
+function saveJSON(key,val){try{localStorage.setItem(key,JSON.stringify(val));return true}catch{alert("Недостаточно памяти для сохранения рабочего стола.");return false}}
+function normalizeColor(v){const s=String(v||"").trim();return /^#[0-9a-fA-F]{6}$/.test(s)?s:"#444444"}
+function clampNum(v,min,max,fallback){const n=parseInt(v,10);if(Number.isNaN(n))return fallback;return Math.max(min,Math.min(max,n))}
+function trimEmptyTail(arr){if(!Array.isArray(arr))return[];while(arr.length&&arr[arr.length-1]==null)arr.pop();return arr}
 
-function $(id) {
-  return document.getElementById(id);
-}
-
-function rootSet(name, value) {
-  document.documentElement.style.setProperty(name, value);
-}
-
-function safeSet(key, value) {
-  try {
-    localStorage.setItem(key, value);
-    return true;
-  } catch (err) {
-    alert("Недостаточно памяти для сохранения данных. Попробуйте выбрать изображение меньшего размера.");
-    return false;
-  }
-}
-
-function safeRemove(key) {
-  try {
-    localStorage.removeItem(key);
-  } catch {}
-}
-
-function loadJSON(key, def) {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return def;
-    const parsed = JSON.parse(raw);
-    return parsed == null ? def : parsed;
-  } catch {
-    return def;
-  }
-}
-
-function saveJSON(key, val) {
-  try {
-    localStorage.setItem(key, JSON.stringify(val));
-    return true;
-  } catch {
-    alert("Недостаточно памяти для сохранения рабочего стола.");
-    return false;
-  }
-}
-
-function normalizeColor(v) {
-  const s = String(v || "").trim();
-  return /^#[0-9a-fA-F]{6}$/.test(s) ? s : "#444444";
-}
-
-function clampNum(v, min, max, fallback) {
-  const n = parseInt(v, 10);
-  if (Number.isNaN(n)) return fallback;
-  return Math.max(min, Math.min(max, n));
-}
-
-function setText(el, text) {
-  el.textContent = String(text || "");
-}
-
-function trimEmptyTail(arr) {
-  if (!Array.isArray(arr)) return [];
-  while (arr.length && arr[arr.length - 1] == null) arr.pop();
-  return arr;
-}
-
-function readAndCompressImage(file, maxSide = 1600, quality = 0.82) {
-  return new Promise((resolve, reject) => {
-    if (!file || !file.type || !file.type.startsWith("image/")) {
-      reject(new Error("Не изображение"));
-      return;
-    }
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      const img = new Image();
-
-      img.onload = () => {
-        let w = img.naturalWidth || img.width;
-        let h = img.naturalHeight || img.height;
-
-        const scale = Math.min(1, maxSide / Math.max(w, h));
-        w = Math.max(1, Math.round(w * scale));
-        h = Math.max(1, Math.round(h * scale));
-
-        const canvas = document.createElement("canvas");
-        canvas.width = w;
-        canvas.height = h;
-
-        const ctx = canvas.getContext("2d", { alpha:false });
-        ctx.drawImage(img, 0, 0, w, h);
-
+function readAndCompressImage(file,maxSide=1600,quality=.82){
+  return new Promise((resolve,reject)=>{
+    if(!file||!file.type||!file.type.startsWith("image/")){reject(new Error("bad"));return}
+    const reader=new FileReader();
+    reader.onload=()=>{
+      const img=new Image();
+      img.onload=()=>{
+        let w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
+        const scale=Math.min(1,maxSide/Math.max(w,h));
+        w=Math.max(1,Math.round(w*scale));
+        h=Math.max(1,Math.round(h*scale));
+        const canvas=document.createElement("canvas");
+        canvas.width=w;canvas.height=h;
+        const ctx=canvas.getContext("2d",{alpha:false});
+        ctx.drawImage(img,0,0,w,h);
         let data;
-        try {
-          data = canvas.toDataURL("image/jpeg", quality);
-        } catch {
-          data = reader.result;
-        }
-
+        try{data=canvas.toDataURL("image/jpeg",quality)}catch{data=reader.result}
         resolve(data);
       };
-
-      img.onerror = reject;
-      img.src = reader.result;
+      img.onerror=reject;
+      img.src=reader.result;
     };
-
-    reader.onerror = reject;
+    reader.onerror=reject;
     reader.readAsDataURL(file);
   });
 }
 
-function fitViewport() {
-  $("device").style.height = window.innerHeight + "px";
+function fitViewport(){
+  const h=window.visualViewport?window.visualViewport.height:window.innerHeight;
+  $("device").style.height=h+"px";
 }
-
-window.addEventListener("resize", fitViewport);
-window.addEventListener("orientationchange", () => setTimeout(fitViewport, 250));
+window.addEventListener("resize",fitViewport);
+if(window.visualViewport){
+  window.visualViewport.addEventListener("resize",fitViewport);
+  window.visualViewport.addEventListener("scroll",fitViewport);
+}
+window.addEventListener("orientationchange",()=>setTimeout(fitViewport,250));
 fitViewport();
 
-/* ---------- IDS ---------- */
+/* IDS */
 
-let uidCounter = clampNum(localStorage.getItem("uidCounter"), 1, 9999999, 1);
+let uidCounter=clampNum(localStorage.getItem("uidCounter"),1,9999999,1);
+function newId(){uidCounter++;safeSet("uidCounter",String(uidCounter));return"i"+uidCounter}
 
-function newId() {
-  uidCounter++;
-  safeSet("uidCounter", String(uidCounter));
-  return "i" + uidCounter;
-}
+/* LOCK */
 
-/* ---------- LOCK ---------- */
-
-const lockSettings = {
+const lockSettings={
   codeLength:4,
-  unlockMethod:localStorage.getItem("unlockMethod") || "sos",
+  unlockMethod:localStorage.getItem("unlockMethod")||"sos",
   attemptsToUnlock:3
 };
 
-let realPin = localStorage.getItem("realPin") || "1234";
-let currentInput = "";
-let attemptCount = 0;
-let sosArmed = false;
+let realPin=localStorage.getItem("realPin")||"1234";
+let currentInput="";
+let attemptCount=0;
+let sosArmed=false;
 
-function buildDots() {
-  const dots = $("dots");
-  dots.innerHTML = "";
-
-  for (let i = 0; i < lockSettings.codeLength; i++) {
-    const d = document.createElement("div");
-    d.className = "dot";
+function buildDots(){
+  const dots=$("dots");
+  dots.innerHTML="";
+  for(let i=0;i<lockSettings.codeLength;i++){
+    const d=document.createElement("div");
+    d.className="dot";
     dots.appendChild(d);
   }
 }
 
-function updateDots() {
-  document.querySelectorAll(".dot").forEach((d, i) => {
-    d.classList.toggle("filled", i < currentInput.length);
-  });
+function updateDots(){
+  document.querySelectorAll(".dot").forEach((d,i)=>d.classList.toggle("filled",i<currentInput.length));
 }
 
-function pressDigit(n) {
-  if (currentInput.length >= lockSettings.codeLength) return;
-
-  currentInput += n;
+function pressDigit(n){
+  if(currentInput.length>=lockSettings.codeLength)return;
+  currentInput+=n;
   updateDots();
-
-  if (currentInput.length === lockSettings.codeLength) {
-    setTimeout(checkCode, 260);
-  }
+  if(currentInput.length===lockSettings.codeLength)setTimeout(checkCode,260);
 }
 
-function deleteDigit() {
-  if (!currentInput.length) return;
-  currentInput = currentInput.slice(0, -1);
+function deleteDigit(){
+  if(!currentInput.length)return;
+  currentInput=currentInput.slice(0,-1);
   updateDots();
 }
 
-function checkCode() {
+function checkCode(){
   attemptCount++;
-
-  if (lockSettings.unlockMethod === "instant") {
-    if (currentInput === realPin) unlock();
-    else wrongCode();
+  if(lockSettings.unlockMethod==="instant"){
+    if(currentInput===realPin)unlock();else wrongCode();
     return;
   }
-
-  if (lockSettings.unlockMethod === "sos") {
-    if (sosArmed) {
-      sosArmed = false;
-      unlock();
-    } else {
-      wrongCode();
-    }
+  if(lockSettings.unlockMethod==="sos"){
+    if(sosArmed){sosArmed=false;unlock()}else wrongCode();
     return;
   }
-
-  if (lockSettings.unlockMethod === "attempts") {
-    if (attemptCount >= lockSettings.attemptsToUnlock) unlock();
-    else wrongCode();
+  if(lockSettings.unlockMethod==="attempts"){
+    if(attemptCount>=lockSettings.attemptsToUnlock)unlock();else wrongCode();
   }
 }
 
-function wrongCode() {
-  const dots = $("dots");
+function wrongCode(){
+  const dots=$("dots");
   dots.classList.add("wrong");
-
-  document.querySelectorAll(".dot").forEach(d => {
-    d.style.background = "#ff3b30";
-    d.style.borderColor = "#ff3b30";
+  document.querySelectorAll(".dot").forEach(d=>{
+    d.style.background="#ff3b30";
+    d.style.borderColor="#ff3b30";
   });
-
-  setTimeout(() => {
+  setTimeout(()=>{
     dots.classList.remove("wrong");
-    document.querySelectorAll(".dot").forEach(d => {
-      d.style.background = "";
-      d.style.borderColor = "";
+    document.querySelectorAll(".dot").forEach(d=>{
+      d.style.background="";
+      d.style.borderColor="";
       d.classList.remove("filled");
     });
-    currentInput = "";
-  }, 600);
+    currentInput="";
+  },600);
 }
 
-function unlock() {
+function unlock(){
   document.body.classList.add("unlocked");
   $("unlockScreen").classList.add("show");
   renderHome();
 }
 
-function lockBack() {
+function lockBack(){
   closeFolder();
   closeIconMenu();
   closeHomeSettings();
   exitEditMode();
   cancelChoose();
   cancelMoveMode();
-
   $("unlockScreen").classList.remove("show");
   document.body.classList.remove("unlocked");
-
-  currentInput = "";
-  attemptCount = 0;
-  sosArmed = false;
+  currentInput="";
+  attemptCount=0;
+  sosArmed=false;
   updateDots();
 }
 
-document.querySelectorAll(".key,.key-zero").forEach(k => {
-  k.addEventListener("click", () => pressDigit(k.dataset.digit));
+document.querySelectorAll(".key,.key-zero").forEach(k=>{
+  k.addEventListener("click",()=>pressDigit(k.dataset.digit));
 });
 
 /* SOS / CANCEL */
 
-let sosTimer = null;
-let sosLong = false;
+let sosTimer=null,sosLong=false;
 
-function sosStart() {
-  sosLong = false;
+function sosStart(){
+  sosLong=false;
   clearTimeout(sosTimer);
-
-  sosTimer = setTimeout(() => {
-    sosLong = true;
-    lockSettings.codeLength = lockSettings.codeLength === 4 ? 6 : 4;
-    currentInput = "";
-    sosArmed = false;
+  sosTimer=setTimeout(()=>{
+    sosLong=true;
+    lockSettings.codeLength=lockSettings.codeLength===4?6:4;
+    currentInput="";
+    sosArmed=false;
     buildDots();
     updateDots();
-  }, 3000);
+  },3000);
 }
 
-function sosEnd() {
+function sosEnd(){
   clearTimeout(sosTimer);
-
-  if (!sosLong) {
-    if (lockSettings.unlockMethod === "sos") sosArmed = true;
-    currentInput = "";
+  if(!sosLong){
+    if(lockSettings.unlockMethod==="sos")sosArmed=true;
+    currentInput="";
     updateDots();
-
-    $("sosKey").style.opacity = ".35";
-    setTimeout(() => $("sosKey").style.opacity = "1", 250);
+    $("sosKey").style.opacity=".35";
+    setTimeout(()=>$("sosKey").style.opacity="1",250);
   }
 }
 
-$("sosKey").addEventListener("mousedown", sosStart);
-$("sosKey").addEventListener("mouseup", sosEnd);
-$("sosKey").addEventListener("mouseleave", () => clearTimeout(sosTimer));
-$("sosKey").addEventListener("touchstart", e => {
-  e.preventDefault();
-  sosStart();
-}, { passive:false });
-$("sosKey").addEventListener("touchend", e => {
-  e.preventDefault();
-  sosEnd();
-}, { passive:false });
+$("sosKey").addEventListener("mousedown",sosStart);
+$("sosKey").addEventListener("mouseup",sosEnd);
+$("sosKey").addEventListener("mouseleave",()=>clearTimeout(sosTimer));
+$("sosKey").addEventListener("touchstart",e=>{e.preventDefault();sosStart()},{passive:false});
+$("sosKey").addEventListener("touchend",e=>{e.preventDefault();sosEnd()},{passive:false});
 
-let cancelTimer = null;
-let cancelLong = false;
+let cancelTimer=null,cancelLong=false;
 
-function cancelStart() {
-  cancelLong = false;
+function cancelStart(){
+  cancelLong=false;
   clearTimeout(cancelTimer);
-
-  cancelTimer = setTimeout(() => {
-    cancelLong = true;
+  cancelTimer=setTimeout(()=>{
+    cancelLong=true;
     openLockSettings();
-  }, 2000);
+  },2000);
 }
 
-function cancelEnd() {
+function cancelEnd(){
   clearTimeout(cancelTimer);
-  if (!cancelLong) deleteDigit();
+  if(!cancelLong)deleteDigit();
 }
 
-$("cancelKey").addEventListener("mousedown", cancelStart);
-$("cancelKey").addEventListener("mouseup", cancelEnd);
-$("cancelKey").addEventListener("mouseleave", () => clearTimeout(cancelTimer));
-$("cancelKey").addEventListener("touchstart", e => {
-  e.preventDefault();
-  cancelStart();
-}, { passive:false });
-$("cancelKey").addEventListener("touchend", e => {
-  e.preventDefault();
-  cancelEnd();
-}, { passive:false });
+$("cancelKey").addEventListener("mousedown",cancelStart);
+$("cancelKey").addEventListener("mouseup",cancelEnd);
+$("cancelKey").addEventListener("mouseleave",()=>clearTimeout(cancelTimer));
+$("cancelKey").addEventListener("touchstart",e=>{e.preventDefault();cancelStart()},{passive:false});
+$("cancelKey").addEventListener("touchend",e=>{e.preventDefault();cancelEnd()},{passive:false});
 
 /* LOCK SETTINGS */
 
-function openLockSettings() {
-  $("lockSettings").classList.add("show");
-}
+function openLockSettings(){$("lockSettings").classList.add("show")}
+function closeLockSettings(){$("lockSettings").classList.remove("show")}
+$("closeLockSettings").onclick=closeLockSettings;
 
-function closeLockSettings() {
-  $("lockSettings").classList.remove("show");
-}
-
-$("closeLockSettings").onclick = closeLockSettings;
-
-$("keySizeSlider").oninput = e => {
-  const v = clampNum(e.target.value, 60, 120, 96);
-  rootSet("--key-size", v + "px");
-  $("keySizeVal").textContent = v + " px";
-  safeSet("keySize", String(v));
+$("keySizeSlider").oninput=e=>{
+  const v=clampNum(e.target.value,60,120,96);
+  rootSet("--key-size",v+"px");
+  $("keySizeVal").textContent=v+" px";
+  safeSet("keySize",String(v));
 };
 
-let pinStepX = clampNum(localStorage.getItem("pinStepX"), -80, 80, 0);
-let pinStepY = clampNum(localStorage.getItem("pinStepY"), -80, 80, 0);
+let pinStepX=clampNum(localStorage.getItem("pinStepX"),-80,80,0);
+let pinStepY=clampNum(localStorage.getItem("pinStepY"),-80,80,0);
 
-const keyPos = {
+const keyPos={
   "1":{c:0,r:0},"2":{c:1,r:0},"3":{c:2,r:0},
   "4":{c:0,r:1},"5":{c:1,r:1},"6":{c:2,r:1},
   "7":{c:0,r:2},"8":{c:1,r:2},"9":{c:2,r:2},
   "0":{c:1,r:3}
 };
 
-function applyPinSpread() {
-  document.querySelectorAll(".key,.key-zero").forEach(el => {
-    const p = keyPos[el.dataset.digit];
-    if (!p) return;
-    el.style.setProperty("--kx", (p.c - 1) * pinStepX + "px");
-    el.style.setProperty("--ky", (p.r - 1) * pinStepY + "px");
+function applyPinSpread(){
+  document.querySelectorAll(".key,.key-zero").forEach(el=>{
+    const p=keyPos[el.dataset.digit];
+    if(!p)return;
+    el.style.setProperty("--kx",(p.c-1)*pinStepX+"px");
+    el.style.setProperty("--ky",(p.r-1)*pinStepY+"px");
   });
 }
 
-$("pinXSlider").oninput = e => {
-  pinStepX = clampNum(e.target.value, -80, 80, 0);
-  $("pinXVal").textContent = pinStepX + " px";
-  safeSet("pinStepX", String(pinStepX));
+$("pinXSlider").oninput=e=>{
+  pinStepX=clampNum(e.target.value,-80,80,0);
+  $("pinXVal").textContent=pinStepX+" px";
+  safeSet("pinStepX",String(pinStepX));
   applyPinSpread();
 };
 
-$("pinYSlider").oninput = e => {
-  pinStepY = clampNum(e.target.value, -80, 80, 0);
-  $("pinYVal").textContent = pinStepY + " px";
-  safeSet("pinStepY", String(pinStepY));
+$("pinYSlider").oninput=e=>{
+  pinStepY=clampNum(e.target.value,-80,80,0);
+  $("pinYVal").textContent=pinStepY+" px";
+  safeSet("pinStepY",String(pinStepY));
   applyPinSpread();
 };
 
-$("pinBlockSlider").oninput = e => {
-  const v = clampNum(e.target.value, -240, 140, 0);
-  rootSet("--pin-y", v + "px");
-  $("pinBlockVal").textContent = v + " px";
-  safeSet("pinBlockY", String(v));
+$("pinBlockSlider").oninput=e=>{
+  const v=clampNum(e.target.value,-240,140,0);
+  rootSet("--pin-y",v+"px");
+  $("pinBlockVal").textContent=v+" px";
+  safeSet("pinBlockY",String(v));
 };
 
-$("savePin").onclick = () => {
-  const v = $("realPinInput").value.replace(/\D/g, "").slice(0, 6);
-
-  if (!v) {
-    alert("Введите код");
-    return;
-  }
-
-  realPin = v;
-  safeSet("realPin", v);
+$("savePin").onclick=()=>{
+  const v=$("realPinInput").value.replace(/\D/g,"").slice(0,6);
+  if(!v){alert("Введите код");return}
+  realPin=v;
+  safeSet("realPin",v);
   alert("Сохранено");
 };
 
-$("pickLockBg").onclick = () => $("lockBgInput").click();
+$("pickLockBg").onclick=()=>$("lockBgInput").click();
 
-$("lockBgInput").onchange = async e => {
-  const f = e.target.files[0];
-  if (!f) return;
-
-  try {
-    const img = await readAndCompressImage(f, 1800, .82);
-    $("wallpaper").style.backgroundImage = `url("${img}")`;
-    safeSet("lockBg", img);
-  } catch {
-    alert("Не удалось загрузить изображение");
-  }
-
-  e.target.value = "";
+$("lockBgInput").onchange=async e=>{
+  const f=e.target.files[0];
+  if(!f)return;
+  try{
+    const img=await readAndCompressImage(f,1800,.82);
+    $("wallpaper").style.backgroundImage=`url("${img}")`;
+    safeSet("lockBg",img);
+  }catch{alert("Не удалось загрузить изображение")}
+  e.target.value="";
 };
 
-$("resetLockBg").onclick = () => {
-  $("wallpaper").style.backgroundImage = "none";
+$("resetLockBg").onclick=()=>{
+  $("wallpaper").style.backgroundImage="none";
   safeRemove("lockBg");
 };
 
-document.querySelectorAll("[data-method]").forEach(btn => {
-  btn.onclick = () => {
-    lockSettings.unlockMethod = btn.dataset.method;
-    safeSet("unlockMethod", lockSettings.unlockMethod);
-
-    document.querySelectorAll("[data-method]").forEach(b => b.classList.remove("active"));
+document.querySelectorAll("[data-method]").forEach(btn=>{
+  btn.onclick=()=>{
+    lockSettings.unlockMethod=btn.dataset.method;
+    safeSet("unlockMethod",lockSettings.unlockMethod);
+    document.querySelectorAll("[data-method]").forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
-
-    if (lockSettings.unlockMethod === "sos") $("methodHint").textContent = "Нажмите SOS, затем код";
-    if (lockSettings.unlockMethod === "attempts") $("methodHint").textContent = "После 3 попыток";
-    if (lockSettings.unlockMethod === "instant") $("methodHint").textContent = "При верном коде";
-
-    currentInput = "";
-    attemptCount = 0;
-    sosArmed = false;
+    if(lockSettings.unlockMethod==="sos")$("methodHint").textContent="Нажмите SOS, затем код";
+    if(lockSettings.unlockMethod==="attempts")$("methodHint").textContent="После 3 попыток";
+    if(lockSettings.unlockMethod==="instant")$("methodHint").textContent="При верном коде";
+    currentInput="";
+    attemptCount=0;
+    sosArmed=false;
     updateDots();
   };
 });
 
-document.querySelectorAll("[data-style]").forEach(btn => {
-  btn.onclick = () => {
-    const s = btn.dataset.style;
-
-    document.body.classList.remove("style-ios", "style-android");
-    document.body.classList.add("style-" + s);
-
-    safeSet("style", s);
-
-    document.querySelectorAll("[data-style]").forEach(b => b.classList.remove("active"));
+document.querySelectorAll("[data-style]").forEach(btn=>{
+  btn.onclick=()=>{
+    const s=btn.dataset.style;
+    document.body.classList.remove("style-ios","style-android");
+    document.body.classList.add("style-"+s);
+    safeSet("style",s);
+    document.querySelectorAll("[data-style]").forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
-
-    $("topLabel").innerHTML = s === "android"
-      ? "Введите PIN-код"
-      : "Смахните вверх для Face ID<br>или введите код-пароль";
+    $("topLabel").innerHTML=s==="android"?"Введите PIN-код":"Смахните вверх для Face ID<br>или введите код-пароль";
   };
 });
 
-/* ---------- HOME DATA ---------- */
-
-function blankIcon() {
-  return {
-    id:newId(),
-    name:"",
-    bg:"#444444",
-    emoji:"",
-    img:null,
-    badge:0,
-    folder:false,
-    items:[]
-  };
+function bindPxRootSlider({varName,storageKey,sliderId,labelId,fallback,min,max}){
+  const saved=localStorage.getItem(storageKey);
+  const start=clampNum(saved,min,max,fallback);
+  rootSet(varName,start+"px");
+  const slider=$(sliderId);
+  const label=$(labelId);
+  if(slider)slider.value=start;
+  if(label)label.textContent=start+" px";
+  if(slider){
+    slider.oninput=e=>{
+      const v=clampNum(e.target.value,min,max,fallback);
+      rootSet(varName,v+"px");
+      if(label)label.textContent=v+" px";
+      safeSet(storageKey,String(v));
+    };
+  }
 }
 
-function defaultPages() {
-  return [{
+function initScreenAreaControls(){
+  bindPxRootSlider({varName:"--bg-bleed-top",storageKey:"bgBleedTop",sliderId:"bgBleedTopSlider",labelId:"bgBleedTopVal",fallback:64,min:0,max:160});
+  bindPxRootSlider({varName:"--bg-bleed-bottom",storageKey:"bgBleedBottom",sliderId:"bgBleedBottomSlider",labelId:"bgBleedBottomVal",fallback:34,min:0,max:120});
+  bindPxRootSlider({varName:"--lock-title-y",storageKey:"lockTitleY",sliderId:"lockTitleYSlider",labelId:"lockTitleYVal",fallback:70,min:0,max:220});
+  bindPxRootSlider({varName:"--lock-dots-y",storageKey:"lockDotsY",sliderId:"lockDotsYSlider",labelId:"lockDotsYVal",fallback:145,min:40,max:300});
+  bindPxRootSlider({varName:"--lock-pin-bottom",storageKey:"lockPinBottom",sliderId:"lockPinBottomSlider",labelId:"lockPinBottomVal",fallback:18,min:-40,max:120});
+}
+
+/* HOME DATA */
+
+function blankIcon(){
+  return{id:newId(),name:"",bg:"#444444",emoji:"",img:null,badge:0,folder:false,items:[]};
+}
+
+function defaultPages(){
+  return[{
     bg:null,
     icons:[
-      {...blankIcon(), name:"Фото", emoji:"🌄", bg:"#ff9f0a"},
-      {...blankIcon(), name:"Музыка", emoji:"🎵", bg:"#ff2d55"},
-      {...blankIcon(), name:"Карты", emoji:"🗺", bg:"#34c759"},
-      {...blankIcon(), name:"Safari", emoji:"🌐", bg:"#007aff"}
+      {...blankIcon(),name:"Фото",emoji:"🌄",bg:"#ff9f0a"},
+      {...blankIcon(),name:"Музыка",emoji:"🎵",bg:"#ff2d55"},
+      {...blankIcon(),name:"Карты",emoji:"🗺",bg:"#34c759"},
+      {...blankIcon(),name:"Safari",emoji:"🌐",bg:"#007aff"}
     ]
   }];
 }
 
-function defaultDock() {
-  return [
-    {...blankIcon(), name:"Телефон", emoji:"☎️", bg:"#30d158"},
-    {...blankIcon(), name:"Почта", emoji:"✉️", bg:"#0a84ff"},
-    {...blankIcon(), name:"Камера", emoji:"📷", bg:"#8e8e93"},
-    {...blankIcon(), name:"Сообщения", emoji:"💬", bg:"#30d158"}
+function defaultDock(){
+  return[
+    {...blankIcon(),name:"Телефон",emoji:"☎️",bg:"#30d158"},
+    {...blankIcon(),name:"Почта",emoji:"✉️",bg:"#0a84ff"},
+    {...blankIcon(),name:"Камера",emoji:"📷",bg:"#8e8e93"},
+    {...blankIcon(),name:"Сообщения",emoji:"💬",bg:"#30d158"}
   ];
 }
 
-let storedVersion = clampNum(localStorage.getItem("dataVersion"), 0, 999, 0);
-let pages = loadJSON("pagesGrid", null);
-let dock = loadJSON("dock", null);
+let storedVersion=clampNum(localStorage.getItem("dataVersion"),0,999,0);
+let pages=loadJSON("pagesGrid",null);
+let dock=loadJSON("dock",null);
 
-if (!Array.isArray(pages) || !pages.length) pages = defaultPages();
-if (!Array.isArray(dock)) dock = defaultDock();
+if(!Array.isArray(pages)||!pages.length)pages=defaultPages();
+if(!Array.isArray(dock))dock=defaultDock();
 
-function normalizeIcon(ic) {
-  if (!ic || typeof ic !== "object") return null;
-
-  ic.id = ic.id || newId();
-  ic.name = typeof ic.name === "string" ? ic.name.slice(0, 40) : "";
-  ic.bg = normalizeColor(ic.bg || "#444444");
-  ic.emoji = typeof ic.emoji === "string" ? ic.emoji.slice(0, 8) : "";
-  ic.img = typeof ic.img === "string" ? ic.img : null;
-  ic.badge = clampNum(ic.badge, 0, 99999, 0);
-  ic.folder = !!ic.folder;
-
-  if (!Array.isArray(ic.items)) ic.items = [];
-  ic.items = ic.items.map(normalizeIcon);
+function normalizeIcon(ic){
+  if(!ic||typeof ic!=="object")return null;
+  ic.id=ic.id||newId();
+  ic.name=typeof ic.name==="string"?ic.name.slice(0,40):"";
+  ic.bg=normalizeColor(ic.bg||"#444444");
+  ic.emoji=typeof ic.emoji==="string"?ic.emoji.slice(0,8):"";
+  ic.img=typeof ic.img==="string"?ic.img:null;
+  ic.badge=clampNum(ic.badge,0,99999,0);
+  ic.folder=!!ic.folder;
+  if(!Array.isArray(ic.items))ic.items=[];
+  ic.items=ic.items.map(normalizeIcon);
   trimEmptyTail(ic.items);
-
   return ic;
 }
 
-function normalizeData() {
-  if (!Array.isArray(pages) || !pages.length) pages = defaultPages();
-
-  pages = pages.map(pg => {
-    if (!pg || typeof pg !== "object") pg = {};
-    pg.bg = typeof pg.bg === "string" ? pg.bg : null;
-    pg.icons = Array.isArray(pg.icons) ? pg.icons.map(normalizeIcon) : [];
+function normalizeData(){
+  if(!Array.isArray(pages)||!pages.length)pages=defaultPages();
+  pages=pages.map(pg=>{
+    if(!pg||typeof pg!=="object")pg={};
+    pg.bg=typeof pg.bg==="string"?pg.bg:null;
+    pg.icons=Array.isArray(pg.icons)?pg.icons.map(normalizeIcon):[];
     trimEmptyTail(pg.icons);
     return pg;
   });
-
-  dock = Array.isArray(dock) ? dock.map(normalizeIcon) : defaultDock();
+  dock=Array.isArray(dock)?dock.map(normalizeIcon):defaultDock();
   trimEmptyTail(dock);
-
-  if (!pages.length) pages = defaultPages();
-
-  if (storedVersion < DATA_VERSION) {
-    safeSet("dataVersion", String(DATA_VERSION));
-  }
+  if(!pages.length)pages=defaultPages();
+  if(storedVersion<DATA_VERSION)safeSet("dataVersion",String(DATA_VERSION));
 }
-
 normalizeData();
 
-function saveData() {
+function saveData(){
   normalizeData();
-  saveJSON("pagesGrid", pages);
-  saveJSON("dock", dock);
-  safeSet("dataVersion", String(DATA_VERSION));
+  saveJSON("pagesGrid",pages);
+  saveJSON("dock",dock);
+  safeSet("dataVersion",String(DATA_VERSION));
 }
 
-let currentPage = 0;
-const PAGE_SLOTS = 32;
-const DOCK_SLOTS = 4;
+let currentPage=0;
+const PAGE_SLOTS=32;
+const DOCK_SLOTS=4;
 
-let gridCols = clampNum(localStorage.getItem("gridCols"), 3, 6, 4);
-let gapX = clampNum(localStorage.getItem("gapX"), 0, 70, 10);
-let gapY = clampNum(localStorage.getItem("gapY"), 0, 90, 14);
-let iconSize = clampNum(localStorage.getItem("iconSize"), 36, 110, 60);
-let iconRadius = clampNum(localStorage.getItem("iconRadius"), 0, 55, 15);
-let iconOpacity = clampNum(localStorage.getItem("iconOpacity"), 0, 100, 100);
-let iconX = clampNum(localStorage.getItem("iconX"), -240, 240, 0);
-let iconY = clampNum(localStorage.getItem("iconY"), -240, 240, 0);
-let dockX = clampNum(localStorage.getItem("dockX"), -240, 240, 0);
-let dockY = clampNum(localStorage.getItem("dockY"), -240, 240, 0);
+let gridCols=clampNum(localStorage.getItem("gridCols"),3,6,4);
+let gapX=clampNum(localStorage.getItem("gapX"),0,70,10);
+let gapY=clampNum(localStorage.getItem("gapY"),0,90,14);
+let iconSize=clampNum(localStorage.getItem("iconSize"),36,110,60);
+let iconRadius=clampNum(localStorage.getItem("iconRadius"),0,55,15);
+let iconOpacity=clampNum(localStorage.getItem("iconOpacity"),0,100,100);
+let iconX=clampNum(localStorage.getItem("iconX"),-240,240,0);
+let iconY=clampNum(localStorage.getItem("iconY"),-240,240,0);
+let dockX=clampNum(localStorage.getItem("dockX"),-240,240,0);
+let dockY=clampNum(localStorage.getItem("dockY"),-240,240,0);
 
-let badgeCfg = loadJSON("badgeCfg", {
-  x:30,
-  y:-2,
-  w:20,
-  h:20,
-  fs:12
-});
+let badgeCfg=loadJSON("badgeCfg",{x:30,y:-2,w:20,h:20,fs:12});
+badgeCfg.x=clampNum(badgeCfg.x,-90,110,30);
+badgeCfg.y=clampNum(badgeCfg.y,-90,110,-2);
+badgeCfg.w=clampNum(badgeCfg.w,10,80,20);
+badgeCfg.h=clampNum(badgeCfg.h,10,70,20);
+badgeCfg.fs=clampNum(badgeCfg.fs,7,30,12);
 
-badgeCfg.x = clampNum(badgeCfg.x, -90, 110, 30);
-badgeCfg.y = clampNum(badgeCfg.y, -90, 110, -2);
-badgeCfg.w = clampNum(badgeCfg.w, 10, 80, 20);
-badgeCfg.h = clampNum(badgeCfg.h, 10, 70, 20);
-badgeCfg.fs = clampNum(badgeCfg.fs, 7, 30, 12);
-
-function applyVars() {
-  rootSet("--cols", gridCols);
-  rootSet("--gap-x", gapX + "px");
-  rootSet("--gap-y", gapY + "px");
-  rootSet("--icon-size", iconSize + "px");
-  rootSet("--icon-radius", iconRadius + "px");
-  rootSet("--icon-opacity", iconOpacity / 100);
-  rootSet("--icon-x", iconX + "px");
-  rootSet("--icon-y", iconY + "px");
-  rootSet("--dock-x", dockX + "px");
-  rootSet("--dock-y", dockY + "px");
-  rootSet("--badge-x", badgeCfg.x + "px");
-  rootSet("--badge-y", badgeCfg.y + "px");
-  rootSet("--badge-w", badgeCfg.w + "px");
-  rootSet("--badge-h", badgeCfg.h + "px");
-  rootSet("--badge-fs", badgeCfg.fs + "px");
+function applyVars(){
+  rootSet("--cols",gridCols);
+  rootSet("--gap-x",gapX+"px");
+  rootSet("--gap-y",gapY+"px");
+  rootSet("--icon-size",iconSize+"px");
+  rootSet("--icon-radius",iconRadius+"px");
+  rootSet("--icon-opacity",iconOpacity/100);
+  rootSet("--icon-x",iconX+"px");
+  rootSet("--icon-y",iconY+"px");
+  rootSet("--dock-x",dockX+"px");
+  rootSet("--dock-y",dockY+"px");
+  rootSet("--badge-x",badgeCfg.x+"px");
+  rootSet("--badge-y",badgeCfg.y+"px");
+  rootSet("--badge-w",badgeCfg.w+"px");
+  rootSet("--badge-h",badgeCfg.h+"px");
+  rootSet("--badge-fs",badgeCfg.fs+"px");
 }
 
-function saveHomeCfg() {
-  safeSet("gridCols", String(gridCols));
-  safeSet("gapX", String(gapX));
-  safeSet("gapY", String(gapY));
-  safeSet("iconSize", String(iconSize));
-  safeSet("iconRadius", String(iconRadius));
-  safeSet("iconOpacity", String(iconOpacity));
-  safeSet("iconX", String(iconX));
-  safeSet("iconY", String(iconY));
-  safeSet("dockX", String(dockX));
-  safeSet("dockY", String(dockY));
-  saveJSON("badgeCfg", badgeCfg);
+function saveHomeCfg(){
+  safeSet("gridCols",String(gridCols));
+  safeSet("gapX",String(gapX));
+  safeSet("gapY",String(gapY));
+  safeSet("iconSize",String(iconSize));
+  safeSet("iconRadius",String(iconRadius));
+  safeSet("iconOpacity",String(iconOpacity));
+  safeSet("iconX",String(iconX));
+  safeSet("iconY",String(iconY));
+  safeSet("dockX",String(dockX));
+  safeSet("dockY",String(dockY));
+  saveJSON("badgeCfg",badgeCfg);
 }
 
-function isEdit() {
-  return $("phone").classList.contains("edit");
-}
+function isEdit(){return $("phone").classList.contains("edit")}
+function badgeText(n){n=clampNum(n,0,99999,0);if(n<=0)return"";return n>9999?Math.floor(n/1000)+"k":String(n)}
 
-function badgeText(n) {
-  n = clampNum(n, 0, 99999, 0);
-  if (n <= 0) return "";
-  return n > 9999 ? Math.floor(n / 1000) + "k" : String(n);
-}
-
-/* ---------- RENDER ICONS SAFELY ---------- */
-
-function makeIconVisual(ic) {
-  if (!ic) {
-    const icon = document.createElement("div");
-    icon.className = "icon empty-icon";
-    icon.textContent = "＋";
-
-    const label = document.createElement("div");
-    label.className = "label empty-label";
-    label.textContent = "Пусто";
-
-    return [icon, label];
+function makeIconVisual(ic){
+  if(!ic){
+    const icon=document.createElement("div");
+    icon.className="icon empty-icon";
+    icon.textContent="＋";
+    const label=document.createElement("div");
+    label.className="label empty-label";
+    label.textContent="Пусто";
+    return[icon,label];
   }
 
-  const nodes = [];
+  const nodes=[];
 
-  if (ic.folder) {
-    const folder = document.createElement("div");
-    folder.className = "folder";
-
-    const items = (ic.items || []).slice(0, 9);
-
-    for (let i = 0; i < 9; i++) {
-      const mini = document.createElement("div");
-      mini.className = "mini";
-
-      const it = items[i];
-
-      if (it) {
-        if (it.img) {
-          mini.style.backgroundImage = `url("${it.img}")`;
-        } else {
-          mini.style.background = normalizeColor(it.bg);
-          mini.textContent = it.emoji || "";
+  if(ic.folder){
+    const folder=document.createElement("div");
+    folder.className="folder";
+    const items=(ic.items||[]).slice(0,9);
+    for(let i=0;i<9;i++){
+      const mini=document.createElement("div");
+      mini.className="mini";
+      const it=items[i];
+      if(it){
+        if(it.img)mini.style.backgroundImage=`url("${it.img}")`;
+        else{
+          mini.style.background=normalizeColor(it.bg);
+          mini.textContent=it.emoji||"";
         }
-      } else {
-        mini.style.background = "transparent";
-      }
-
+      }else mini.style.background="transparent";
       folder.appendChild(mini);
     }
-
     nodes.push(folder);
-  } else {
-    const icon = document.createElement("div");
-    icon.className = "icon";
-
-    if (ic.img) {
-      icon.style.backgroundImage = `url("${ic.img}")`;
-    } else {
-      icon.style.background = normalizeColor(ic.bg);
-      icon.textContent = ic.emoji || "";
+  }else{
+    const icon=document.createElement("div");
+    icon.className="icon";
+    if(ic.img)icon.style.backgroundImage=`url("${ic.img}")`;
+    else{
+      icon.style.background=normalizeColor(ic.bg);
+      icon.textContent=ic.emoji||"";
     }
-
     nodes.push(icon);
   }
 
-  const b = badgeText(ic.badge);
-
-  if (b) {
-    const badge = document.createElement("div");
-    badge.className = "badge";
-    badge.textContent = b;
+  const b=badgeText(ic.badge);
+  if(b){
+    const badge=document.createElement("div");
+    badge.className="badge";
+    badge.textContent=b;
     nodes.push(badge);
   }
 
-  const label = document.createElement("div");
-  label.className = "label";
-  label.textContent = ic.name || "";
+  const label=document.createElement("div");
+  label.className="label";
+  label.textContent=ic.name||"";
   nodes.push(label);
 
   return nodes;
 }
 
-function buildCell(ic, context, index, pageIndex) {
-  const cell = document.createElement("div");
-  cell.className = "cell";
-  if (!ic) cell.classList.add("empty-cell");
-
-  const nodes = makeIconVisual(ic);
-  nodes.forEach(n => cell.appendChild(n));
-
-  attachCell(cell, ic, context, index, pageIndex);
-
-  if (ic) {
-    const del = document.createElement("div");
-    del.className = "del";
-    del.textContent = "×";
-    del.onclick = e => {
+function buildCell(ic,context,index,pageIndex){
+  const cell=document.createElement("div");
+  cell.className="cell";
+  if(!ic)cell.classList.add("empty-cell");
+  makeIconVisual(ic).forEach(n=>cell.appendChild(n));
+  attachCell(cell,ic,context,index,pageIndex);
+  if(ic){
+    const del=document.createElement("div");
+    del.className="del";
+    del.textContent="×";
+    del.onclick=e=>{
       e.stopPropagation();
-      deleteAt(context, index, pageIndex);
+      deleteAt(context,index,pageIndex);
     };
     cell.appendChild(del);
   }
-
   return cell;
 }
 
-function renderHome() {
+function renderHome(){
   applyVars();
 
-  const hw = $("homeWallpaper");
-  const pg = pages[currentPage];
+  const hw=$("homeWallpaper");
+  const pg=pages[currentPage];
 
-  if (pg && pg.bg) {
-    hw.style.backgroundImage = `url("${pg.bg}")`;
-  } else {
-    const common = localStorage.getItem("homeBg");
-    hw.style.backgroundImage = common ? `url("${common}")` : "none";
-    if (!common) hw.style.background = "#000";
+  if(pg&&pg.bg)hw.style.backgroundImage=`url("${pg.bg}")`;
+  else{
+    const common=localStorage.getItem("homeBg");
+    hw.style.backgroundImage=common?`url("${common}")`:"none";
+    if(!common)hw.style.background="#000";
   }
 
-  const track = $("pagesTrack");
-  track.innerHTML = "";
+  const track=$("pagesTrack");
+  track.innerHTML="";
 
-  pages.forEach((page, pi) => {
-    const pageEl = document.createElement("div");
-    pageEl.className = "page";
+  pages.forEach((page,pi)=>{
+    const pageEl=document.createElement("div");
+    pageEl.className="page";
+    const grid=document.createElement("div");
+    grid.className="grid";
 
-    const grid = document.createElement("div");
-    grid.className = "grid";
-
-    const count = isEdit()
-      ? Math.max(PAGE_SLOTS, page.icons.length + 4)
-      : page.icons.length;
-
-    for (let i = 0; i < count; i++) {
-      grid.appendChild(buildCell(page.icons[i] || null, "page", i, pi));
-    }
+    const count=isEdit()?Math.max(PAGE_SLOTS,page.icons.length+4):page.icons.length;
+    for(let i=0;i<count;i++)grid.appendChild(buildCell(page.icons[i]||null,"page",i,pi));
 
     pageEl.appendChild(grid);
     track.appendChild(pageEl);
   });
 
-  goToPage(currentPage, false);
+  goToPage(currentPage,false);
   renderDock();
   renderDots();
 }
 
-function renderDock() {
-  const d = $("dock");
-  d.innerHTML = "";
-
-  const count = isEdit()
-    ? Math.max(DOCK_SLOTS, dock.length)
-    : dock.length;
-
-  for (let i = 0; i < count; i++) {
-    d.appendChild(buildCell(dock[i] || null, "dock", i, -1));
-  }
+function renderDock(){
+  const d=$("dock");
+  d.innerHTML="";
+  const count=isEdit()?Math.max(DOCK_SLOTS,dock.length):dock.length;
+  for(let i=0;i<count;i++)d.appendChild(buildCell(dock[i]||null,"dock",i,-1));
 }
 
-function renderDots() {
-  const d = $("pageDots");
-  d.innerHTML = "";
-
-  pages.forEach((_, i) => {
-    const dot = document.createElement("div");
-    dot.className = "pdot" + (i === currentPage ? " active" : "");
-    dot.onclick = () => goToPage(i, true);
-
-    dot.oncontextmenu = e => {
+function renderDots(){
+  const d=$("pageDots");
+  d.innerHTML="";
+  pages.forEach((_,i)=>{
+    const dot=document.createElement("div");
+    dot.className="pdot"+(i===currentPage?" active":"");
+    dot.onclick=()=>goToPage(i,true);
+    dot.oncontextmenu=e=>{
       e.preventDefault();
       tryDeleteEmptyPage(i);
     };
-
-    let timer = null;
-    dot.addEventListener("touchstart", () => {
-      timer = setTimeout(() => tryDeleteEmptyPage(i), 800);
-    }, { passive:true });
-    dot.addEventListener("touchend", () => clearTimeout(timer));
-    dot.addEventListener("touchmove", () => clearTimeout(timer));
-
+    let timer=null;
+    dot.addEventListener("touchstart",()=>{timer=setTimeout(()=>tryDeleteEmptyPage(i),800)},{passive:true});
+    dot.addEventListener("touchend",()=>clearTimeout(timer));
+    dot.addEventListener("touchmove",()=>clearTimeout(timer));
     d.appendChild(dot);
   });
 }
 
-function tryDeleteEmptyPage(i) {
-  if (pages.length <= 1) return;
-  if (!isEdit()) return;
-
-  const pg = pages[i];
-  const hasIcons = pg.icons.some(Boolean);
-
-  if (hasIcons) {
-    alert("Удалить можно только пустой экран.");
-    return;
-  }
-
-  if (!confirm("Удалить пустой экран?")) return;
-
-  pages.splice(i, 1);
-  if (currentPage >= pages.length) currentPage = pages.length - 1;
-
+function tryDeleteEmptyPage(i){
+  if(pages.length<=1)return;
+  if(!isEdit())return;
+  const pg=pages[i];
+  const hasIcons=pg.icons.some(Boolean);
+  if(hasIcons){alert("Удалить можно только пустой экран.");return}
+  if(!confirm("Удалить пустой экран?"))return;
+  pages.splice(i,1);
+  if(currentPage>=pages.length)currentPage=pages.length-1;
   saveData();
   renderHome();
 }
 
-function goToPage(i, anim) {
-  currentPage = Math.max(0, Math.min(pages.length - 1, i));
-
-  const track = $("pagesTrack");
-  track.style.transition = anim ? "transform .3s ease" : "none";
-  track.style.transform = `translateX(${-currentPage * 100}%)`;
-
+function goToPage(i,anim){
+  currentPage=Math.max(0,Math.min(pages.length-1,i));
+  const track=$("pagesTrack");
+  track.style.transition=anim?"transform .3s ease":"none";
+  track.style.transform=`translateX(${-currentPage*100}%)`;
   renderDots();
 }
 
-/* ---------- CELL LOGIC ---------- */
+/* CELL LOGIC */
 
-let iconCtx = null;
-let folderCtx = null;
-let choosingTrigger = false;
-let choosingLock = false;
-let triggerIconId = localStorage.getItem("triggerIconId") || "";
-let lockIconId = localStorage.getItem("lockIconId") || "";
+let iconCtx=null;
+let folderCtx=null;
+let choosingTrigger=false;
+let choosingLock=false;
+let triggerIconId=localStorage.getItem("triggerIconId")||"";
+let lockIconId=localStorage.getItem("lockIconId")||"";
+let movingCtx=null;
+const iconTapState=new Map();
 
-let movingCtx = null;
-
-const iconTapState = new Map();
-
-function findIcon(id) {
-  for (let p = 0; p < pages.length; p++) {
-    const idx = pages[p].icons.findIndex(x => x && x.id === id);
-    if (idx >= 0) return { icon:pages[p].icons[idx], context:"page", page:p, index:idx };
+function findIcon(id){
+  for(let p=0;p<pages.length;p++){
+    const idx=pages[p].icons.findIndex(x=>x&&x.id===id);
+    if(idx>=0)return{icon:pages[p].icons[idx],context:"page",page:p,index:idx};
   }
+  const di=dock.findIndex(x=>x&&x.id===id);
+  if(di>=0)return{icon:dock[di],context:"dock",page:-1,index:di};
 
-  const di = dock.findIndex(x => x && x.id === id);
-  if (di >= 0) return { icon:dock[di], context:"dock", page:-1, index:di };
-
-  for (let p = 0; p < pages.length; p++) {
-    for (let i = 0; i < pages[p].icons.length; i++) {
-      const ic = pages[p].icons[i];
-
-      if (ic && ic.folder && Array.isArray(ic.items)) {
-        const fi = ic.items.findIndex(x => x && x.id === id);
-
-        if (fi >= 0) {
-          return { icon:ic.items[fi], context:"folder", parent:ic, page:p, index:fi };
-        }
+  for(let p=0;p<pages.length;p++){
+    for(let i=0;i<pages[p].icons.length;i++){
+      const ic=pages[p].icons[i];
+      if(ic&&ic.folder&&Array.isArray(ic.items)){
+        const fi=ic.items.findIndex(x=>x&&x.id===id);
+        if(fi>=0)return{icon:ic.items[fi],context:"folder",parent:ic,page:p,index:fi};
       }
     }
   }
-
   return null;
 }
 
-function getArrayByContext(context, pageIndex) {
-  if (context === "dock") return dock;
-  if (context === "page") return pages[pageIndex].icons;
-  if (context === "folder" && folderCtx) return folderCtx.icon.items;
+function getArrayByContext(context,pageIndex){
+  if(context==="dock")return dock;
+  if(context==="page")return pages[pageIndex].icons;
+  if(context==="folder"&&folderCtx)return folderCtx.icon.items;
   return null;
 }
 
-function createIconAt(context, index, pageIndex) {
-  const ic = blankIcon();
-  const arr = getArrayByContext(context, pageIndex);
-  if (!arr) return;
-
-  arr[index] = ic;
-
+function createIconAt(context,index,pageIndex){
+  const ic=blankIcon();
+  const arr=getArrayByContext(context,pageIndex);
+  if(!arr)return;
+  arr[index]=ic;
   saveData();
   renderHome();
-  if (folderCtx) renderFolderBox(folderCtx.icon);
-  openIconMenu(ic, context, index, pageIndex);
+  if(folderCtx)renderFolderBox(folderCtx.icon);
+  openIconMenu(ic,context,index,pageIndex);
 }
 
-function deleteAt(context, index, pageIndex) {
-  const arr = getArrayByContext(context, pageIndex);
-  if (!arr) return;
-
-  arr[index] = null;
+function deleteAt(context,index,pageIndex){
+  const arr=getArrayByContext(context,pageIndex);
+  if(!arr)return;
+  arr[index]=null;
   trimEmptyTail(arr);
 
-  if (context === "folder" && folderCtx && folderCtx.icon.items.every(x => !x)) {
-    folderCtx.icon.items = [];
-  }
+  if(context==="folder"&&folderCtx&&folderCtx.icon.items.every(x=>!x))folderCtx.icon.items=[];
 
   saveData();
   renderHome();
-  if (folderCtx) renderFolderBox(folderCtx.icon);
+  if(folderCtx)renderFolderBox(folderCtx.icon);
 }
 
-function startMove(context, index, pageIndex) {
-  const arr = getArrayByContext(context, pageIndex);
-  if (!arr || !arr[index]) return;
-
-  movingCtx = {
-    context,
-    index,
-    pageIndex,
-    icon:arr[index]
-  };
-
+function startMove(context,index,pageIndex){
+  const arr=getArrayByContext(context,pageIndex);
+  if(!arr||!arr[index])return;
+  movingCtx={context,index,pageIndex,icon:arr[index]};
   $("phone").classList.add("moving");
   closeIconMenu();
   showChoose("Выберите пустую ячейку для переноса");
-  if (!isEdit()) enterEditMode();
+  if(!isEdit())enterEditMode();
 }
 
-function cancelMoveMode() {
-  movingCtx = null;
+function cancelMoveMode(){
+  movingCtx=null;
   $("phone").classList.remove("moving");
   $("chooseHint").classList.remove("show");
 }
 
-function placeMovedIcon(context, index, pageIndex) {
-  if (!movingCtx) return;
+function placeMovedIcon(context,index,pageIndex){
+  if(!movingCtx)return;
+  const fromArr=getArrayByContext(movingCtx.context,movingCtx.pageIndex);
+  const toArr=getArrayByContext(context,pageIndex);
+  if(!fromArr||!toArr)return;
+  if(toArr[index]){alert("Выберите пустую ячейку.");return}
 
-  const fromArr = getArrayByContext(movingCtx.context, movingCtx.pageIndex);
-  const toArr = getArrayByContext(context, pageIndex);
-
-  if (!fromArr || !toArr) return;
-  if (toArr[index]) {
-    alert("Выберите пустую ячейку.");
-    return;
-  }
-
-  toArr[index] = movingCtx.icon;
-  fromArr[movingCtx.index] = null;
-
+  toArr[index]=movingCtx.icon;
+  fromArr[movingCtx.index]=null;
   trimEmptyTail(fromArr);
   trimEmptyTail(toArr);
 
   cancelMoveMode();
   saveData();
   renderHome();
-  if (folderCtx) renderFolderBox(folderCtx.icon);
+  if(folderCtx)renderFolderBox(folderCtx.icon);
 }
 
-function registerDoubleIconTap(id, callback) {
-  const now = Date.now();
-  const prev = iconTapState.get(id) || 0;
-
-  if (now - prev < 450) {
-    iconTapState.set(id, 0);
+function registerDoubleIconTap(id,callback){
+  const now=Date.now();
+  const prev=iconTapState.get(id)||0;
+  if(now-prev<450){
+    iconTapState.set(id,0);
     callback();
     return true;
   }
-
-  iconTapState.set(id, now);
-
-  setTimeout(() => {
-    if (iconTapState.get(id) === now) iconTapState.set(id, 0);
-  }, 500);
-
+  iconTapState.set(id,now);
+  setTimeout(()=>{
+    if(iconTapState.get(id)===now)iconTapState.set(id,0);
+  },500);
   return false;
 }
 
-function attachCell(cell, ic, context, index, pageIndex) {
-  cell.onclick = e => {
+function attachCell(cell,ic,context,index,pageIndex){
+  cell.onclick=e=>{
     e.stopPropagation();
 
-    if (!ic) {
-      if (movingCtx) {
-        placeMovedIcon(context, index, pageIndex);
-        return;
-      }
-
-      if (isEdit()) {
-        createIconAt(context, index, pageIndex);
-      }
-
+    if(!ic){
+      if(movingCtx){placeMovedIcon(context,index,pageIndex);return}
+      if(isEdit())createIconAt(context,index,pageIndex);
       return;
     }
 
-    if (choosingTrigger) {
-      triggerIconId = ic.id;
-      safeSet("triggerIconId", triggerIconId);
+    if(choosingTrigger){
+      triggerIconId=ic.id;
+      safeSet("triggerIconId",triggerIconId);
       cancelChoose();
       openHomeSettings();
       syncTriggerLabels();
       return;
     }
 
-    if (choosingLock) {
-      lockIconId = ic.id;
-      safeSet("lockIconId", lockIconId);
+    if(choosingLock){
+      lockIconId=ic.id;
+      safeSet("lockIconId",lockIconId);
       cancelChoose();
       openHomeSettings();
       syncTriggerLabels();
       return;
     }
 
-    if (isEdit()) {
-      openIconMenu(ic, context, index, pageIndex);
+    if(isEdit()){
+      openIconMenu(ic,context,index,pageIndex);
       return;
     }
 
-    if (ic.id === triggerIconId) {
-      const done = registerDoubleIconTap(ic.id + "_trigger", openHomeSettings);
-      if (done) return;
+    if(ic.id===triggerIconId){
+      const done=registerDoubleIconTap(ic.id+"_trigger",openHomeSettings);
+      if(done)return;
     }
 
-    if (ic.id === lockIconId) {
-      const done = registerDoubleIconTap(ic.id + "_lock", lockBack);
-      if (done) return;
+    if(ic.id===lockIconId){
+      const done=registerDoubleIconTap(ic.id+"_lock",lockBack);
+      if(done)return;
     }
 
-    if (ic.folder) {
-      openFolder(ic, context, index, pageIndex);
-    }
+    if(ic.folder)openFolder(ic,context,index,pageIndex);
   };
 
-  let timer = null;
-
-  const start = () => {
-    if (!ic) return;
-
+  let timer=null;
+  const start=()=>{
+    if(!ic)return;
     clearTimeout(timer);
-
-    timer = setTimeout(() => {
-      if (!isEdit()) enterEditMode();
-      openIconMenu(ic, context, index, pageIndex);
-    }, 550);
+    timer=setTimeout(()=>{
+      if(!isEdit())enterEditMode();
+      openIconMenu(ic,context,index,pageIndex);
+    },550);
   };
+  const end=()=>clearTimeout(timer);
 
-  const end = () => clearTimeout(timer);
-
-  cell.addEventListener("mousedown", start);
-  cell.addEventListener("mouseup", end);
-  cell.addEventListener("mouseleave", end);
-  cell.addEventListener("touchstart", start, { passive:true });
-  cell.addEventListener("touchend", end);
-  cell.addEventListener("touchmove", end);
+  cell.addEventListener("mousedown",start);
+  cell.addEventListener("mouseup",end);
+  cell.addEventListener("mouseleave",end);
+  cell.addEventListener("touchstart",start,{passive:true});
+  cell.addEventListener("touchend",end);
+  cell.addEventListener("touchmove",end);
 }
 
-function enterEditMode() {
+function enterEditMode(){
   $("phone").classList.add("edit");
   $("tgEdit").classList.add("on");
   renderHome();
 }
 
-function exitEditMode() {
+function exitEditMode(){
   $("phone").classList.remove("edit");
   $("tgEdit").classList.remove("on");
   cancelMoveMode();
   renderHome();
 }
 
-$("editDone").onclick = exitEditMode;
-$("cancelMove").onclick = cancelMoveMode;
+$("editDone").onclick=exitEditMode;
+$("cancelMove").onclick=cancelMoveMode;
 
-/* ---------- FOLDER ---------- */
+/* FOLDER */
 
-function openFolder(ic, context, index, pageIndex) {
-  folderCtx = { icon:ic, context, index, pageIndex };
-  $("folderTitle").textContent = ic.name || "Папка";
+function openFolder(ic,context,index,pageIndex){
+  folderCtx={icon:ic,context,index,pageIndex};
+  $("folderTitle").textContent=ic.name||"Папка";
   renderFolderBox(ic);
   $("folderView").classList.add("open");
 }
 
-function closeFolder() {
+function closeFolder(){
   $("folderView").classList.remove("open");
-  folderCtx = null;
+  folderCtx=null;
 }
 
-function renderFolderBox(ic) {
-  const box = $("folderBox");
-  box.innerHTML = "";
+function renderFolderBox(ic){
+  const box=$("folderBox");
+  box.innerHTML="";
+  const count=isEdit()?Math.max(9,ic.items.length+3):ic.items.length;
 
-  const count = isEdit()
-    ? Math.max(9, ic.items.length + 3)
-    : ic.items.length;
-
-  if (!isEdit() && !ic.items.some(Boolean)) {
-    const hint = document.createElement("div");
-    hint.className = "folder-empty-hint";
-    hint.style.gridColumn = "1 / -1";
-    hint.textContent = "Папка пуста. Включите режим редактирования, чтобы добавить иконки.";
+  if(!isEdit()&&!ic.items.some(Boolean)){
+    const hint=document.createElement("div");
+    hint.className="folder-empty-hint";
+    hint.style.gridColumn="1 / -1";
+    hint.textContent="Папка пуста. Включите режим редактирования, чтобы добавить иконки.";
     box.appendChild(hint);
     return;
   }
 
-  for (let i = 0; i < count; i++) {
-    box.appendChild(buildCell(ic.items[i] || null, "folder", i, currentPage));
-  }
+  for(let i=0;i<count;i++)box.appendChild(buildCell(ic.items[i]||null,"folder",i,currentPage));
 }
 
-$("folderView").onclick = e => {
-  if (e.target.id === "folderView") closeFolder();
+$("folderView").onclick=e=>{
+  if(e.target.id==="folderView")closeFolder();
 };
 
-/* ---------- ICON MENU ---------- */
+/* ICON MENU */
 
-function openIconMenu(ic, context, index, pageIndex) {
-  iconCtx = { icon:ic, context, index, pageIndex };
+function openIconMenu(ic,context,index,pageIndex){
+  iconCtx={icon:ic,context,index,pageIndex};
 
-  const p = $("menuPreview");
-  p.style.backgroundImage = "none";
-  p.textContent = "";
+  const p=$("menuPreview");
+  p.style.backgroundImage="none";
+  p.textContent="";
 
-  if (ic.folder) {
-    p.style.background = "#333";
-    p.textContent = "📁";
-  } else if (ic.img) {
-    p.style.backgroundImage = `url("${ic.img}")`;
-  } else {
-    p.style.background = normalizeColor(ic.bg);
-    p.textContent = ic.emoji || "";
+  if(ic.folder){
+    p.style.background="#333";
+    p.textContent="📁";
+  }else if(ic.img){
+    p.style.backgroundImage=`url("${ic.img}")`;
+  }else{
+    p.style.background=normalizeColor(ic.bg);
+    p.textContent=ic.emoji||"";
   }
 
-  $("menuTitle").textContent = ic.name || (ic.folder ? "Папка" : "Иконка");
-  $("menuName").value = ic.name || "";
-  $("menuEmoji").value = ic.emoji || "";
-  $("menuColor").value = normalizeColor(ic.bg);
-  $("menuColorText").value = normalizeColor(ic.bg);
-  $("menuBadge").value = clampNum(ic.badge, 0, 99999, 0);
-  $("makeFolder").textContent = ic.folder ? "📁 Открыть папку" : "📁 Сделать папкой";
-
+  $("menuTitle").textContent=ic.name||(ic.folder?"Папка":"Иконка");
+  $("menuName").value=ic.name||"";
+  $("menuEmoji").value=ic.emoji||"";
+  $("menuColor").value=normalizeColor(ic.bg);
+  $("menuColorText").value=normalizeColor(ic.bg);
+  $("menuBadge").value=clampNum(ic.badge,0,99999,0);
+  $("makeFolder").textContent=ic.folder?"📁 Открыть папку":"📁 Сделать папкой";
   $("iconMenu").classList.add("open");
 }
 
-function closeIconMenu() {
+function closeIconMenu(){
   $("iconMenu").classList.remove("open");
-  iconCtx = null;
+  iconCtx=null;
 }
 
-$("iconMenu").onclick = e => {
-  if (e.target.id === "iconMenu") closeIconMenu();
+$("iconMenu").onclick=e=>{
+  if(e.target.id==="iconMenu")closeIconMenu();
 };
+$("iconMenuCard").onclick=e=>e.stopPropagation();
+$("closeIconMenu").onclick=closeIconMenu;
 
-$("iconMenuCard").onclick = e => e.stopPropagation();
-$("closeIconMenu").onclick = closeIconMenu;
-
-function afterIconChange() {
+function afterIconChange(){
   saveData();
   renderHome();
-  if (folderCtx) renderFolderBox(folderCtx.icon);
-  if (iconCtx) openIconMenu(iconCtx.icon, iconCtx.context, iconCtx.index, iconCtx.pageIndex);
+  if(folderCtx)renderFolderBox(folderCtx.icon);
+  if(iconCtx)openIconMenu(iconCtx.icon,iconCtx.context,iconCtx.index,iconCtx.pageIndex);
 }
 
-$("saveName").onclick = () => {
-  if (!iconCtx) return;
-  iconCtx.icon.name = $("menuName").value.slice(0, 40);
+$("saveName").onclick=()=>{
+  if(!iconCtx)return;
+  iconCtx.icon.name=$("menuName").value.slice(0,40);
   afterIconChange();
 };
 
-$("saveEmoji").onclick = () => {
-  if (!iconCtx) return;
-  iconCtx.icon.emoji = $("menuEmoji").value.slice(0, 8);
-  iconCtx.icon.img = null;
+$("saveEmoji").onclick=()=>{
+  if(!iconCtx)return;
+  iconCtx.icon.emoji=$("menuEmoji").value.slice(0,8);
+  iconCtx.icon.img=null;
   afterIconChange();
 };
 
-$("menuColor").oninput = e => {
-  $("menuColorText").value = e.target.value;
+$("menuColor").oninput=e=>{
+  $("menuColorText").value=e.target.value;
 };
 
-$("saveColor").onclick = () => {
-  if (!iconCtx) return;
-  iconCtx.icon.bg = normalizeColor($("menuColorText").value || $("menuColor").value);
+$("saveColor").onclick=()=>{
+  if(!iconCtx)return;
+  iconCtx.icon.bg=normalizeColor($("menuColorText").value||$("menuColor").value);
   afterIconChange();
 };
 
-$("saveBadge").onclick = () => {
-  if (!iconCtx) return;
-  iconCtx.icon.badge = clampNum($("menuBadge").value, 0, 99999, 0);
+$("saveBadge").onclick=()=>{
+  if(!iconCtx)return;
+  iconCtx.icon.badge=clampNum($("menuBadge").value,0,99999,0);
   afterIconChange();
 };
 
-$("pickIconPhoto").onclick = () => $("iconPhotoInput").click();
+$("pickIconPhoto").onclick=()=>$("iconPhotoInput").click();
 
-$("iconPhotoInput").onchange = async e => {
-  const f = e.target.files[0];
-  if (!f || !iconCtx) return;
-
-  try {
-    const img = await readAndCompressImage(f, 512, .84);
-    iconCtx.icon.img = img;
-    iconCtx.icon.emoji = "";
+$("iconPhotoInput").onchange=async e=>{
+  const f=e.target.files[0];
+  if(!f||!iconCtx)return;
+  try{
+    const img=await readAndCompressImage(f,512,.84);
+    iconCtx.icon.img=img;
+    iconCtx.icon.emoji="";
     afterIconChange();
-  } catch {
-    alert("Не удалось загрузить изображение");
-  }
-
-  e.target.value = "";
+  }catch{alert("Не удалось загрузить изображение")}
+  e.target.value="";
 };
 
-$("resetIconPhoto").onclick = () => {
-  if (!iconCtx) return;
-  iconCtx.icon.img = null;
+$("resetIconPhoto").onclick=()=>{
+  if(!iconCtx)return;
+  iconCtx.icon.img=null;
   afterIconChange();
 };
 
-$("makeFolder").onclick = () => {
-  if (!iconCtx) return;
+$("makeFolder").onclick=()=>{
+  if(!iconCtx)return;
+  const ic=iconCtx.icon;
 
-  const ic = iconCtx.icon;
-
-  if (ic.folder) {
+  if(ic.folder){
     closeIconMenu();
-    openFolder(ic, iconCtx.context, iconCtx.index, iconCtx.pageIndex);
+    openFolder(ic,iconCtx.context,iconCtx.index,iconCtx.pageIndex);
     return;
   }
 
-  const oldIcon = {
+  const oldIcon={
     ...blankIcon(),
     name:ic.name,
     bg:ic.bg,
@@ -2602,398 +2115,377 @@ $("makeFolder").onclick = () => {
     items:[]
   };
 
-  ic.folder = true;
-  ic.items = [];
-  if (oldIcon.name || oldIcon.emoji || oldIcon.img) {
-    ic.items.push(oldIcon);
-  }
-
-  ic.img = null;
-  ic.emoji = "";
-  ic.badge = 0;
-  if (!ic.name) ic.name = "Папка";
-
+  ic.folder=true;
+  ic.items=[];
+  if(oldIcon.name||oldIcon.emoji||oldIcon.img)ic.items.push(oldIcon);
+  ic.img=null;
+  ic.emoji="";
+  ic.badge=0;
+  if(!ic.name)ic.name="Папка";
   afterIconChange();
 };
 
-$("moveIcon").onclick = () => {
-  if (!iconCtx) return;
-  startMove(iconCtx.context, iconCtx.index, iconCtx.pageIndex);
+$("moveIcon").onclick=()=>{
+  if(!iconCtx)return;
+  startMove(iconCtx.context,iconCtx.index,iconCtx.pageIndex);
 };
 
-$("deleteIcon").onclick = () => {
-  if (!iconCtx) return;
-  deleteAt(iconCtx.context, iconCtx.index, iconCtx.pageIndex);
+$("deleteIcon").onclick=()=>{
+  if(!iconCtx)return;
+  deleteAt(iconCtx.context,iconCtx.index,iconCtx.pageIndex);
   closeIconMenu();
 };
 
-/* ---------- HOME SETTINGS ---------- */
+/* HOME SETTINGS */
 
-function openHomeSettings() {
+function openHomeSettings(){
   $("homeSettings").classList.add("open");
   syncHomeSettings();
 }
 
-function closeHomeSettings() {
+function closeHomeSettings(){
   $("homeSettings").classList.remove("open");
 }
 
-$("closeHomeSettings").onclick = closeHomeSettings;
+$("closeHomeSettings").onclick=closeHomeSettings;
 
-document.querySelectorAll(".section-head").forEach(h => {
-  h.onclick = () => h.parentElement.classList.toggle("open");
+document.querySelectorAll(".section-head").forEach(h=>{
+  h.onclick=()=>h.parentElement.classList.toggle("open");
 });
 
-function setSlider(id, valId, get, set, suffix, needRender) {
-  const el = $(id);
-  const lab = $(valId);
+function setSlider(id,valId,get,set,suffix,needRender){
+  const el=$(id);
+  const lab=$(valId);
+  el.value=get();
+  lab.textContent=get()+suffix;
 
-  el.value = get();
-  lab.textContent = get() + suffix;
-
-  el.oninput = () => {
-    const v = parseInt(el.value, 10);
-
+  el.oninput=()=>{
+    const v=parseInt(el.value,10);
     set(v);
-    lab.textContent = v + suffix;
+    lab.textContent=v+suffix;
     applyVars();
     saveHomeCfg();
-
-    if (needRender) renderHome();
+    if(needRender)renderHome();
   };
 }
 
-function syncHomeSettings() {
-  setSlider("colsSlider", "colsVal", () => gridCols, v => gridCols = v, "", true);
-  setSlider("gapXSlider", "gapXVal", () => gapX, v => gapX = v, "px", false);
-  setSlider("gapYSlider", "gapYVal", () => gapY, v => gapY = v, "px", false);
+function syncHomeSettings(){
+  setSlider("colsSlider","colsVal",()=>gridCols,v=>gridCols=v,"",true);
+  setSlider("gapXSlider","gapXVal",()=>gapX,v=>gapX=v,"px",false);
+  setSlider("gapYSlider","gapYVal",()=>gapY,v=>gapY=v,"px",false);
 
-  setSlider("iconSizeSlider", "iconSizeVal", () => iconSize, v => iconSize = v, "px", false);
-  setSlider("iconRadiusSlider", "iconRadiusVal", () => iconRadius, v => iconRadius = v, "px", false);
+  setSlider("iconSizeSlider","iconSizeVal",()=>iconSize,v=>iconSize=v,"px",false);
+  setSlider("iconRadiusSlider","iconRadiusVal",()=>iconRadius,v=>iconRadius=v,"px",false);
 
-  setSlider("iconXSlider", "iconXVal", () => iconX, v => iconX = v, " px", false);
-  setSlider("iconYSlider", "iconYVal", () => iconY, v => iconY = v, " px", false);
+  setSlider("iconXSlider","iconXVal",()=>iconX,v=>iconX=v," px",false);
+  setSlider("iconYSlider","iconYVal",()=>iconY,v=>iconY=v," px",false);
 
-  setSlider("dockXSlider", "dockXVal", () => dockX, v => dockX = v, " px", false);
-  setSlider("dockYSlider", "dockYVal", () => dockY, v => dockY = v, " px", false);
+  setSlider("dockXSlider","dockXVal",()=>dockX,v=>dockX=v," px",false);
+  setSlider("dockYSlider","dockYVal",()=>dockY,v=>dockY=v," px",false);
 
-  setSlider("iconOpacitySlider", "iconOpacityVal", () => iconOpacity, v => iconOpacity = v, "%", false);
+  setSlider("iconOpacitySlider","iconOpacityVal",()=>iconOpacity,v=>iconOpacity=v,"%",false);
 
-  setSlider("badgeXSlider", "badgeXVal", () => badgeCfg.x, v => badgeCfg.x = v, " px", false);
-  setSlider("badgeYSlider", "badgeYVal", () => badgeCfg.y, v => badgeCfg.y = v, " px", false);
-  setSlider("badgeWSlider", "badgeWVal", () => badgeCfg.w, v => badgeCfg.w = v, " px", false);
-  setSlider("badgeHSlider", "badgeHVal", () => badgeCfg.h, v => badgeCfg.h = v, " px", false);
-  setSlider("badgeFsSlider", "badgeFsVal", () => badgeCfg.fs, v => badgeCfg.fs = v, " px", false);
+  setSlider("badgeXSlider","badgeXVal",()=>badgeCfg.x,v=>badgeCfg.x=v," px",false);
+  setSlider("badgeYSlider","badgeYVal",()=>badgeCfg.y,v=>badgeCfg.y=v," px",false);
+  setSlider("badgeWSlider","badgeWVal",()=>badgeCfg.w,v=>badgeCfg.w=v," px",false);
+  setSlider("badgeHSlider","badgeHVal",()=>badgeCfg.h,v=>badgeCfg.h=v," px",false);
+  setSlider("badgeFsSlider","badgeFsVal",()=>badgeCfg.fs,v=>badgeCfg.fs=v," px",false);
 
-  $("tgEdit").classList.toggle("on", isEdit());
-  $("tgBadges").classList.toggle("on", localStorage.getItem("showBadges") !== "0");
-  $("tgHold").classList.toggle("on", holdEnabled);
-  $("tgDouble").classList.toggle("on", doubleEnabled);
-  $("tgLockSwipe").classList.toggle("on", lockSwipeEnabled);
+  $("tgEdit").classList.toggle("on",isEdit());
+  $("tgBadges").classList.toggle("on",localStorage.getItem("showBadges")!=="0");
+  $("tgHold").classList.toggle("on",holdEnabled);
+  $("tgDouble").classList.toggle("on",doubleEnabled);
+  $("tgLockSwipe").classList.toggle("on",lockSwipeEnabled);
 
   syncTriggerLabels();
 }
 
-$("rowEdit").onclick = () => {
-  if (isEdit()) exitEditMode();
+$("rowEdit").onclick=()=>{
+  if(isEdit())exitEditMode();
   else enterEditMode();
 };
 
-$("rowBadges").onclick = () => {
-  const on = !$("tgBadges").classList.contains("on");
-  $("tgBadges").classList.toggle("on", on);
-  document.body.classList.toggle("hide-badges", !on);
-  safeSet("showBadges", on ? "1" : "0");
+$("rowBadges").onclick=()=>{
+  const on=!$("tgBadges").classList.contains("on");
+  $("tgBadges").classList.toggle("on",on);
+  document.body.classList.toggle("hide-badges",!on);
+  safeSet("showBadges",on?"1":"0");
   renderHome();
 };
 
-$("addPage").onclick = () => {
-  pages.push({ bg:null, icons:[] });
-  currentPage = pages.length - 1;
+$("addPage").onclick=()=>{
+  pages.push({bg:null,icons:[]});
+  currentPage=pages.length-1;
   saveData();
   renderHome();
 };
 
-document.querySelectorAll("[data-act]").forEach(row => {
-  row.onclick = () => {
-    const act = row.dataset.act;
+document.querySelectorAll("[data-act]").forEach(row=>{
+  row.onclick=()=>{
+    const act=row.dataset.act;
 
-    if (act === "homeBg") $("homeBgInput").click();
+    if(act==="homeBg")$("homeBgInput").click();
 
-    if (act === "homeBgReset") {
+    if(act==="homeBgReset"){
       safeRemove("homeBg");
       renderHome();
     }
 
-    if (act === "pageBg") $("pageBgInput").click();
+    if(act==="pageBg")$("pageBgInput").click();
 
-    if (act === "pageBgReset") {
-      pages[currentPage].bg = null;
+    if(act==="pageBgReset"){
+      pages[currentPage].bg=null;
       saveData();
       renderHome();
     }
   };
 });
 
-$("homeBgInput").onchange = async e => {
-  const f = e.target.files[0];
-  if (!f) return;
-
-  try {
-    const img = await readAndCompressImage(f, 1800, .82);
-    safeSet("homeBg", img);
+$("homeBgInput").onchange=async e=>{
+  const f=e.target.files[0];
+  if(!f)return;
+  try{
+    const img=await readAndCompressImage(f,1800,.82);
+    safeSet("homeBg",img);
     renderHome();
-  } catch {
-    alert("Не удалось загрузить изображение");
-  }
-
-  e.target.value = "";
+  }catch{alert("Не удалось загрузить изображение")}
+  e.target.value="";
 };
 
-$("pageBgInput").onchange = async e => {
-  const f = e.target.files[0];
-  if (!f) return;
-
-  try {
-    const img = await readAndCompressImage(f, 1800, .82);
-    pages[currentPage].bg = img;
+$("pageBgInput").onchange=async e=>{
+  const f=e.target.files[0];
+  if(!f)return;
+  try{
+    const img=await readAndCompressImage(f,1800,.82);
+    pages[currentPage].bg=img;
     saveData();
     renderHome();
-  } catch {
-    alert("Не удалось загрузить изображение");
-  }
-
-  e.target.value = "";
+  }catch{alert("Не удалось загрузить изображение")}
+  e.target.value="";
 };
 
-/* ---------- TRIGGERS ---------- */
+/* TRIGGERS */
 
-let holdEnabled = localStorage.getItem("holdEnabled") !== "0";
-let doubleEnabled = localStorage.getItem("doubleEnabled") === "1";
-let lockSwipeEnabled = localStorage.getItem("lockSwipeEnabled") !== "0";
+let holdEnabled=localStorage.getItem("holdEnabled")!=="0";
+let doubleEnabled=localStorage.getItem("doubleEnabled")==="1";
+let lockSwipeEnabled=localStorage.getItem("lockSwipeEnabled")!=="0";
 
-$("rowHold").onclick = () => {
-  holdEnabled = !holdEnabled;
-  safeSet("holdEnabled", holdEnabled ? "1" : "0");
-  $("tgHold").classList.toggle("on", holdEnabled);
+$("rowHold").onclick=()=>{
+  holdEnabled=!holdEnabled;
+  safeSet("holdEnabled",holdEnabled?"1":"0");
+  $("tgHold").classList.toggle("on",holdEnabled);
 };
 
-$("rowDouble").onclick = () => {
-  doubleEnabled = !doubleEnabled;
-  safeSet("doubleEnabled", doubleEnabled ? "1" : "0");
-  $("tgDouble").classList.toggle("on", doubleEnabled);
+$("rowDouble").onclick=()=>{
+  doubleEnabled=!doubleEnabled;
+  safeSet("doubleEnabled",doubleEnabled?"1":"0");
+  $("tgDouble").classList.toggle("on",doubleEnabled);
 };
 
-$("rowLockSwipe").onclick = () => {
-  lockSwipeEnabled = !lockSwipeEnabled;
-  safeSet("lockSwipeEnabled", lockSwipeEnabled ? "1" : "0");
-  $("tgLockSwipe").classList.toggle("on", lockSwipeEnabled);
+$("rowLockSwipe").onclick=()=>{
+  lockSwipeEnabled=!lockSwipeEnabled;
+  safeSet("lockSwipeEnabled",lockSwipeEnabled?"1":"0");
+  $("tgLockSwipe").classList.toggle("on",lockSwipeEnabled);
 };
 
-$("chooseTriggerIcon").onclick = () => {
-  choosingTrigger = true;
+$("chooseTriggerIcon").onclick=()=>{
+  choosingTrigger=true;
   closeHomeSettings();
   showChoose("Выберите иконку-триггер для настроек");
 };
 
-$("chooseLockIcon").onclick = () => {
-  choosingLock = true;
+$("chooseLockIcon").onclick=()=>{
+  choosingLock=true;
   closeHomeSettings();
   showChoose("Выберите иконку для возврата к блокировке");
 };
 
-function syncTriggerLabels() {
-  const t = triggerIconId ? findIcon(triggerIconId) : null;
-  const l = lockIconId ? findIcon(lockIconId) : null;
-
-  $("triggerText").textContent = "Иконка-триггер: " + (t ? (t.icon.name || "без названия") : "не выбрана");
-  $("lockText").textContent = "Иконка блокировки: " + (l ? (l.icon.name || "без названия") : "не выбрана");
+function syncTriggerLabels(){
+  const t=triggerIconId?findIcon(triggerIconId):null;
+  const l=lockIconId?findIcon(lockIconId):null;
+  $("triggerText").textContent="Иконка-триггер: "+(t?(t.icon.name||"без названия"):"не выбрана");
+  $("lockText").textContent="Иконка блокировки: "+(l?(l.icon.name||"без названия"):"не выбрана");
 }
 
-function showChoose(text) {
-  $("chooseHint").textContent = text;
+function showChoose(text){
+  $("chooseHint").textContent=text;
   $("chooseHint").classList.add("show");
 }
 
-function cancelChoose() {
-  choosingTrigger = false;
-  choosingLock = false;
+function cancelChoose(){
+  choosingTrigger=false;
+  choosingLock=false;
   $("chooseHint").classList.remove("show");
 }
 
-$("chooseHint").onclick = () => {
+$("chooseHint").onclick=()=>{
   cancelChoose();
   cancelMoveMode();
   openHomeSettings();
 };
 
-/* ---------- HOME GESTURES ---------- */
+/* HOME GESTURES */
 
-let holdTimer = null;
-let holdSX = 0;
-let holdSY = 0;
-let holdMoved = false;
+let holdTimer=null,holdSX=0,holdSY=0,holdMoved=false;
 
-function holdStart(x, y, target) {
-  if (!holdEnabled || isEdit()) return;
-  if (target.closest("#homeSettings,#iconMenu,#folderView,#editBar,#chooseHint,.cell")) return;
+function holdStart(x,y,target){
+  if(!holdEnabled||isEdit())return;
+  if(target.closest("#homeSettings,#iconMenu,#folderView,#editBar,#chooseHint,.cell"))return;
 
-  holdSX = x;
-  holdSY = y;
-  holdMoved = false;
+  holdSX=x;
+  holdSY=y;
+  holdMoved=false;
   clearTimeout(holdTimer);
 
-  holdTimer = setTimeout(() => {
-    if (!holdMoved) openHomeSettings();
-  }, 900);
+  holdTimer=setTimeout(()=>{
+    if(!holdMoved)openHomeSettings();
+  },900);
 }
 
-function holdMove(x, y) {
-  if (Math.abs(x - holdSX) > 12 || Math.abs(y - holdSY) > 12) {
-    holdMoved = true;
+function holdMove(x,y){
+  if(Math.abs(x-holdSX)>12||Math.abs(y-holdSY)>12){
+    holdMoved=true;
     clearTimeout(holdTimer);
   }
 }
 
-function holdEnd() {
+function holdEnd(){
   clearTimeout(holdTimer);
 }
 
-$("phone").addEventListener("mousedown", e => holdStart(e.clientX, e.clientY, e.target));
-$("phone").addEventListener("mousemove", e => holdMove(e.clientX, e.clientY));
-$("phone").addEventListener("mouseup", holdEnd);
-$("phone").addEventListener("mouseleave", holdEnd);
+$("phone").addEventListener("mousedown",e=>holdStart(e.clientX,e.clientY,e.target));
+$("phone").addEventListener("mousemove",e=>holdMove(e.clientX,e.clientY));
+$("phone").addEventListener("mouseup",holdEnd);
+$("phone").addEventListener("mouseleave",holdEnd);
 
-$("phone").addEventListener("touchstart", e => {
-  const t = e.touches[0];
-  holdStart(t.clientX, t.clientY, e.target);
-}, { passive:true });
+$("phone").addEventListener("touchstart",e=>{
+  const t=e.touches[0];
+  holdStart(t.clientX,t.clientY,e.target);
+},{passive:true});
 
-$("phone").addEventListener("touchmove", e => {
-  const t = e.touches[0];
-  holdMove(t.clientX, t.clientY);
-}, { passive:true });
+$("phone").addEventListener("touchmove",e=>{
+  const t=e.touches[0];
+  holdMove(t.clientX,t.clientY);
+},{passive:true});
 
-$("phone").addEventListener("touchend", holdEnd);
+$("phone").addEventListener("touchend",holdEnd);
 
-let tapCounter = 0;
-let tapTimer = null;
+let tapCounter=0,tapTimer=null;
 
-$("phone").addEventListener("click", e => {
-  if (!doubleEnabled) return;
-  if (e.target.closest("#homeSettings,#iconMenu,#folderView,#editBar,#chooseHint,.cell,#pageDots")) return;
+$("phone").addEventListener("click",e=>{
+  if(!doubleEnabled)return;
+  if(e.target.closest("#homeSettings,#iconMenu,#folderView,#editBar,#chooseHint,.cell,#pageDots"))return;
 
   tapCounter++;
   clearTimeout(tapTimer);
 
-  if (tapCounter >= 2) {
-    tapCounter = 0;
+  if(tapCounter>=2){
+    tapCounter=0;
     openHomeSettings();
-  } else {
-    tapTimer = setTimeout(() => tapCounter = 0, 450);
+  }else{
+    tapTimer=setTimeout(()=>tapCounter=0,450);
   }
 });
 
-/* ---------- PAGE SWIPE ---------- */
+/* PAGE SWIPE */
 
-let swipeX = 0;
-let swipeY = 0;
-let swiping = false;
+let swipeX=0,swipeY=0,swiping=false;
 
-function swipeStart(x, y) {
-  swipeX = x;
-  swipeY = y;
-  swiping = true;
+function swipeStart(x,y){
+  swipeX=x;
+  swipeY=y;
+  swiping=true;
 }
 
-function swipeEnd(x, y) {
-  if (!swiping) return;
-  swiping = false;
+function swipeEnd(x,y){
+  if(!swiping)return;
+  swiping=false;
 
-  const dx = x - swipeX;
-  const dy = y - swipeY;
+  const dx=x-swipeX;
+  const dy=y-swipeY;
 
-  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 45) {
-    if (dx < 0 && currentPage < pages.length - 1) goToPage(currentPage + 1, true);
-    if (dx > 0 && currentPage > 0) goToPage(currentPage - 1, true);
+  if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>45){
+    if(dx<0&&currentPage<pages.length-1)goToPage(currentPage+1,true);
+    if(dx>0&&currentPage>0)goToPage(currentPage-1,true);
     return;
   }
 
-  if (dy > 90 && Math.abs(dx) < 70 && swipeY < 180 && lockSwipeEnabled && !isEdit()) {
+  if(dy>90&&Math.abs(dx)<70&&swipeY<180&&lockSwipeEnabled&&!isEdit()){
     lockBack();
   }
 }
 
-$("pagesViewport").addEventListener("mousedown", e => swipeStart(e.clientX, e.clientY));
-$("pagesViewport").addEventListener("mouseup", e => swipeEnd(e.clientX, e.clientY));
-$("pagesViewport").addEventListener("touchstart", e => swipeStart(e.touches[0].clientX, e.touches[0].clientY), { passive:true });
-$("pagesViewport").addEventListener("touchend", e => swipeEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY), { passive:true });
+$("pagesViewport").addEventListener("mousedown",e=>swipeStart(e.clientX,e.clientY));
+$("pagesViewport").addEventListener("mouseup",e=>swipeEnd(e.clientX,e.clientY));
+$("pagesViewport").addEventListener("touchstart",e=>swipeStart(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
+$("pagesViewport").addEventListener("touchend",e=>swipeEnd(e.changedTouches[0].clientX,e.changedTouches[0].clientY),{passive:true});
 
-/* ---------- KEYBOARD ---------- */
+/* KEYBOARD */
 
-document.addEventListener("keydown", e => {
-  if ($("lockSettings").classList.contains("show")) {
-    if (e.key === "Escape") closeLockSettings();
+document.addEventListener("keydown",e=>{
+  if($("lockSettings").classList.contains("show")){
+    if(e.key==="Escape")closeLockSettings();
     return;
   }
 
-  if ($("unlockScreen").classList.contains("show")) {
-    if (e.key === "Escape") {
-      if ($("iconMenu").classList.contains("open")) closeIconMenu();
-      else if ($("homeSettings").classList.contains("open")) closeHomeSettings();
-      else if ($("folderView").classList.contains("open")) closeFolder();
-      else if (isEdit()) exitEditMode();
+  if($("unlockScreen").classList.contains("show")){
+    if(e.key==="Escape"){
+      if($("iconMenu").classList.contains("open"))closeIconMenu();
+      else if($("homeSettings").classList.contains("open"))closeHomeSettings();
+      else if($("folderView").classList.contains("open"))closeFolder();
+      else if(isEdit())exitEditMode();
       else lockBack();
     }
-
     return;
   }
 
-  if (e.key >= "0" && e.key <= "9") pressDigit(e.key);
-  if (e.key === "Backspace") deleteDigit();
+  if(e.key>="0"&&e.key<="9")pressDigit(e.key);
+  if(e.key==="Backspace")deleteDigit();
 
-  if (e.key === "Enter") {
-    sosArmed = true;
-    currentInput = "";
+  if(e.key==="Enter"){
+    sosArmed=true;
+    currentInput="";
     updateDots();
   }
 });
 
-/* ---------- INIT ---------- */
+/* INIT */
 
-(function init() {
+(function init(){
   buildDots();
   updateDots();
 
-  const keySize = clampNum(localStorage.getItem("keySize"), 60, 120, 96);
-  rootSet("--key-size", keySize + "px");
-  $("keySizeSlider").value = keySize;
-  $("keySizeVal").textContent = keySize + " px";
+  initScreenAreaControls();
 
-  $("pinXSlider").value = pinStepX;
-  $("pinYSlider").value = pinStepY;
-  $("pinXVal").textContent = pinStepX + " px";
-  $("pinYVal").textContent = pinStepY + " px";
+  const keySize=clampNum(localStorage.getItem("keySize"),60,120,96);
+  rootSet("--key-size",keySize+"px");
+  $("keySizeSlider").value=keySize;
+  $("keySizeVal").textContent=keySize+" px";
+
+  $("pinXSlider").value=pinStepX;
+  $("pinYSlider").value=pinStepY;
+  $("pinXVal").textContent=pinStepX+" px";
+  $("pinYVal").textContent=pinStepY+" px";
   applyPinSpread();
 
-  const pby = clampNum(localStorage.getItem("pinBlockY"), -240, 140, 0);
-  $("pinBlockSlider").value = pby;
-  $("pinBlockVal").textContent = pby + " px";
-  rootSet("--pin-y", pby + "px");
+  const pby=clampNum(localStorage.getItem("pinBlockY"),-240,140,0);
+  $("pinBlockSlider").value=pby;
+  $("pinBlockVal").textContent=pby+" px";
+  rootSet("--pin-y",pby+"px");
 
-  const lb = localStorage.getItem("lockBg");
-  if (lb) $("wallpaper").style.backgroundImage = `url("${lb}")`;
+  const lb=localStorage.getItem("lockBg");
+  if(lb)$("wallpaper").style.backgroundImage=`url("${lb}")`;
 
-  $("realPinInput").value = realPin;
+  $("realPinInput").value=realPin;
 
-  const methodBtn = document.querySelector(`[data-method="${lockSettings.unlockMethod}"]`);
-  if (methodBtn) methodBtn.click();
+  const methodBtn=document.querySelector(`[data-method="${lockSettings.unlockMethod}"]`);
+  if(methodBtn)methodBtn.click();
 
-  const style = localStorage.getItem("style") || "ios";
-  const styleBtn = document.querySelector(`[data-style="${style}"]`);
-  if (styleBtn) styleBtn.click();
+  const style=localStorage.getItem("style")||"ios";
+  const styleBtn=document.querySelector(`[data-style="${style}"]`);
+  if(styleBtn)styleBtn.click();
 
-  if (localStorage.getItem("showBadges") === "0") {
+  if(localStorage.getItem("showBadges")==="0"){
     document.body.classList.add("hide-badges");
   }
 
