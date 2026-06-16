@@ -2,23 +2,33 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
 <title>Lock Screen</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
-html,body { width:100%; height:100%; overflow:hidden; font-family:-apple-system,'SF Pro Display',sans-serif; background:#000; }
-
-#device { position:relative; width:100%; height:100%; margin:0 auto; overflow:hidden; background:#000; }
-#device.preset { box-shadow:0 0 0 100vmax #000; }
-
+:root {
+--ui-top: env(safe-area-inset-top, 0px);
+--ui-bottom: env(safe-area-inset-bottom, 0px);
+--ui-left: env(safe-area-inset-left, 0px);
+--ui-right: env(safe-area-inset-right, 0px);
+--icon-opacity: 1;
+--icon-size: 60px;
+--icon-radius: 15px;
+--label-h: 16px;
+--gap-x: 10px;
+--gap-y: 14px;
+--cols: 4;
+}
+html,body { width:100%; height:100%; min-height:100vh; min-height:100dvh; overflow:hidden; font-family:-apple-system,'SF Pro Display',sans-serif; background:#000; position:fixed; inset:0; }
+#device { position:fixed; inset:0; width:100vw; height:100vh; height:100dvh; margin:0 auto; overflow:hidden; background:#000; }
 .wallpaper { position:absolute; inset:0; background:#000; background-size:cover; background-position:center; z-index:0; transition:background 0.4s ease; }
 #bgInput { display:none; }
-
-.lock-screen { position:relative; width:100%; height:100%; z-index:2; display:flex; flex-direction:column; align-items:center; }
+.lock-screen { position:relative; width:100%; height:100%; z-index:2; display:flex; flex-direction:column; align-items:center; padding-top:var(--ui-top); }
 body.unlocked .lock-screen { display:none; }
-
 .top-label { margin-top:22%; text-align:center; color:white; font-size:16px; font-weight:400; line-height:1.5; text-shadow:0 1px 6px rgba(0,0,0,0.5); padding:0 40px; }
 .dots-container { display:flex; gap:18px; margin-top:18px; height:14px; align-items:center; }
 .dot { width:13px; height:13px; border-radius:50%; border:1.5px solid rgba(255,255,255,0.85); background:transparent; transition:all 0.15s ease; }
@@ -26,26 +36,22 @@ body.unlocked .lock-screen { display:none; }
 @keyframes dotPop { 0%{transform:scale(0.8);} 50%{transform:scale(1.2);} 100%{transform:scale(1);} }
 .wrong-animation { animation:wrongShake 0.5s ease; }
 @keyframes wrongShake { 0%,100%{transform:translateX(0);} 15%{transform:translateX(-10px);} 30%{transform:translateX(10px);} 45%{transform:translateX(-8px);} 60%{transform:translateX(8px);} 75%{transform:translateX(-4px);} 90%{transform:translateX(4px);} }
-
 .passcode-section { position:absolute; bottom:0; width:100%; display:flex; flex-direction:column; align-items:center; transform:translateY(var(--pin-block-y,0px)); transition:transform 0.2s ease; }
 .keyboard { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; width:92%; max-width:340px; justify-items:center; }
-
 .key, .key-zero { display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; aspect-ratio:1; border-radius:50%; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); color:white; cursor:pointer; position:relative; overflow:hidden; max-width:var(--key-size,96px); max-height:var(--key-size,96px); margin:0 auto; text-align:center; transform:translate(var(--kx,0px), var(--ky,0px)); transition:background 0.1s ease, transform 0.12s ease; }
 .key.pressed, .key-zero.pressed { animation:keyPop 0.2s ease; }
 @keyframes keyPop { 0%{background:rgba(255,255,255,0.45);} 40%{transform:translate(var(--kx,0px), var(--ky,0px)) scale(0.9);background:rgba(255,255,255,0.5);} 100%{transform:translate(var(--kx,0px), var(--ky,0px)) scale(1);} }
 .key:active, .key-zero:active { background:rgba(255,255,255,0.35); }
 .key-number { font-size:calc(var(--key-size,96px)*0.33); font-weight:300; line-height:1; pointer-events:none; }
 .key-letters { font-size:8px; font-weight:400; letter-spacing:1px; opacity:0.65; margin-top:2px; pointer-events:none; text-align:center; line-height:1.4; }
-.bottom-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; width:92%; max-width:340px; padding:12px 0 36px; align-items:center; }
+.bottom-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; width:92%; max-width:340px; padding:12px 0 calc(36px + var(--ui-bottom)); align-items:center; }
 .btn-sos, .btn-cancel { color:white; font-size:17px; font-weight:400; background:transparent; border:none; cursor:pointer; padding:10px 0; opacity:0.9; letter-spacing:0.2px; display:flex; align-items:center; justify-content:center; }
 .btn-sos:active, .btn-cancel:active { opacity:0.4; }
 .key-zero .key-number { font-size:calc(var(--key-size,96px)*0.33); font-weight:300; pointer-events:none; }
-
 .unlock-screen { position:absolute; inset:0; width:100%; height:100%; z-index:100; display:none; }
 .unlock-screen.show { display:block; animation:unlockAnim 0.5s ease forwards; }
 @keyframes unlockAnim { 0%{opacity:0;transform:scale(1.04);} 100%{opacity:1;transform:scale(1);} }
-
-.settings-overlay { position:absolute; inset:0; z-index:200; background:rgba(0,0,0,0.78); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); display:none; flex-direction:column; padding:50px 22px 30px; overflow-y:auto; }
+.settings-overlay { position:absolute; inset:0; z-index:200; background:rgba(0,0,0,0.78); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); display:none; flex-direction:column; padding:calc(50px + var(--ui-top)) 22px calc(30px + var(--ui-bottom)); overflow-y:auto; }
 .settings-overlay.show { display:flex; animation:settingsAnim 0.3s ease forwards; }
 @keyframes settingsAnim { 0%{opacity:0;transform:translateY(20px);} 100%{opacity:1;transform:translateY(0);} }
 .settings-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
@@ -74,97 +80,72 @@ body.style-android .key, body.style-android .key-zero { border-radius:50%; backg
 body.style-android .top-label { font-size:14px; opacity:0.85; }
 body.style-android .dot { width:11px; height:11px; }
 body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; text-transform:uppercase; letter-spacing:1px; }
-
-/* ===== РАБОЧИЙ СТОЛ ===== */
 #phone { position:relative; width:100%; height:100%; background:#000; overflow:hidden; color:#fff; display:flex; flex-direction:column; }
 #homeWallpaper { position:absolute; inset:0; background:#000; background-size:cover; background-position:center; z-index:0; transition:background 0.4s ease; }
 #phone > #pagesViewport, #phone > #pageDots, #phone > #search, #phone > #dock { position:relative; z-index:1; }
-
 #pagesViewport { flex:1; overflow:hidden; position:relative; }
-#pagesTrack { display:flex; height:100%; transition:transform 0.3s cubic-bezier(.22,.61,.36,1); transform:translate(var(--icon-x,0px), var(--icon-y,0px)) translateX(var(--page-shift,0px)); will-change:transform; }
-#pagesTrack.dragging { transition:none; }
-
-.page { flex:0 0 100%; width:100%; height:100%; padding:24px 16px 0; overflow-y:auto; overflow-x:hidden; }
-.grid { display:grid; grid-template-columns:repeat(var(--cols,4),1fr); grid-auto-rows:var(--slot-h,84px); gap:var(--slot-gap,10px); width:100%; }
-
-.slot { position:relative; border-radius:15px; display:flex; align-items:center; justify-content:center; }
-#phone.edit .slot.empty { border:2px dashed rgba(255,255,255,0.28); }
-#phone.edit .slot.empty::after { content:'+'; font-size:26px; color:rgba(255,255,255,0.45); }
-
-.cell { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; width:100%; height:100%; }
+#pagesTrack { display:flex; height:100%; transition:transform 0.3s cubic-bezier(.22,.61,.36,1); will-change:transform; }
+.page { flex:0 0 100%; width:100%; height:100%; padding:calc(24px + var(--ui-top)) calc(16px + var(--ui-right)) 0 calc(16px + var(--ui-left)); overflow-y:auto; overflow-x:hidden; position:relative; }
+.grid { display:grid; grid-template-columns:repeat(var(--cols,4),1fr); grid-auto-rows:calc(var(--icon-size,60px) + var(--label-h,16px) + 4px); column-gap:var(--gap-x,10px); row-gap:var(--gap-y,14px); width:100%; transform:translate(var(--icon-x,0px), var(--icon-y,0px)); position:relative; z-index:1; justify-items:center; }
+.cell { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; cursor:pointer; width:var(--icon-size,60px); height:100%; }
 .cell .icon, .cell .folder { transition:opacity 0.2s ease; }
-.icon { width:60px; height:60px; border-radius:15px; display:flex; align-items:center; justify-content:center; font-size:30px; color:#fff; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.3); }
+.icon { width:var(--icon-size,60px); height:var(--icon-size,60px); border-radius:var(--icon-radius,15px); display:flex; align-items:center; justify-content:center; font-size:calc(var(--icon-size,60px)*0.5); color:#fff; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.3); background-size:cover; background-position:center; }
+.icon.empty-icon { background:rgba(120,120,120,0.25) !important; box-shadow:none; border:1px dashed rgba(255,255,255,0.25); }
 .icon img { width:100%; height:100%; object-fit:cover; }
-.cell.big .icon, .cell.big .folder { width:100%; height:100%; }
-.folder { width:60px; height:60px; border-radius:15px; background:rgba(20,20,20,0.55); backdrop-filter:blur(8px); display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); gap:2.5px; padding:5px; box-shadow:0 2px 6px rgba(0,0,0,0.3); }
-.folder .mini { border-radius:4px; font-size:8px; display:flex; align-items:center; justify-content:center; overflow:hidden; color:#fff; }
-.folder .mini img { width:100%; height:100%; object-fit:cover; }
-.label { margin-top:4px; font-size:12px; text-align:center; text-shadow:0 1px 3px rgba(0,0,0,0.6); max-width:90%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:opacity 0.2s ease; }
-
-/* ИСПРАВЛЕНО: убраны opacity:0, иконки видны вне edit */
-#phone:not(.edit) .grid .cell { background:transparent; }
-#phone:not(.edit) #dock .cell { background:transparent; }
-
-#phone.edit .grid .cell { outline:2px solid #ff3b30; outline-offset:-2px; border-radius:15px; }
-#phone.edit .grid .cell.selected-merge { outline:2px solid #30d158; box-shadow:0 0 0 3px rgba(48,209,88,0.35); }
-#phone.edit .grid .cell { animation:wiggle 0.3s infinite alternate; }
-#phone.edit #folderBox .cell { animation:wiggle 0.3s infinite alternate; }
+.cell.big { width:100%; }
+.cell.big .icon, .cell.big .folder { width:100%; height:var(--icon-size,60px); }
+.folder { width:var(--icon-size,60px); height:var(--icon-size,60px); border-radius:var(--icon-radius,15px); background:rgba(20,20,20,0.55); backdrop-filter:blur(8px); display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); gap:2.5px; padding:5px; box-shadow:0 2px 6px rgba(0,0,0,0.3); }
+.folder .mini { border-radius:4px; font-size:8px; display:flex; align-items:center; justify-content:center; overflow:hidden; color:#fff; background-size:cover; background-position:center; }
+.label { margin-top:4px; height:var(--label-h,16px); line-height:var(--label-h,16px); font-size:12px; text-align:center; text-shadow:0 1px 3px rgba(0,0,0,0.6); max-width:130%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:opacity 0.2s ease; }
+#phone:not(.edit) .grid .cell .icon,
+#phone:not(.edit) .grid .cell .folder,
+#phone:not(.edit) .grid .cell .label,
+#phone:not(.edit) #dock .cell .icon,
+#phone:not(.edit) #dock .cell .folder { opacity:var(--icon-opacity,1); }
+#phone.edit .grid .cell .icon, #phone.edit .grid .cell .folder { outline:2px solid #ff3b30; outline-offset:2px; border-radius:var(--icon-radius,15px); }
+#phone.edit .grid .cell.sel .icon, #phone.edit .grid .cell.sel .folder { outline:2px solid #30d158; box-shadow:0 0 0 3px rgba(48,209,88,0.35); }
+#phone.edit .grid .cell, #phone.edit #folderBox .cell, #phone.edit #dock .cell { animation:wiggle 0.3s infinite alternate; }
 @keyframes wiggle { from { transform:rotate(-1deg); } to { transform:rotate(1deg); } }
-
-.badge { position:absolute; top:-4px; right:8px; z-index:3; min-width:20px; height:20px; padding:0 5px; background:#ff3b30; border-radius:12px; border:1.5px solid #000; color:#fff; font-size:12px; font-weight:700; display:var(--badge-disp,flex); align-items:center; justify-content:center; }
-.attempt-badge { background:#ff3b30; display:flex !important; }
-
-.del-corner { display:none; position:absolute; top:-8px; left:2px; width:22px; height:22px; border-radius:50%; background:#e0e0e0; color:#000; font-size:16px; font-weight:700; align-items:center; justify-content:center; z-index:6; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.4); }
-#phone.edit .grid .cell .del-corner, #phone.edit #dock .cell .del-corner { display:flex; }
-
-#phone.choosing-trigger .cell, #phone.choosing-attempt .cell, #phone.choosing-lock .cell { cursor:pointer; }
-#phone.choosing-trigger .grid .cell, #phone.choosing-attempt .grid .cell, #phone.choosing-lock .grid .cell { outline:2px solid #0a84ff; outline-offset:-2px; border-radius:15px; }
-#phone.choosing-trigger::after { content:'Нажмите на иконку для назначения'; position:absolute; top:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); padding:10px 18px; border-radius:14px; font-size:14px; z-index:60; white-space:nowrap; }
-#phone.choosing-lock::after { content:'Выберите иконку для блокировки'; position:absolute; top:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); padding:10px 18px; border-radius:14px; font-size:14px; z-index:60; white-space:nowrap; }
-
-#editBar { display:none; position:absolute; bottom:0; left:0; right:0; z-index:65; background:rgba(20,20,20,0.92); backdrop-filter:blur(14px); padding:12px 14px calc(12px + env(safe-area-inset-bottom)); flex-wrap:wrap; gap:8px; justify-content:center; }
+body.hide-badges .badge { display:none !important; }
+.badge { position:absolute; z-index:3; background:#ff3b30; color:#fff; font-weight:700; border:none; display:flex; align-items:center; justify-content:center; border-radius:12px; overflow:hidden; line-height:1; left:50%; top:0; transform:translate(calc(-50% + var(--bx,30px)), calc(-50% + var(--by,-2px))); min-width:var(--bw,20px); height:var(--bh,20px); padding:0 5px; font-size:var(--bfs,12px); }
+.del-corner { display:none; position:absolute; top:-8px; left:-8px; width:22px; height:22px; border-radius:50%; background:#e0e0e0; color:#000; font-size:16px; font-weight:700; align-items:center; justify-content:center; z-index:6; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.4); }
+#phone.edit .grid .cell .del-corner, #phone.edit #dock .cell .del-corner, #phone.edit #folderBox .cell .del-corner { display:flex; }
+#phone.choosing-trigger .grid .cell .icon, #phone.choosing-trigger .grid .cell .folder,
+#phone.choosing-attempt .grid .cell .icon, #phone.choosing-attempt .grid .cell .folder,
+#phone.choosing-lock .grid .cell .icon, #phone.choosing-lock .grid .cell .folder { outline:2px solid #0a84ff; outline-offset:2px; }
+#phone.choosing-trigger .grid .cell .icon, #phone.choosing-trigger .grid .cell .folder, #phone.choosing-trigger .grid .cell .label,
+#phone.choosing-attempt .grid .cell .icon, #phone.choosing-attempt .grid .cell .folder, #phone.choosing-attempt .grid .cell .label,
+#phone.choosing-lock .grid .cell .icon, #phone.choosing-lock .grid .cell .folder, #phone.choosing-lock .grid .cell .label { opacity:1; }
+#editBar { display:none; position:absolute; bottom:0; left:0; right:0; z-index:65; background:transparent; padding:12px 14px calc(12px + var(--ui-bottom)); flex-wrap:wrap; gap:8px; justify-content:center; pointer-events:none; }
 #phone.edit #editBar { display:flex; }
-#editBar button { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:12px; padding:10px 14px; font-size:13px; cursor:pointer; }
-#editBar button.primary { background:rgba(48,209,88,0.22); border-color:#30d158; color:#30d158; }
-#editBar button.warn { background:rgba(255,159,10,0.2); border-color:#ff9f0a; color:#ffb340; }
-#editBar button.danger { background:rgba(255,59,48,0.2); border-color:#ff3b30; color:#ff453a; }
+#editBar > * { pointer-events:auto; }
+#editBar button { background:rgba(20,20,20,0.78); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:12px; padding:10px 14px; font-size:13px; cursor:pointer; backdrop-filter:blur(8px); }
+#editBar button.primary { background:rgba(48,209,88,0.32); border-color:#30d158; color:#fff; }
 #editBar button:active { transform:scale(0.96); }
-#editBar .eb-info { width:100%; text-align:center; font-size:12px; opacity:0.7; margin-bottom:2px; }
-
-.widget { background:rgba(120,120,120,0.32); backdrop-filter:blur(14px); border-radius:24px; display:flex; flex-direction:column; padding:14px 18px; box-shadow:0 3px 12px rgba(0,0,0,0.3); width:100%; height:100%; }
-.widget .ring { width:54px; height:54px; position:relative; }
-.widget .ring .phone-ico { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:22px; }
-.widget .pct { font-size:34px; font-weight:700; margin-top:auto; }
-.widget .ttl { font-size:14px; opacity:0.85; margin-top:2px; }
-
+#editBar .eb-info { width:100%; text-align:center; font-size:12px; opacity:0.85; margin-bottom:2px; background:rgba(0,0,0,0.45); border-radius:8px; padding:4px 8px; }
 #pageDots { display:flex; justify-content:center; align-items:center; gap:8px; padding:6px 0 2px; min-height:20px; }
 #pageDots .pdot { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,0.35); transition:.2s; }
 #pageDots .pdot.active { background:#fff; transform:scale(1.15); }
-#pageDots .padd { width:18px; height:18px; border-radius:50%; border:1px dashed rgba(255,255,255,0.5); color:rgba(255,255,255,0.7); font-size:13px; display:none; align-items:center; justify-content:center; cursor:pointer; margin-left:4px; }
-#phone.edit #pageDots .padd { display:flex; }
-#pageDots .pdel { width:18px; height:18px; border-radius:50%; border:1px solid rgba(255,80,80,0.7); color:#ff6b6b; font-size:12px; display:none; align-items:center; justify-content:center; cursor:pointer; margin-left:4px; }
-#phone.edit #pageDots .pdel { display:flex; }
-
 #search { align-self:center; margin:6px 0 12px; background:rgba(120,120,120,0.3); backdrop-filter:blur(12px); padding:7px 18px; border-radius:18px; font-size:14px; display:flex; gap:6px; align-items:center; cursor:pointer; }
-#dock { margin:0 12px 16px; background:rgba(120,120,120,0.28); backdrop-filter:blur(20px); border-radius:32px; padding:12px 14px; display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
-#phone:not(.edit) #dock { background:rgba(120,120,120,0.28); }
-#phone.edit #dock .cell { outline:2px solid #ff3b30; outline-offset:-2px; border-radius:15px; }
-#dock .cell { height:60px; }
+#phone:not(.edit) #search { opacity:0; }
+#phone.edit #dock { margin-bottom:calc(96px + var(--ui-bottom)); }
+#dock { margin:0 calc(12px + var(--ui-right)) calc(16px + var(--ui-bottom)) calc(12px + var(--ui-left)); background:rgba(120,120,120,0.28); backdrop-filter:blur(20px); border-radius:32px; padding:12px 14px; display:flex; justify-content:space-around; align-items:flex-start; gap:8px; transition:margin .2s ease; }
+#phone:not(.edit) #dock { background:transparent; backdrop-filter:none; }
+#dock .cell { height:auto; }
 #dock .label { display:none; }
-
 #folderView { position:absolute; inset:0; z-index:40; display:none; flex-direction:column; align-items:center; background:rgba(0,0,0,0.45); backdrop-filter:blur(22px); animation:fadeIn 0.25s ease; }
 #folderView.open { display:flex; }
-#folderTitle { font-size:30px; font-weight:700; margin:60px 0 26px; align-self:flex-start; padding-left:40px; text-shadow:0 1px 6px rgba(0,0,0,0.6); }
-#folderBox { width:300px; min-height:300px; background:rgba(180,180,180,0.18); border:1px solid rgba(255,255,255,0.18); border-radius:34px; padding:26px 22px; display:grid; grid-template-columns:repeat(3,1fr); gap:22px 18px; align-content:start; }
-#folderBox .cell { height:84px; }
+#folderTitle { font-size:30px; font-weight:700; margin:calc(60px + var(--ui-top)) 0 26px; align-self:flex-start; padding-left:40px; text-shadow:0 1px 6px rgba(0,0,0,0.6); }
+#folderBox { width:300px; min-height:300px; background:rgba(180,180,180,0.18); border:1px solid rgba(255,255,255,0.18); border-radius:34px; padding:26px 22px; display:grid; grid-template-columns:repeat(3,1fr); gap:22px 18px; align-content:start; justify-items:center; }
+#folderBox .cell { height:auto; }
 #folderBox .cell .icon { width:58px; height:58px; }
-
+#folderBox .cell .label, #folderBox .cell .icon, #folderBox .cell .folder { opacity:1 !important; }
 #iconMenu { position:absolute; inset:0; z-index:70; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); backdrop-filter:blur(6px); animation:fadeIn 0.2s ease; }
 #iconMenu.open { display:flex; }
-.im-card { width:280px; max-width:88%; background:#1c1c1e; border:1px solid rgba(255,255,255,0.12); border-radius:22px; padding:18px; box-shadow:0 12px 40px rgba(0,0,0,0.6); animation:imPop 0.2s ease; max-height:86%; overflow-y:auto; }
+.im-card { width:320px; max-width:92%; background:#1c1c1e; border:1px solid rgba(255,255,255,0.12); border-radius:22px; padding:18px; box-shadow:0 12px 40px rgba(0,0,0,0.6); animation:imPop 0.2s ease; max-height:88%; overflow-y:auto; }
 @keyframes imPop { 0%{transform:scale(0.9);opacity:0;} 100%{transform:scale(1);opacity:1;} }
 .im-head { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
-.im-prev { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; overflow:hidden; flex-shrink:0; }
+.im-prev { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; overflow:hidden; flex-shrink:0; position:relative; background-size:cover; background-position:center; }
 .im-prev img { width:100%; height:100%; object-fit:cover; }
 .im-title { font-size:16px; font-weight:600; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .im-btn { width:100%; display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.08); border:none; color:#fff; padding:13px 14px; border-radius:12px; font-size:14px; cursor:pointer; margin-bottom:9px; text-align:left; }
@@ -172,21 +153,38 @@ body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; te
 .im-btn .imi { font-size:17px; width:22px; text-align:center; }
 .im-btn.danger { color:#ff453a; }
 .im-row { display:flex; gap:8px; align-items:center; margin-bottom:9px; }
-.im-row input { flex:1; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:10px; padding:11px 12px; font-size:14px; outline:none; }
+.im-row input[type=text], .im-row input[type=number] { flex:1; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:10px; padding:11px 12px; font-size:14px; outline:none; }
+.im-row input[type=color] { width:46px; height:42px; border:none; background:none; border-radius:10px; cursor:pointer; padding:0; }
 .im-row .im-ok { background:rgba(48,209,88,0.2); border:1px solid #30d158; color:#30d158; border-radius:10px; padding:11px 15px; font-size:13px; cursor:pointer; }
+.im-seg { display:flex; gap:6px; margin-bottom:9px; }
+.im-seg button { flex:1; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:10px; padding:10px 0; font-size:13px; cursor:pointer; }
+.im-seg button.on { background:rgba(10,132,255,0.25); border-color:#0a84ff; color:#fff; }
 .im-close { width:100%; background:rgba(255,255,255,0.12); border:none; color:#fff; padding:12px; border-radius:12px; font-size:15px; cursor:pointer; margin-top:4px; }
 .im-close:active { transform:scale(0.97); }
 .im-sub { font-size:11px; opacity:0.5; margin:2px 2px 8px; }
-
-#hsSettings { position:absolute; inset:0; z-index:50; background:rgba(0,0,0,0.55); backdrop-filter:blur(18px); display:none; flex-direction:column; padding:40px 22px 60px; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; animation:fadeIn 0.25s ease; }
+#hsSettings { position:absolute; inset:0; z-index:50; background:rgba(0,0,0,0.55); backdrop-filter:blur(18px); display:none; flex-direction:column; padding:calc(40px + var(--ui-top)) 22px calc(60px + var(--ui-bottom)); overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; animation:fadeIn 0.25s ease; transition:background .25s ease, backdrop-filter .25s ease; }
 #hsSettings.open { display:flex; }
+#hsSettings.tweak { background:rgba(0,0,0,0.05); backdrop-filter:none; -webkit-backdrop-filter:none; pointer-events:none; }
+#hsSettings.tweak h2, #hsSettings.tweak .subtitle, #hsSettings.tweak .set-section { opacity:0.12; pointer-events:none; transition:opacity .25s ease; }
+#hsSettings.tweak #closeSet { opacity:0.12; pointer-events:none; }
+#hsSettings.tweak .tweak-panel { display:block; pointer-events:auto; opacity:1; }
+.tweak-panel { display:none; position:fixed; bottom:0; left:0; right:0; background:rgba(20,20,20,0.94); backdrop-filter:blur(14px); border-radius:18px 18px 0 0; padding:16px 16px calc(16px + var(--ui-bottom)); z-index:300; box-shadow:0 -6px 30px rgba(0,0,0,0.5); }
+.tweak-panel .tp-title { font-size:14px; font-weight:600; margin-bottom:12px; }
+.tweak-panel .tp-done { width:100%; margin-top:8px; background:rgba(48,209,88,0.25); border:1px solid #30d158; color:#fff; border-radius:12px; padding:12px; font-size:15px; cursor:pointer; }
 #hsSettings::-webkit-scrollbar { width:6px; }
 #hsSettings::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.25); border-radius:3px; }
 @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 #hsSettings h2 { font-size:22px; font-weight:700; margin-bottom:4px; }
 #hsSettings .subtitle { font-size:13px; opacity:0.6; margin-bottom:22px; }
-.set-section-title { font-size:13px; opacity:0.55; margin:4px 4px 8px; text-transform:uppercase; letter-spacing:0.5px; }
-.set-group { background:rgba(255,255,255,0.08); border-radius:16px; overflow:hidden; margin-bottom:18px; flex-shrink:0; }
+.set-section { margin-bottom:14px; flex-shrink:0; }
+.set-section-head { display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.1); border-radius:14px; padding:14px 16px; cursor:pointer; font-size:15px; font-weight:600; }
+.set-section-head .sec-ic { margin-right:10px; }
+.set-section-head .sec-chevron { transition:transform .25s ease; opacity:0.6; font-size:16px; }
+.set-section.open .set-section-head .sec-chevron { transform:rotate(90deg); }
+.set-section-body { max-height:0; overflow:hidden; transition:max-height .3s ease; }
+.set-section.open .set-section-body { max-height:6000px; }
+.set-section-body-inner { padding-top:10px; }
+.set-group { background:rgba(255,255,255,0.08); border-radius:16px; overflow:hidden; margin-bottom:12px; }
 .set-row { display:flex; align-items:center; justify-content:space-between; padding:15px 16px; font-size:15px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.08); }
 .set-row:last-child { border-bottom:none; }
 .set-row .ic { font-size:18px; margin-right:12px; }
@@ -197,8 +195,7 @@ body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; te
 .toggle::after { content:''; position:absolute; top:2px; left:2px; width:24px; height:24px; border-radius:50%; background:#fff; transition:0.2s; }
 .toggle.on::after { left:22px; }
 .choose-btn { display:none; margin:0 16px 14px; padding:11px; background:rgba(48,209,88,0.2); border:1px solid #30d158; color:#30d158; border-radius:12px; font-size:14px; text-align:center; cursor:pointer; }
-#triggerGroup.show-choose .choose-btn { display:block; }
-#lockGroup.show-choose .choose-btn { display:block; }
+.choose-btn.show { display:block; }
 .config-inline { display:none; padding:14px 16px 16px; background:rgba(255,159,10,0.10); border-bottom:1px solid rgba(255,255,255,0.08); }
 .config-inline.show { display:block; }
 .config-inline .ci-label { font-size:13px; opacity:0.8; margin-bottom:8px; }
@@ -206,1171 +203,462 @@ body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; te
 .config-inline input { flex:1; background:rgba(255,255,255,0.12); border:1px solid rgba(255,159,10,0.5); color:#fff; border-radius:10px; padding:10px 12px; font-size:15px; outline:none; }
 .config-inline .ci-unit { font-size:13px; opacity:0.7; min-width:30px; }
 .config-inline .ci-save { background:rgba(48,209,88,0.2); border:1px solid #30d158; color:#30d158; border-radius:10px; padding:10px 16px; font-size:14px; cursor:pointer; }
-.config-inline .ci-save:active { transform:scale(0.96); }
-.config-inline .ci-hint { font-size:12px; opacity:0.5; margin-top:8px; }
+.info-line { font-size:12px; opacity:0.7; padding:0 16px 12px; }
 #closeSet { margin-top:10px; align-self:center; background:rgba(255,255,255,0.15); color:#fff; border:none; border-radius:14px; padding:13px 40px; font-size:16px; cursor:pointer; flex-shrink:0; }
-#closeSet:active { transform:scale(0.96); }
-#hsBgInput, #hsIconInput { display:none; }
+#hsBgInput, #hsIconInput, #hsPageBgInput, #galleryInput { display:none; }
 #attemptList { display:flex; flex-direction:column; gap:8px; }
-.attempt-row { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.06); border-radius:12px; padding:10px 12px; }
-.attempt-row .at-num { font-size:13px; opacity:0.7; min-width:90px; }
-.attempt-row .at-target { flex:1; font-size:13px; opacity:0.9; }
-
-#toastWrap { position:fixed; left:50%; bottom:40px; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
-.toast { background:rgba(30,30,32,0.95); color:#fff; padding:12px 20px; border-radius:14px; font-size:14px; box-shadow:0 6px 24px rgba(0,0,0,0.5); max-width:80vw; text-align:center; animation:toastIn 0.25s ease; }
-@keyframes toastIn { from{opacity:0;transform:translateY(14px);} to{opacity:1;transform:translateY(0);} }
-.toast.out { animation:toastOut 0.3s ease forwards; }
-@keyframes toastOut { to{opacity:0;transform:translateY(14px);} }
-
-#dialogOverlay { position:fixed; inset:0; z-index:9998; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.55); backdrop-filter:blur(6px); }
-#dialogOverlay.show { display:flex; }
-.dlg-card { width:300px; max-width:88%; background:#1c1c1e; border:1px solid rgba(255,255,255,0.12); border-radius:20px; padding:22px 20px 16px; box-shadow:0 12px 40px rgba(0,0,0,0.6); animation:imPop 0.2s ease; }
-.dlg-msg { color:#fff; font-size:15px; line-height:1.5; text-align:center; margin-bottom:18px; white-space:pre-line; }
-.dlg-btns { display:flex; gap:10px; }
-.dlg-btns button { flex:1; border:none; border-radius:12px; padding:12px; font-size:15px; cursor:pointer; }
-.dlg-cancel { background:rgba(255,255,255,0.12); color:#fff; }
-.dlg-ok { background:#0a84ff; color:#fff; font-weight:600; }
-.dlg-ok.danger { background:#ff3b30; }
-.dlg-btns button:active { transform:scale(0.96); }
+.group-inner-block { padding:14px 16px; }
+.tweak-launch { width:100%; margin-top:6px; color:#0a84ff; font-size:13px; background:rgba(10,132,255,0.12); border:1px solid rgba(10,132,255,0.5); padding:11px; border-radius:12px; cursor:pointer; }
+.divider-label { font-size:12px; text-transform:uppercase; letter-spacing:.5px; opacity:0.5; margin:14px 2px 8px; }
+#chooseHint { display:none; position:absolute; bottom:calc(20px + var(--ui-bottom)); left:50%; transform:translateX(-50%); z-index:400; background:rgba(10,132,255,0.92); color:#fff; padding:12px 18px; border-radius:14px; font-size:13px; text-align:center; max-width:90%; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.4); }
+#chooseHint.show { display:block; }
+/* Галерея */
+#galleryModal { position:absolute; inset:0; z-index:500; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.65); backdrop-filter:blur(8px); }
+#galleryModal.open { display:flex; }
+.gm-card { width:340px; max-width:94%; max-height:84%; background:#1c1c1e; border:1px solid rgba(255,255,255,0.12); border-radius:22px; padding:18px; display:flex; flex-direction:column; }
+.gm-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.gm-title { font-size:16px; font-weight:600; }
+.gm-upload { background:rgba(10,132,255,0.2); border:1px solid #0a84ff; color:#0a84ff; border-radius:10px; padding:8px 14px; font-size:13px; cursor:pointer; }
+.gm-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; overflow-y:auto; padding-right:4px; }
+.gm-item { position:relative; aspect-ratio:1; border-radius:10px; overflow:hidden; cursor:pointer; background:#333; background-size:cover; background-position:center; border:2px solid transparent; }
+.gm-item:active { border-color:#0a84ff; }
+.gm-item .gm-del { position:absolute; top:2px; right:2px; width:20px; height:20px; border-radius:50%; background:rgba(255,59,48,0.9); color:#fff; font-size:13px; display:flex; align-items:center; justify-content:center; }
+.gm-empty { grid-column:1/-1; text-align:center; opacity:0.5; font-size:13px; padding:30px 0; }
+.gm-close { margin-top:12px; background:rgba(255,255,255,0.12); border:none; color:#fff; border-radius:12px; padding:12px; font-size:15px; cursor:pointer; }
 </style>
 </head>
 <body class="style-ios">
 <div id="device">
-  <div class="wallpaper" id="wallpaper"></div>
-  <input type="file" id="bgInput" accept="image/*">
+<div class="wallpaper" id="wallpaper"></div>
+<input type="file" id="bgInput" accept="image/*" onchange="changeBg(event)">
 
-  <div class="lock-screen" id="lockScreen">
-    <div class="top-label" id="topLabel">Смахните вверх для Face ID<br>или введите код-пароль</div>
-    <div class="dots-container" id="dotsContainer"></div>
-    <div class="passcode-section">
-      <div class="keyboard" id="keyboard">
-        <button class="key" data-digit="1" type="button"><span class="key-number">1</span><span class="key-letters">&nbsp;</span></button>
-        <button class="key" data-digit="2" type="button"><span class="key-number">2</span><span class="key-letters">АБВГ<br>ABC</span></button>
-        <button class="key" data-digit="3" type="button"><span class="key-number">3</span><span class="key-letters">ДЕЖЗ<br>DEF</span></button>
-        <button class="key" data-digit="4" type="button"><span class="key-number">4</span><span class="key-letters">ИЙКЛ<br>GHI</span></button>
-        <button class="key" data-digit="5" type="button"><span class="key-number">5</span><span class="key-letters">МНОП<br>JKL</span></button>
-        <button class="key" data-digit="6" type="button"><span class="key-number">6</span><span class="key-letters">РСТУ<br>MNO</span></button>
-        <button class="key" data-digit="7" type="button"><span class="key-number">7</span><span class="key-letters">ФХЦЧ<br>PQRS</span></button>
-        <button class="key" data-digit="8" type="button"><span class="key-number">8</span><span class="key-letters">ШЩЪЫ<br>TUV</span></button>
-        <button class="key" data-digit="9" type="button"><span class="key-number">9</span><span class="key-letters">ЬЭЮЯ<br>WXYZ</span></button>
-      </div>
-      <div class="bottom-row">
-        <button class="btn-sos" id="sosKey" type="button">SOS</button>
-        <button class="key-zero" data-digit="0" type="button"><span class="key-number">0</span></button>
-        <button class="btn-cancel" id="cancelKey" type="button">Отменить</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="settings-overlay" id="settingsOverlay">
-    <div class="settings-header">
-      <div class="settings-title">⚙️ Настройки блокировки</div>
-      <button class="settings-close" id="closeSettingsBtn" type="button">Готово</button>
-    </div>
-    <div class="settings-block">
-      <div class="settings-block-title">Размер кнопок ввода</div>
-      <input type="range" class="size-slider" id="sizeSlider" min="60" max="120" value="96">
-      <div class="size-value" id="sizeValue">96 px</div>
-    </div>
-    <div class="settings-block">
-      <div class="settings-block-title">Смещение цифр (относительно центра «5»)</div>
-      <div class="slider-row">
-        <div class="sl-label"><span>По горизонтали</span><span id="pinXVal">0 px</span></div>
-        <input type="range" class="size-slider" id="pinXSlider" min="-40" max="40" value="0">
-      </div>
-      <div class="slider-row">
-        <div class="sl-label"><span>По вертикали</span><span id="pinYVal">0 px</span></div>
-        <input type="range" class="size-slider" id="pinYSlider" min="-40" max="40" value="0">
-      </div>
-    </div>
-    <div class="settings-block">
-      <div class="settings-block-title">Смещение блока цифр (по вертикали)</div>
-      <div class="slider-row">
-        <div class="sl-label"><span>Сдвиг блока</span><span id="pinBlockVal">0 px</span></div>
-        <input type="range" class="size-slider" id="pinBlockSlider" min="-200" max="100" value="0">
-      </div>
-    </div>
-    <div class="settings-block">
-      <div class="settings-block-title">Размер экрана (устройство)</div>
-      <div class="option-row">
-        <button class="option-btn active" data-screen="auto" type="button">Авто</button>
-        <button class="option-btn" data-screen="iphone11" type="button">iPhone 11</button>
-      </div>
-      <div class="settings-hint">iPhone 11 — 828×1792 (414×896 CSS px)</div>
-    </div>
-    <div class="settings-block">
-      <div class="settings-block-title">Фон экрана блокировки</div>
-      <button class="bg-pick-btn" id="pickLockBg" type="button">🖼 Выбрать из галереи</button>
-      <button class="bg-pick-btn" id="resetLockBg" style="margin-top:10px;" type="button">↺ Сбросить фон</button>
-    </div>
-    <div class="settings-block">
-      <div class="settings-block-title">Метод разблокировки</div>
-      <div class="option-row">
-        <button class="option-btn active" data-method="sos" type="button">SOS</button>
-        <button class="option-btn" data-method="attempts" type="button">3 попытки</button>
-        <button class="option-btn" data-method="instant" type="button">Сразу</button>
-      </div>
-      <div class="settings-hint" id="methodHint">Нажмите SOS, затем введите код</div>
-    </div>
-    <div class="settings-block">
-      <div class="settings-block-title">Стиль экрана блокировки</div>
-      <div class="option-row">
-        <button class="option-btn active" data-style="ios" type="button">🍎 iOS</button>
-        <button class="option-btn" data-style="android" type="button">🤖 Android</button>
-      </div>
-    </div>
-    <div class="settings-hint">Меню: долгое нажатие на «Отменить» (2 сек)</div>
-  </div>
-
-  <div class="unlock-screen" id="unlockScreen">
-    <div id="phone">
-      <div id="homeWallpaper"></div>
-      <div id="pagesViewport"><div id="pagesTrack"></div></div>
-      <div id="pageDots"></div>
-      <div id="search">🔍 Поиск</div>
-      <div id="dock"></div>
-
-      <div id="editBar">
-        <div class="eb-info" id="ebInfo">Режим редактирования</div>
-        <button class="primary" id="ebMerge" type="button">🔗 Объединить</button>
-        <button class="warn" id="ebSplit" type="button">✂️ Разделить</button>
-        <button id="ebAddPage" type="button">➕ Экран</button>
-        <button class="danger" id="ebDelPage" type="button">🗑 Экран</button>
-        <button id="ebDone" type="button">✓ Готово</button>
-      </div>
-
-      <div id="folderView">
-        <div id="folderTitle"></div>
-        <div id="folderBox"></div>
-      </div>
-
-      <div id="iconMenu">
-        <div class="im-card" id="imCard">
-          <div class="im-head">
-            <div class="im-prev" id="imPrev">📱</div>
-            <div class="im-title" id="imTitle">Иконка</div>
-          </div>
-          <div class="im-sub">Название</div>
-          <div class="im-row">
-            <input type="text" id="imName" placeholder="Название иконки">
-            <button class="im-ok" id="imNameOk" type="button">OK</button>
-          </div>
-          <div class="im-sub">Уведомление (число на значке, 0 = убрать)</div>
-          <div class="im-row">
-            <input type="number" id="imBadge" min="0" max="99999" placeholder="0 = нет">
-            <button class="im-ok" id="imBadgeOk" type="button">OK</button>
-          </div>
-          <button class="im-btn" id="imPhoto" type="button"><span class="imi">🖼</span> Изменить фон / фото</button>
-          <button class="im-btn" id="imMakeFolder" type="button"><span class="imi">📁</span> Сделать папкой / открыть</button>
-          <button class="im-btn danger" id="imDelete" type="button"><span class="imi">🗑</span> Удалить иконку</button>
-          <button class="im-close" id="imClose" type="button">Закрыть</button>
-        </div>
-      </div>
-
-      <div id="hsSettings">
-        <h2>⚙️ Настройки рабочего стола</h2>
-        <div class="subtitle" id="setSub">Способ вызова можно изменить ниже</div>
-
-        <div class="set-section-title">Внешний вид</div>
-        <div class="set-group">
-          <div class="set-row" id="rowBg"><span class="ic">🌄</span><span class="txt">Сменить фон рабочего стола</span><span class="arrow">›</span></div>
-          <div class="set-row" id="rowResetBg"><span class="ic">↺</span><span class="txt">Удалить фон (чёрный экран)</span><span class="arrow">›</span></div>
-        </div>
-
-        <div class="set-section-title">Сетка рабочего стола</div>
-        <div class="set-group" style="padding:14px 16px;">
-          <div class="slider-row">
-            <div class="sl-label"><span>Колонок</span><span id="colsVal">4</span></div>
-            <input type="range" class="size-slider" id="colsSlider" min="3" max="6" value="4">
-          </div>
-          <div class="slider-row">
-            <div class="sl-label"><span>Высота строки</span><span id="rowHVal">84 px</span></div>
-            <input type="range" class="size-slider" id="rowHSlider" min="60" max="120" value="84">
-          </div>
-          <div class="slider-row">
-            <div class="sl-label"><span>Промежуток</span><span id="gapVal">10 px</span></div>
-            <input type="range" class="size-slider" id="gapSlider" min="0" max="24" value="10">
-          </div>
-        </div>
-
-        <div class="set-section-title">Положение иконок</div>
-        <div class="set-group" style="padding:14px 16px;">
-          <div class="slider-row">
-            <div class="sl-label"><span>По горизонтали</span><span id="iconXVal">0 px</span></div>
-            <input type="range" class="size-slider" id="iconXSlider" min="-60" max="60" value="0">
-          </div>
-          <div class="slider-row">
-            <div class="sl-label"><span>По вертикали</span><span id="iconYVal">0 px</span></div>
-            <input type="range" class="size-slider" id="iconYSlider" min="-60" max="120" value="0">
-          </div>
-        </div>
-
-        <div class="set-section-title">Иконки</div>
-        <div class="set-group">
-          <div class="set-row" id="rowEdit"><span class="ic">✏️</span><span class="txt">Режим редактирования<br><small style="opacity:.55">иконки подсветятся красным; там же объединение блоков и экраны</small></span><div class="toggle" id="tgEdit"></div></div>
-          <div class="set-row" id="rowBadges"><span class="ic">🔴</span><span class="txt">Красные уведомления</span><div class="toggle on" id="tgBadges"></div></div>
-        </div>
-
-        <div class="set-section-title">Способ вызова настроек (можно несколько)</div>
-        <div class="set-group" id="triggerGroup">
-          <div class="set-row trigger-opt" data-mode="hold"><span class="ic">⏱️</span><span class="txt">Долгое нажатие<br><small style="opacity:.55" id="holdDuration">Длительность: 2 сек</small></span><div class="toggle" id="tgHold"></div></div>
-          <div class="config-inline" id="cfgHold">
-            <div class="ci-label">Длительность удержания (в секундах)</div>
-            <div class="ci-row"><input type="number" id="inHold" step="0.1" min="0.5" max="5" value="2"><span class="ci-unit">сек</span><button class="ci-save" data-save="hold" type="button">OK</button></div>
-            <div class="ci-hint">Допустимо от 0.5 до 5 секунд</div>
-          </div>
-          <div class="set-row trigger-opt" data-mode="double"><span class="ic">👆</span><span class="txt">Множественное нажатие (подряд)<br><small style="opacity:.55" id="tapCount">Количество: 2 нажатия</small></span><div class="toggle" id="tgDouble"></div></div>
-          <div class="config-inline" id="cfgDouble">
-            <div class="ci-label">Количество быстрых нажатий по пустому месту</div>
-            <div class="ci-row"><input type="number" id="inDouble" step="1" min="2" max="5" value="2"><span class="ci-unit">раз</span><button class="ci-save" data-save="double" type="button">OK</button></div>
-            <div class="ci-hint">Нажатия должны идти подряд (быстро). От 2 до 5</div>
-          </div>
-          <div class="set-row trigger-opt" data-mode="corner"><span class="ic">🎯</span><span class="txt">Нажатия по иконке<br><small style="opacity:.55" id="iconTapCount">Количество: 3 нажатия</small></span><div class="toggle" id="tgCorner"></div></div>
-          <div class="config-inline" id="cfgCorner">
-            <div class="ci-label">Количество нажатий по иконке</div>
-            <div class="ci-row"><input type="number" id="inCorner" step="1" min="2" max="5" value="3"><span class="ci-unit">раз</span><button class="ci-save" data-save="corner" type="button">OK</button></div>
-            <div class="ci-hint">Допустимо от 2 до 5</div>
-          </div>
-          <div class="choose-btn" id="chooseIconBtn">📌 Выбрать иконку-триггер</div>
-        </div>
-
-        <div class="set-section-title">Возврат к экрану блокировки (можно несколько)</div>
-        <div class="set-group" id="lockGroup">
-          <div class="set-row lock-opt" data-mode="swipe"><span class="ic">⬇️</span><span class="txt">Свайп вниз<br><small style="opacity:.55">провести пальцем сверху вниз</small></span><div class="toggle" id="tgLockSwipe"></div></div>
-          <div class="set-row lock-opt" data-mode="taps"><span class="ic">👆</span><span class="txt">Множественное нажатие (подряд)<br><small style="opacity:.55" id="lockTapCount">Количество: 3 нажатия</small></span><div class="toggle" id="tgLockTaps"></div></div>
-          <div class="config-inline" id="cfgLockTaps">
-            <div class="ci-label">Количество быстрых нажатий по пустому месту</div>
-            <div class="ci-row"><input type="number" id="inLockTaps" step="1" min="2" max="6" value="3"><span class="ci-unit">раз</span><button class="ci-save" data-save="locktaps" type="button">OK</button></div>
-            <div class="ci-hint">Нажатия должны идти подряд. От 2 до 6</div>
-          </div>
-          <div class="set-row lock-opt" data-mode="icon"><span class="ic">🔒</span><span class="txt">Нажатия по иконке<br><small style="opacity:.55" id="lockIconTapCount">Количество: 2 нажатия</small></span><div class="toggle" id="tgLockIcon"></div></div>
-          <div class="config-inline" id="cfgLockIcon">
-            <div class="ci-label">Количество нажатий по иконке блокировки</div>
-            <div class="ci-row"><input type="number" id="inLockIcon" step="1" min="2" max="5" value="2"><span class="ci-unit">раз</span><button class="ci-save" data-save="lockicon" type="button">OK</button></div>
-            <div class="ci-hint">Допустимо от 2 до 5</div>
-          </div>
-          <div class="choose-btn" id="chooseLockIconBtn">🔒 Выбрать иконку блокировки</div>
-        </div>
-
-        <div class="set-section-title">Попытки ввода пароля</div>
-        <div class="set-group" style="padding:14px 16px;">
-          <div class="ci-label" style="font-size:13px;opacity:0.8;margin-bottom:8px;">Сколько последних попыток показывать</div>
-          <div class="ci-row" style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
-            <input type="number" id="inAttemptCount" step="1" min="1" max="5" value="2" style="flex:1;background:rgba(255,255,255,0.12);border:1px solid rgba(255,159,10,0.5);color:#fff;border-radius:10px;padding:10px 12px;font-size:15px;outline:none;">
-            <span style="font-size:13px;opacity:0.7;">шт.</span>
-            <button id="saveAttemptCount" style="background:rgba(48,209,88,0.2);border:1px solid #30d158;color:#30d158;border-radius:10px;padding:10px 16px;font-size:14px;cursor:pointer;" type="button">OK</button>
-          </div>
-          <div style="font-size:12px;opacity:0.5;margin-bottom:6px;">Допустимо от 1 до 5</div>
-          <div style="display:flex;gap:8px;margin-bottom:12px;">
-            <button id="clearAttempts" style="flex:1;background:rgba(255,59,48,0.18);border:1px solid #ff3b30;color:#ff453a;border-radius:10px;padding:9px;font-size:13px;cursor:pointer;" type="button">🗑 Очистить историю попыток</button>
-          </div>
-          <div id="attemptList"></div>
-        </div>
-
-        <button id="closeSet" type="button">Готово</button>
-      </div>
-
-      <input type="file" id="hsBgInput" accept="image/*">
-      <input type="file" id="hsIconInput" accept="image/*">
-    </div>
-  </div>
+<div class="lock-screen" id="lockScreen">
+<div class="top-label" id="topLabel">Смахните вверх для Face ID<br>или введите код-пароль</div>
+<div class="dots-container" id="dotsContainer"></div>
+<div class="passcode-section">
+<div class="keyboard" id="keyboard">
+<div class="key" data-digit="1" onclick="pressKey('1',this)"><span class="key-number">1</span><span class="key-letters">&nbsp;</span></div>
+<div class="key" data-digit="2" onclick="pressKey('2',this)"><span class="key-number">2</span><span class="key-letters">АБВГ<br>ABC</span></div>
+<div class="key" data-digit="3" onclick="pressKey('3',this)"><span class="key-number">3</span><span class="key-letters">ДЕЖЗ<br>DEF</span></div>
+<div class="key" data-digit="4" onclick="pressKey('4',this)"><span class="key-number">4</span><span class="key-letters">ИЙКЛ<br>GHI</span></div>
+<div class="key" data-digit="5" onclick="pressKey('5',this)"><span class="key-number">5</span><span class="key-letters">МНОП<br>JKL</span></div>
+<div class="key" data-digit="6" onclick="pressKey('6',this)"><span class="key-number">6</span><span class="key-letters">РСТУ<br>MNO</span></div>
+<div class="key" data-digit="7" onclick="pressKey('7',this)"><span class="key-number">7</span><span class="key-letters">ФХЦЧ<br>PQRS</span></div>
+<div class="key" data-digit="8" onclick="pressKey('8',this)"><span class="key-number">8</span><span class="key-letters">ШЩЪЫ<br>TUV</span></div>
+<div class="key" data-digit="9" onclick="pressKey('9',this)"><span class="key-number">9</span><span class="key-letters">ЬЭЮЯ<br>WXYZ</span></div>
+</div>
+<div class="bottom-row">
+<button class="btn-sos" id="sosKey">SOS</button>
+<div class="key-zero" data-digit="0" onclick="pressKey('0',this)"><span class="key-number">0</span></div>
+<button class="btn-cancel" id="cancelKey">Отменить</button>
+</div>
+</div>
+</div>
+<div class="settings-overlay" id="settingsOverlay">
+<div class="settings-header"><div class="settings-title">⚙️ Настройки блокировки</div><button class="settings-close" onclick="closeSettings()">Готово</button></div>
+<div class="settings-block"><div class="settings-block-title">Размер кнопок ввода</div><input type="range" class="size-slider" id="sizeSlider" min="60" max="120" value="96" oninput="changeKeySize(this.value)"><div class="size-value" id="sizeValue">96 px</div></div>
+<div class="settings-block"><div class="settings-block-title">Смещение цифр (относительно «5»)</div>
+<div class="slider-row"><div class="sl-label"><span>По горизонтали</span><span id="pinXVal">0 px</span></div><input type="range" class="size-slider" id="pinXSlider" min="-40" max="40" value="0" oninput="changePinSpread('x',this.value)"></div>
+<div class="slider-row"><div class="sl-label"><span>По вертикали</span><span id="pinYVal">0 px</span></div><input type="range" class="size-slider" id="pinYSlider" min="-40" max="40" value="0" oninput="changePinSpread('y',this.value)"></div></div>
+<div class="settings-block"><div class="settings-block-title">Сдвиг блока цифр</div><div class="slider-row"><div class="sl-label"><span>Сдвиг</span><span id="pinBlockVal">0 px</span></div><input type="range" class="size-slider" id="pinBlockSlider" min="-200" max="100" value="0" oninput="changePinBlockY(this.value)"></div></div>
+<div class="settings-block"><div class="settings-block-title">Реальный код-пароль (для «Сразу»)</div><div class="slider-row" style="display:flex;gap:8px;align-items:center;"><input type="text" id="realPinInput" inputmode="numeric" maxlength="6" placeholder="1234" style="flex:1;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:#fff;border-radius:10px;padding:11px 12px;font-size:15px;outline:none;"><button class="settings-close" onclick="saveRealPin()">OK</button></div></div>
+<div class="settings-block"><div class="settings-block-title">Фон блокировки</div><button class="bg-pick-btn" onclick="document.getElementById('bgInput').click()">🖼 Выбрать с устройства</button><button class="bg-pick-btn" style="margin-top:10px;" onclick="openGallery('lockBg')">🗂 Из папки img</button><button class="bg-pick-btn" style="margin-top:10px;" onclick="resetBg()">↺ Сбросить</button></div>
+<div class="settings-block"><div class="settings-block-title">Метод разблокировки</div><div class="option-row"><button class="option-btn active" data-method="sos" onclick="setUnlockMethod('sos',this)">SOS</button><button class="option-btn" data-method="attempts" onclick="setUnlockMethod('attempts',this)">3 попытки</button><button class="option-btn" data-method="instant" onclick="setUnlockMethod('instant',this)">Сразу</button></div><div class="settings-hint" id="methodHint">Нажмите SOS, затем код</div></div>
+<div class="settings-block"><div class="settings-block-title">Стиль</div><div class="option-row"><button class="option-btn active" data-style="ios" onclick="setStyle('ios',this)">🍎 iOS</button><button class="option-btn" data-style="android" onclick="setStyle('android',this)">🤖 Android</button></div></div>
+<div class="settings-hint">Меню: удержание «Отменить» (2 сек)</div>
 </div>
 
-<div id="toastWrap"></div>
-<div id="dialogOverlay">
-  <div class="dlg-card">
-    <div class="dlg-msg" id="dlgMsg"></div>
-    <div class="dlg-btns" id="dlgBtns"></div>
-  </div>
+<div class="unlock-screen" id="unlockScreen">
+<div id="phone">
+<div id="homeWallpaper"></div>
+<div id="pagesViewport"><div id="pagesTrack"></div></div>
+<div id="pageDots"></div>
+<div id="search">🔍 Поиск</div>
+<div id="dock"></div>
+<div id="editBar"><div class="eb-info" id="ebInfo">Режим редактирования</div><button class="primary" id="ebMerge">🔗 Объединить</button><button id="ebDone">✓ Готово</button></div>
+<div id="folderView"><div id="folderTitle"></div><div id="folderBox"></div></div>
+<div id="iconMenu"><div class="im-card" onclick="event.stopPropagation()">
+<div class="im-head"><div class="im-prev" id="imPrev">📱</div><div class="im-title" id="imTitle">Иконка</div></div>
+<div class="im-sub">Название</div><div class="im-row"><input type="text" id="imName" placeholder="Название"><button class="im-ok" id="imNameOk">OK</button></div>
+<div class="im-sub">Эмодзи / символ</div><div class="im-row"><input type="text" id="imEmoji" maxlength="4" placeholder="📷 или T"><button class="im-ok" id="imEmojiOk">OK</button></div>
+<div class="im-sub">Цвет фона</div><div class="im-row"><input type="color" id="imColor" value="#444444"><input type="text" id="imColorText" placeholder="#444444"><button class="im-ok" id="imColorOk">OK</button></div>
+<div class="im-sub">Размер блока</div><div class="im-seg" id="imSizeSeg"><button data-w="1" data-h="1">1×1</button><button data-w="2" data-h="1">2×1</button><button data-w="2" data-h="2">2×2</button></div>
+<div class="im-sub">Уведомление (0 = убрать)</div><div class="im-row"><input type="number" id="imBadge" min="0" max="99999" placeholder="0"><button class="im-ok" id="imBadgeOk">OK</button></div>
+<button class="im-btn" id="imPhoto"><span class="imi">🖼</span> Фото с устройства</button><button class="im-btn" id="imPhotoGallery"><span class="imi">🗂</span> Фото из папки img</button><button class="im-btn" id="imResetPhoto"><span class="imi">🚫</span> Убрать фото</button><button class="im-btn" id="imMakeFolder"><span class="imi">📁</span> Папка / открыть</button><button class="im-btn danger" id="imDelete"><span class="imi">🗑</span> Удалить</button><button class="im-close" id="imClose">Закрыть</button>
+</div></div>
+<div id="hsSettings">
+<h2>⚙️ Настройки рабочего стола</h2><div class="subtitle">Нажмите на заголовок группы</div>
+<div class="set-section" data-sec="appear"><div class="set-section-head"><span><span class="sec-ic">🎨</span>Внешний вид</span><span class="sec-chevron">›</span></div><div class="set-section-body"><div class="set-section-body-inner">
+<div class="set-group"><div class="set-row" data-act="homeBg"><span class="ic">🌄</span><span class="txt">Общий фон (устройство)</span><span class="arrow">›</span></div><div class="set-row" data-act="homeBgGallery"><span class="ic">🗂</span><span class="txt">Общий фон (папка img)</span><span class="arrow">›</span></div><div class="set-row" data-act="homeBgReset"><span class="ic">↺</span><span class="txt">Удалить общий фон</span><span class="arrow">›</span></div><div class="set-row" data-act="pageBg"><span class="ic">🖼</span><span class="txt">Фон экрана (устройство)</span><span class="arrow">›</span></div><div class="set-row" data-act="pageBgGallery"><span class="ic">🗂</span><span class="txt">Фон экрана (папка img)</span><span class="arrow">›</span></div><div class="set-row" data-act="pageBgReset"><span class="ic">↺</span><span class="txt">Сбросить фон экрана</span><span class="arrow">›</span></div><div class="set-row" data-act="openGalleryManage"><span class="ic">🗂</span><span class="txt">Папка img (загрузить картинки)</span><span class="arrow">›</span></div></div>
+<div class="divider-label">Сетка</div><div class="set-group group-inner-block">
+<div class="slider-row"><div class="sl-label"><span>Колонок</span><span id="colsVal">4</span></div><input type="range" class="size-slider" id="colsSlider" min="3" max="6" value="4" oninput="changeCols(this.value)"></div>
+<div class="slider-row"><div class="sl-label"><span>Отступ X</span><span id="gapXVal">10px</span></div><input type="range" class="size-slider" id="gapXSlider" min="0" max="40" value="10" oninput="changeGapX(this.value)"></div>
+<div class="slider-row"><div class="sl-label"><span>Отступ Y</span><span id="gapYVal">14px</span></div><input type="range" class="size-slider" id="gapYSlider" min="0" max="50" value="14" oninput="changeGapY(this.value)"></div>
+<button class="tweak-launch" data-tweak="grid">👁 Поверх стола</button></div>
+<div class="divider-label">Размер иконок</div><div class="set-group group-inner-block">
+<div class="slider-row"><div class="sl-label"><span>Размер</span><span id="iconSizeVal">60px</span></div><input type="range" class="size-slider" id="iconSizeSlider" min="36" max="100" value="60" oninput="changeIconSize(this.value)"></div>
+<div class="slider-row"><div class="sl-label"><span>Скругление</span><span id="iconRadiusVal">15px</span></div><input type="range" class="size-slider" id="iconRadiusSlider" min="0" max="50" value="15" oninput="changeIconRadius(this.value)"></div>
+<button class="tweak-launch" data-tweak="iconsize">👁 Поверх стола</button></div>
+<div class="divider-label">Положение иконок</div><div class="set-group group-inner-block">
+<div class="slider-row"><div class="sl-label"><span>По X</span><span id="iconXVal">0 px</span></div><input type="range" class="size-slider" id="iconXSlider" min="-60" max="60" value="0" oninput="changeIconOffset('x',this.value)"></div>
+<div class="slider-row"><div class="sl-label"><span>По Y</span><span id="iconYVal">0 px</span></div><input type="range" class="size-slider" id="iconYSlider" min="-60" max="120" value="0" oninput="changeIconOffset('y',this.value)"></div>
+<button class="tweak-launch" data-tweak="iconpos">👁 Поверх стола</button></div>
+<div class="divider-label">Прозрачность</div><div class="set-group group-inner-block">
+<div class="slider-row"><div class="sl-label"><span>Прозрачность</span><span id="iconOpVal">100%</span></div><input type="range" class="size-slider" id="iconOpSlider" min="0" max="100" value="100" oninput="changeIconOpacity(this.value)"></div>
+<button class="tweak-launch" data-tweak="iconop">👁 Поверх стола</button></div>
+</div></div></div>
+<div class="set-section" data-sec="icons"><div class="set-section-head"><span><span class="sec-ic">📲</span>Иконки</span><span class="sec-chevron">›</span></div><div class="set-section-body"><div class="set-section-body-inner">
+<div class="set-group"><div class="set-row" id="rowEdit"><span class="ic">✏️</span><span class="txt">Режим редактирования</span><div class="toggle" id="tgEdit"></div></div><div class="set-row" id="rowBadges"><span class="ic">🔴</span><span class="txt">Показывать уведомления</span><div class="toggle on" id="tgBadges"></div></div></div>
+<div class="divider-label">Действия</div><div class="set-group"><div class="set-row" id="rowAddIcon"><span class="ic">➕</span><span class="txt">Добавить иконку</span><span class="arrow">›</span></div><div class="set-row" id="rowAddDock"><span class="ic">➕</span><span class="txt">Добавить в док</span><span class="arrow">›</span></div><div class="set-row" id="rowMerge"><span class="ic">🔗</span><span class="txt">Объединить в папку</span><span class="arrow">›</span></div><div class="set-row" id="rowAddPage"><span class="ic">➕</span><span class="txt">Добавить экран</span><span class="arrow">›</span></div><div class="set-row" id="rowDelPage"><span class="ic">🗑</span><span class="txt">Удалить экран</span><span class="arrow">›</span></div></div>
+<div class="divider-label">Уведомления (бейджи)</div><div class="set-group group-inner-block">
+<div class="slider-row"><div class="sl-label"><span>По X</span><span id="bgBxVal">30 px</span></div><input type="range" class="size-slider" id="bgBx" min="-40" max="60" value="30" oninput="changeBadgeCfg('bx',this.value)"></div>
+<div class="slider-row"><div class="sl-label"><span>По Y</span><span id="bgByVal">-2 px</span></div><input type="range" class="size-slider" id="bgBy" min="-30" max="60" value="-2" oninput="changeBadgeCfg('by',this.value)"></div>
+<div class="slider-row"><div class="sl-label"><span>Ширина</span><span id="bgBwVal">20 px</span></div><input type="range" class="size-slider" id="bgBw" min="10" max="60" value="20" oninput="changeBadgeCfg('bw',this.value)"></div>
+<div class="slider-row"><div class="sl-label"><span>Высота</span><span id="bgBhVal">20 px</span></div><input type="range" class="size-slider" id="bgBh" min="10" max="50" value="20" oninput="changeBadgeCfg('bh',this.value)"></div>
+<div class="slider-row"><div class="sl-label"><span>Шрифт</span><span id="bgBfsVal">12 px</span></div><input type="range" class="size-slider" id="bgBfs" min="7" max="30" value="12" oninput="changeBadgeCfg('bfs',this.value)"></div>
+<button class="tweak-launch" data-tweak="badge">👁 Поверх стола</button></div>
+</div></div></div>
+<div class="set-section" data-sec="trigger"><div class="set-section-head"><span><span class="sec-ic">🚪</span>Вызов настроек</span><span class="sec-chevron">›</span></div><div class="set-section-body"><div class="set-section-body-inner">
+<div class="set-group" id="triggerGroup">
+<div class="set-row trigger-opt" data-mode="hold"><span class="ic">⏱️</span><span class="txt">Долгое нажатие<br><small style="opacity:.55" id="holdDuration">2 сек</small></span><div class="toggle" id="tgHold"></div></div>
+<div class="config-inline" id="cfgHold"><div class="ci-label">Длительность (сек)</div><div class="ci-row"><input type="number" id="inHold" step="0.1" min="0.5" max="5" value="2"><span class="ci-unit">сек</span><button class="ci-save" data-save="hold">OK</button></div></div>
+<div class="set-row trigger-opt" data-mode="double"><span class="ic">👆</span><span class="txt">Множественное нажатие<br><small style="opacity:.55" id="tapCount">2 нажатия</small></span><div class="toggle" id="tgDouble"></div></div>
+<div class="config-inline" id="cfgDouble"><div class="ci-label">Кол-во быстрых нажатий</div><div class="ci-row"><input type="number" id="inDouble" step="1" min="2" max="5" value="2"><span class="ci-unit">раз</span><button class="ci-save" data-save="double">OK</button></div></div>
+<div class="set-row" id="rowDoubleOnIcons" style="display:none;"><span class="ic">📲</span><span class="txt">Реагировать на иконки<br><small style="opacity:.55">тапы считаются и поверх значков</small></span><div class="toggle on" id="tgDoubleIcons"></div></div>
+<div class="set-row trigger-opt" data-mode="corner"><span class="ic">🎯</span><span class="txt">Нажатия по иконке<br><small style="opacity:.55" id="iconTapCount">3 нажатия</small></span><div class="toggle" id="tgCorner"></div></div>
+<div class="config-inline" id="cfgCorner"><div class="ci-label">Кол-во нажатий по иконке</div><div class="ci-row"><input type="number" id="inCorner" step="1" min="2" max="5" value="3"><span class="ci-unit">раз</span><button class="ci-save" data-save="corner">OK</button></div></div>
+<div class="choose-btn" id="chooseIconBtn">📌 Выбрать иконку-триггер</div><div class="info-line" id="triggerIconInfo"></div>
+</div></div></div></div>
+<div class="set-section" data-sec="lock"><div class="set-section-head"><span><span class="sec-ic">🔒</span>Возврат к блокировке</span><span class="sec-chevron">›</span></div><div class="set-section-body"><div class="set-section-body-inner">
+<div class="set-group" id="lockGroup">
+<div class="set-row lock-opt" data-mode="swipe"><span class="ic">⬇️</span><span class="txt">Свайп вниз</span><div class="toggle" id="tgLockSwipe"></div></div>
+<div class="set-row lock-opt" data-mode="tap"><span class="ic">👆</span><span class="txt">Множественное нажатие<br><small style="opacity:.55" id="lockTapCount">3 нажатия</small></span><div class="toggle" id="tgLockTaps"></div></div>
+<div class="config-inline" id="cfgLockTaps"><div class="ci-label">Кол-во нажатий</div><div class="ci-row"><input type="number" id="inLockTaps" step="1" min="2" max="6" value="3"><span class="ci-unit">раз</span><button class="ci-save" data-save="locktaps">OK</button></div></div>
+<div class="set-row lock-opt" data-mode="icon"><span class="ic">🔐</span><span class="txt">Нажатия по иконке<br><small style="opacity:.55" id="lockIconTapCount">2 нажатия</small></span><div class="toggle" id="tgLockIcon"></div></div>
+<div class="config-inline" id="cfgLockIcon"><div class="ci-label">Кол-во нажатий по иконке</div><div class="ci-row"><input type="number" id="inLockIcon" step="1" min="2" max="5" value="2"><span class="ci-unit">раз</span><button class="ci-save" data-save="lockicon">OK</button></div></div>
+<div class="choose-btn" id="chooseLockIconBtn">🔒 Выбрать иконку блокировки</div><div class="info-line" id="lockIconInfo"></div>
+</div></div></div></div>
+<div class="set-section" data-sec="attempts"><div class="set-section-head"><span><span class="sec-ic">🔢</span>Попытки пароля</span><span class="sec-chevron">›</span></div><div class="set-section-body"><div class="set-section-body-inner">
+<div class="set-group group-inner-block"><div class="ci-label">Сколько попыток показывать</div><div class="ci-row" style="display:flex;gap:8px;align-items:center;margin-bottom:6px;"><input type="number" id="inAttemptCount" step="1" min="1" max="5" value="2" style="flex:1;background:rgba(255,255,255,0.12);border:1px solid rgba(255,159,10,0.5);color:#fff;border-radius:10px;padding:10px 12px;font-size:15px;outline:none;"><span style="font-size:13px;opacity:0.7;">шт.</span><button id="saveAttemptCount" style="background:rgba(48,209,88,0.2);border:1px solid #30d158;color:#30d158;border-radius:10px;padding:10px 16px;font-size:14px;cursor:pointer;">OK</button></div>
+<div style="display:flex;gap:8px;margin:8px 0 12px;"><button id="clearAttempts" style="flex:1;background:rgba(255,59,48,0.18);border:1px solid #ff3b30;color:#ff453a;border-radius:10px;padding:9px;font-size:13px;cursor:pointer;">🗑 Очистить</button></div>
+<div class="ci-label">Иконки для показа попыток</div><div id="attemptList"></div></div>
+</div></div></div>
+<button id="closeSet">Готово</button>
+<div class="tweak-panel" id="tweakPanel"><div class="tp-title" id="tpTitle">Настройка</div><div id="tpContent"></div><button class="tp-done" id="tpDone">✓ Готово</button></div>
 </div>
-            <script>
-'use strict';
+<div id="chooseHint">Выберите иконку</div>
+<div id="galleryModal"><div class="gm-card" onclick="event.stopPropagation()">
+<div class="gm-head"><div class="gm-title">🗂 Папка img</div><button class="gm-upload" id="gmUpload">＋ Загрузить</button></div>
+<div class="gm-grid" id="gmGrid"></div>
+<button class="gm-close" id="gmClose">Закрыть</button>
+</div></div>
+<input type="file" id="hsBgInput" accept="image/*">
+<input type="file" id="hsIconInput" accept="image/*">
+<input type="file" id="hsPageBgInput" accept="image/*">
+<input type="file" id="galleryInput" accept="image/*" multiple>
+</div>
+</div>
+</div>
+<script>
+function fitViewport(){ document.getElementById('device').style.height=window.innerHeight+'px'; }
+window.addEventListener('resize',fitViewport);
+window.addEventListener('orientationchange',()=>setTimeout(fitViewport,200));
+fitViewport();
 
-/* ===== УТИЛИТЫ ===== */
-const $ = id => document.getElementById(id);
-function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
-function clampInt(v, min, max, def){ v=parseInt(v,10); if(isNaN(v)) v=def; return Math.max(min, Math.min(max, v)); }
-function loadJSON(key, def){ try { const v=JSON.parse(localStorage.getItem(key)); return v==null?def:v; } catch(e){ return def; } }
-function saveJSON(key, val){ try { localStorage.setItem(key, JSON.stringify(val)); return true; } catch(e){ toast('⚠️ Не удалось сохранить (нет места)'); return false; } }
-
-/* ===== TOAST ===== */
-function toast(msg, ms=2200){
-  const wrap=$('toastWrap');
-  const el=document.createElement('div'); el.className='toast'; el.textContent=msg;
-  wrap.appendChild(el);
-  setTimeout(()=>{ el.classList.add('out'); setTimeout(()=>el.remove(), 320); }, ms);
-}
-
-/* ===== ДИАЛОГИ ===== */
-function dialogConfirm(msg, danger=false){
-  return new Promise(resolve=>{
-    $('dlgMsg').textContent=msg;
-    const btns=$('dlgBtns'); btns.innerHTML='';
-    const cancel=document.createElement('button'); cancel.className='dlg-cancel'; cancel.textContent='Отмена';
-    cancel.onclick=()=>{ $('dialogOverlay').classList.remove('show'); resolve(false); };
-    const ok=document.createElement('button'); ok.className='dlg-ok'+(danger?' danger':''); ok.textContent='Удалить';
-    ok.onclick=()=>{ $('dialogOverlay').classList.remove('show'); resolve(true); };
-    btns.appendChild(cancel); btns.appendChild(ok);
-    $('dialogOverlay').classList.add('show');
-  });
-}
-
-/* ===== ХРАНИЛИЩЕ КАРТИНОК (IndexedDB) ===== */
-const ImageStore = (()=>{
-  let dbPromise=null;
-  const cache=new Map();
-  function open(){
-    if(dbPromise) return dbPromise;
-    dbPromise=new Promise((resolve,reject)=>{
-      const req=indexedDB.open('lockScreenImages', 1);
-      req.onupgradeneeded=()=>{ if(!req.result.objectStoreNames.contains('images')) req.result.createObjectStore('images'); };
-      req.onsuccess=()=>resolve(req.result);
-      req.onerror=()=>reject(req.error);
-    });
-    return dbPromise;
-  }
-  async function put(id, blob){
-    const db=await open();
-    return new Promise((res,rej)=>{
-      const tx=db.transaction('images','readwrite');
-      tx.objectStore('images').put(blob, id);
-      tx.oncomplete=res; tx.onerror=()=>rej(tx.error);
-    });
-  }
-  async function getBlob(id){
-    const db=await open();
-    return new Promise((res,rej)=>{
-      const tx=db.transaction('images','readonly');
-      const r=tx.objectStore('images').get(id);
-      r.onsuccess=()=>res(r.result||null); r.onerror=()=>rej(r.error);
-    });
-  }
-  /* ИСПРАВЛЕНО: очистка кэша перед return */
-  async function del(id){
-    if(cache.has(id)){ URL.revokeObjectURL(cache.get(id)); cache.delete(id); }
-    const db=await open();
-    return new Promise((res)=>{
-      const tx=db.transaction('images','readwrite');
-      tx.objectStore('images').delete(id);
-      tx.oncomplete=res; tx.onerror=res;
-    });
-  }
-  async function url(id){
-    if(!id) return null;
-    if(cache.has(id)) return cache.get(id);
-    const blob=await getBlob(id);
-    if(!blob) return null;
-    const u=URL.createObjectURL(blob);
-    cache.set(id, u);
-    return u;
-  }
-  return { put, url, del };
-})();
-
-let imgIdCounter = parseInt(localStorage.getItem('imgIdCounter'),10) || 0;
-function newImgId(){ imgIdCounter++; localStorage.setItem('imgIdCounter', imgIdCounter); return 'img'+imgIdCounter; }
-async function storeImageFile(file){ const id=newImgId(); await ImageStore.put(id, file); return id; }
-
-/* ===== ЭКРАН БЛОКИРОВКИ ===== */
-const SETTINGS = { codeLength: 4, unlockMethod: 'sos', attemptsToUnlock: 3 };
-let currentInput = '', attemptCount = 0, sosArmed = false;
-
-function buildDots() {
-  const c = $('dotsContainer'); c.innerHTML = '';
-  for (let i = 0; i < SETTINGS.codeLength; i++) { const d = document.createElement('div'); d.className = 'dot'; c.appendChild(d); }
-}
-function updateDots() { document.querySelectorAll('.dot').forEach((dot, i) => dot.classList.toggle('filled', i < currentInput.length)); }
-function pressKey(num, el) {
-  if (el) { el.classList.remove('pressed'); void el.offsetWidth; el.classList.add('pressed'); setTimeout(() => el.classList.remove('pressed'), 220); }
-  if (currentInput.length >= SETTINGS.codeLength) return;
-  currentInput += num; updateDots();
-  if (currentInput.length === SETTINGS.codeLength) setTimeout(checkCode, 300);
-}
-function deleteKey() { if (!currentInput.length) return; currentInput = currentInput.slice(0, -1); updateDots(); }
-function checkCode() {
-  attemptCount++; recordAttempt(currentInput);
-  if (SETTINGS.unlockMethod === 'instant') { doUnlock(); return; }
-  if (SETTINGS.unlockMethod === 'sos') { if (sosArmed) { sosArmed = false; doUnlock(); } else wrongPasswordAnimation(); return; }
-  if (SETTINGS.unlockMethod === 'attempts') { if (attemptCount >= SETTINGS.attemptsToUnlock) { doUnlock(); return; } wrongPasswordAnimation(); }
-}
-function wrongPasswordAnimation() {
-  const dots = $('dotsContainer'); dots.classList.add('wrong-animation');
-  document.querySelectorAll('.dot').forEach(d => { d.style.background = '#ff3b30'; d.style.borderColor = '#ff3b30'; });
-  setTimeout(() => {
-    dots.classList.remove('wrong-animation');
-    document.querySelectorAll('.dot').forEach(d => { d.style.background = ''; d.style.borderColor = ''; d.classList.remove('filled'); });
-    currentInput = '';
-  }, 600);
-}
-function doUnlock() {
-  document.body.classList.add('unlocked');
-  $('unlockScreen').classList.add('show');
-  renderHome();
-}
-function closeHome() {
-  closeFolder(); closeHsSettings(); closeIconMenu();
-  exitEditMode();
-  phone.classList.remove('choosing-trigger', 'choosing-attempt', 'choosing-lock');
-  $('unlockScreen').classList.remove('show');
-  document.body.classList.remove('unlocked');
-  resetScreen();
-}
-function resetScreen() { currentInput = ''; attemptCount = 0; sosArmed = false; updateDots(); }
-
-/* ===== ФОН БЛОКИРОВКИ ===== */
-async function setLockBgFromFile(file){ const id=await storeImageFile(file); localStorage.setItem('lockBgId', id); applyLockBg(); }
-async function applyLockBg(){
-  const id=localStorage.getItem('lockBgId'); const wp=$('wallpaper');
-  if(!id){ wp.style.backgroundImage='none'; wp.style.background='#000'; return; }
-  const u=await ImageStore.url(id);
-  if(u){ wp.style.backgroundImage=`url('${u}')`; wp.style.backgroundSize='cover'; wp.style.backgroundPosition='center'; }
-}
-function resetBg() {
-  const id=localStorage.getItem('lockBgId'); if(id) ImageStore.del(id);
-  localStorage.removeItem('lockBgId');
-  const wp=$('wallpaper'); wp.style.backgroundImage='none'; wp.style.background='#000';
-}
-
-/* ===== ФОН РАБОЧЕГО СТОЛА ===== */
-async function setHomeBgFromFile(file){ const id=await storeImageFile(file); localStorage.setItem('homeBgId', id); applyHomeBg(); }
-async function applyHomeBg(){
-  const id=localStorage.getItem('homeBgId'); const hw=$('homeWallpaper');
-  if(!id){ hw.style.backgroundImage='none'; hw.style.background='#000'; return; }
-  const u=await ImageStore.url(id);
-  if(u){ hw.style.backgroundImage=`url('${u}')`; hw.style.backgroundSize='cover'; hw.style.backgroundPosition='center'; }
-}
-function resetHomeBg() {
-  const id=localStorage.getItem('homeBgId'); if(id) ImageStore.del(id);
-  localStorage.removeItem('homeBgId');
-  const hw=$('homeWallpaper'); hw.style.backgroundImage='none'; hw.style.background='#000';
-}
-
-/* ===== РАЗМЕР / СМЕЩЕНИЕ КЛАВИШ ===== */
-function changeKeySize(val) {
-  document.documentElement.style.setProperty('--key-size', val + 'px');
-  $('sizeValue').textContent = val + ' px'; localStorage.setItem('keySize', val);
-}
-let pinStepX = 0, pinStepY = 0;
-const KEY_POS = { '1':{c:0,r:0},'2':{c:1,r:0},'3':{c:2,r:0},'4':{c:0,r:1},'5':{c:1,r:1},'6':{c:2,r:1},'7':{c:0,r:2},'8':{c:1,r:2},'9':{c:2,r:2},'0':{c:1,r:3} };
-function applyPinSpread() {
-  document.querySelectorAll('.key, .key-zero').forEach(el => {
-    const p = KEY_POS[el.dataset.digit]; if (!p) return;
-    el.style.setProperty('--kx', (p.c - 1) * pinStepX + 'px');
-    el.style.setProperty('--ky', (p.r - 1) * pinStepY + 'px');
-  });
-}
-function changePinSpread(axis, val) {
-  val = parseInt(val,10);
-  if (axis === 'x') { pinStepX = val; $('pinXVal').textContent = val + ' px'; localStorage.setItem('pinStepX', val); }
-  else { pinStepY = val; $('pinYVal').textContent = val + ' px'; localStorage.setItem('pinStepY', val); }
-  applyPinSpread();
-}
-function changePinBlockY(val) {
-  val = parseInt(val,10);
-  document.documentElement.style.setProperty('--pin-block-y', val + 'px');
-  $('pinBlockVal').textContent = val + ' px'; localStorage.setItem('pinBlockY', val);
-}
-function setScreenPreset(type, btn) {
-  const device = $('device');
-  document.querySelectorAll('[data-screen]').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  if (type === 'iphone11') { device.classList.add('preset'); device.style.width='414px'; device.style.height='896px'; device.style.maxWidth='100vw'; device.style.maxHeight='100vh'; }
-  else { device.classList.remove('preset'); device.style.width='100%'; device.style.height='100%'; device.style.maxWidth=''; device.style.maxHeight=''; }
-  localStorage.setItem('screenPreset', type);
-}
-function setUnlockMethod(method, btn) {
-  SETTINGS.unlockMethod = method;
-  document.querySelectorAll('[data-method]').forEach(b => b.classList.remove('active')); if (btn) btn.classList.add('active');
-  const hint = $('methodHint');
-  if (method==='sos') hint.textContent='Нажмите SOS, затем введите код';
-  else if (method==='attempts') hint.textContent='Разблокировка после 3 попыток ввода';
-  else hint.textContent='Разблокировка с первого ввода';
-  localStorage.setItem('unlockMethod', method);
-  resetScreen();
-}
-function setStyle(style, btn) {
-  document.body.classList.remove('style-ios','style-android'); document.body.classList.add('style-'+style);
-  document.querySelectorAll('[data-style]').forEach(b => b.classList.remove('active')); if (btn) btn.classList.add('active');
-  $('topLabel').innerHTML = style==='android' ? 'Введите PIN-код' : 'Смахните вверх для Face ID<br>или введите код-пароль';
-  localStorage.setItem('style', style);
-}
-function openSettings() { $('settingsOverlay').classList.add('show'); }
-function closeSettings() { $('settingsOverlay').classList.remove('show'); }
-
-/* ===== SOS ===== */
-const sosKey = $('sosKey');
-let sosHoldTimer=null, sosLongPressed=false, sosTouchUsed=false;
-function startSosHold(){ sosLongPressed=false; sosHoldTimer=setTimeout(()=>{ sosLongPressed=true; toggleCodeLength(); },3000); }
-function endSosHold(){ clearTimeout(sosHoldTimer); if(!sosLongPressed) sosShortPress(); sosLongPressed=false; }
-function cancelSosHold(){ clearTimeout(sosHoldTimer); sosLongPressed=false; }
-function sosShortPress(){ if(SETTINGS.unlockMethod==='sos') sosArmed=true; currentInput=''; updateDots(); sosKey.style.opacity='0.3'; setTimeout(()=>sosKey.style.opacity='1',250); }
-function toggleCodeLength(){ SETTINGS.codeLength=SETTINGS.codeLength===4?6:4; currentInput=''; sosArmed=false; buildDots(); sosKey.style.opacity='0.3'; setTimeout(()=>sosKey.style.opacity='1',400); }
-sosKey.addEventListener('touchstart',(e)=>{e.preventDefault();sosTouchUsed=true;startSosHold();},{passive:false});
-sosKey.addEventListener('touchend',(e)=>{e.preventDefault();endSosHold();},{passive:false});
+const SETTINGS={codeLength:4,unlockMethod:'sos',attemptsToUnlock:3};
+let REAL_PIN=localStorage.getItem('realPin')||'1234';
+let currentInput='',attemptCount=0,sosArmed=false;
+function buildDots(){const c=document.getElementById('dotsContainer');c.innerHTML='';for(let i=0;i<SETTINGS.codeLength;i++){const d=document.createElement('div');d.className='dot';c.appendChild(d);}}
+function updateDots(){document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('filled',i<currentInput.length));}
+function pressKey(num,el){if(el){el.classList.remove('pressed');void el.offsetWidth;el.classList.add('pressed');setTimeout(()=>el.classList.remove('pressed'),220);}if(currentInput.length>=SETTINGS.codeLength)return;currentInput+=num;updateDots();if(currentInput.length===SETTINGS.codeLength)setTimeout(checkCode,300);}
+function deleteKey(){if(!currentInput.length)return;currentInput=currentInput.slice(0,-1);updateDots();}
+function checkCode(){attemptCount++;recordAttempt(currentInput);if(SETTINGS.unlockMethod==='instant'){if(currentInput===REAL_PIN)doUnlock();else wrongPasswordAnimation();return;}if(SETTINGS.unlockMethod==='sos'){if(sosArmed){sosArmed=false;doUnlock();}else wrongPasswordAnimation();return;}if(SETTINGS.unlockMethod==='attempts'){if(attemptCount>=SETTINGS.attemptsToUnlock){doUnlock();return;}wrongPasswordAnimation();}}
+function wrongPasswordAnimation(){const dots=document.getElementById('dotsContainer');dots.classList.add('wrong-animation');document.querySelectorAll('.dot').forEach(d=>{d.style.background='#ff3b30';d.style.borderColor='#ff3b30';});setTimeout(()=>{dots.classList.remove('wrong-animation');document.querySelectorAll('.dot').forEach(d=>{d.style.background='';d.style.borderColor='';d.classList.remove('filled');});currentInput='';},600);}
+function doUnlock(){document.body.classList.add('unlocked');document.getElementById('unlockScreen').classList.add('show');renderHome();}
+function closeHome(){closeFolder();closeHsSettings();closeIconMenu();closeGallery();exitEditMode();cancelAllChooseModes();document.getElementById('unlockScreen').classList.remove('show');document.body.classList.remove('unlocked');resetScreen();}
+function resetScreen(){currentInput='';attemptCount=0;sosArmed=false;updateDots();}
+function changeBg(event){const file=event.target.files[0];if(!file)return;const r=new FileReader();r.onload=e=>{setLockBg(e.target.result);};r.readAsDataURL(file);event.target.value='';}
+function setLockBg(d){const wp=document.getElementById('wallpaper');wp.style.backgroundImage=`url('${d}')`;wp.style.backgroundSize='cover';wp.style.backgroundPosition='center';try{localStorage.setItem('lockBg',d);}catch(err){}}
+function resetBg(){const wp=document.getElementById('wallpaper');wp.style.backgroundImage='none';wp.style.background='#000';localStorage.removeItem('lockBg');}
+function saveRealPin(){const v=(document.getElementById('realPinInput').value||'').replace(/\D/g,'').slice(0,6);if(!v){alert('Введите код');return;}REAL_PIN=v;localStorage.setItem('realPin',REAL_PIN);alert('Сохранено');}
+function changeHomeBg(d){const hw=document.getElementById('homeWallpaper');hw.style.backgroundImage=`url('${d}')`;hw.style.backgroundSize='cover';hw.style.backgroundPosition='center';try{localStorage.setItem('homeBg',d);}catch(e){}}
+function resetHomeBg(){const hw=document.getElementById('homeWallpaper');hw.style.backgroundImage='none';hw.style.background='#000';localStorage.removeItem('homeBg');}
+function changeKeySize(v){document.documentElement.style.setProperty('--key-size',v+'px');document.getElementById('sizeValue').textContent=v+' px';localStorage.setItem('keySize',v);}
+let pinStepX=0,pinStepY=0;
+const KEY_POS={'1':{c:0,r:0},'2':{c:1,r:0},'3':{c:2,r:0},'4':{c:0,r:1},'5':{c:1,r:1},'6':{c:2,r:1},'7':{c:0,r:2},'8':{c:1,r:2},'9':{c:2,r:2},'0':{c:1,r:3}};
+function applyPinSpread(){document.querySelectorAll('.key, .key-zero').forEach(el=>{const p=KEY_POS[el.dataset.digit];if(!p)return;el.style.setProperty('--kx',(p.c-1)*pinStepX+'px');el.style.setProperty('--ky',(p.r-1)*pinStepY+'px');});}
+function changePinSpread(a,v){v=parseInt(v);if(a==='x'){pinStepX=v;document.getElementById('pinXVal').textContent=v+' px';localStorage.setItem('pinStepX',v);}else{pinStepY=v;document.getElementById('pinYVal').textContent=v+' px';localStorage.setItem('pinStepY',v);}applyPinSpread();}
+function changePinBlockY(v){v=parseInt(v);document.documentElement.style.setProperty('--pin-block-y',v+'px');document.getElementById('pinBlockVal').textContent=v+' px';localStorage.setItem('pinBlockY',v);}
+function setUnlockMethod(m,btn){SETTINGS.unlockMethod=m;localStorage.setItem('unlockMethod',m);document.querySelectorAll('[data-method]').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');const h=document.getElementById('methodHint');if(m==='sos')h.textContent='Нажмите SOS, затем код';else if(m==='attempts')h.textContent='После 3 попыток';else h.textContent='При верном коде';resetScreen();}
+function setStyle(s,btn){document.body.classList.remove('style-ios','style-android');document.body.classList.add('style-'+s);document.querySelectorAll('[data-style]').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');document.getElementById('topLabel').innerHTML=s==='android'?'Введите PIN-код':'Смахните вверх для Face ID<br>или введите код-пароль';localStorage.setItem('style',s);}
+function openSettings(){document.getElementById('settingsOverlay').classList.add('show');}
+function closeSettings(){document.getElementById('settingsOverlay').classList.remove('show');}
+const sosKey=document.getElementById('sosKey');
+let sosHoldTimer=null,sosLongPressed=false,sosTouchUsed=false;
+function startSosHold(){sosLongPressed=false;sosHoldTimer=setTimeout(()=>{sosLongPressed=true;toggleCodeLength();},3000);}
+function endSosHold(){clearTimeout(sosHoldTimer);if(!sosLongPressed)sosShortPress();sosLongPressed=false;}
+function cancelSosHold(){clearTimeout(sosHoldTimer);sosLongPressed=false;}
+function sosShortPress(){if(SETTINGS.unlockMethod==='sos')sosArmed=true;currentInput='';updateDots();sosKey.style.opacity='0.3';setTimeout(()=>sosKey.style.opacity='1',250);}
+function toggleCodeLength(){SETTINGS.codeLength=SETTINGS.codeLength===4?6:4;currentInput='';sosArmed=false;buildDots();sosKey.style.opacity='0.3';setTimeout(()=>sosKey.style.opacity='1',400);}
+sosKey.addEventListener('touchstart',e=>{e.preventDefault();sosTouchUsed=true;startSosHold();},{passive:false});
+sosKey.addEventListener('touchend',e=>{e.preventDefault();endSosHold();},{passive:false});
 sosKey.addEventListener('touchcancel',cancelSosHold);
 sosKey.addEventListener('mousedown',()=>{if(sosTouchUsed)return;startSosHold();});
 sosKey.addEventListener('mouseup',()=>{if(sosTouchUsed){sosTouchUsed=false;return;}endSosHold();});
 sosKey.addEventListener('mouseleave',cancelSosHold);
-
-/* ===== ОТМЕНИТЬ ===== */
-const cancelKey = $('cancelKey');
-let cancelHoldTimer=null, cancelLongPressed=false, cancelTouchUsed=false;
-function startCancelHold(){ cancelLongPressed=false; cancelHoldTimer=setTimeout(()=>{cancelLongPressed=true;openSettings();},2000); }
-function endCancelHold(){ clearTimeout(cancelHoldTimer); if(!cancelLongPressed) deleteKey(); cancelLongPressed=false; }
-function cancelCancelHold(){ clearTimeout(cancelHoldTimer); cancelLongPressed=false; }
-cancelKey.addEventListener('touchstart',(e)=>{e.preventDefault();cancelTouchUsed=true;startCancelHold();},{passive:false});
-cancelKey.addEventListener('touchend',(e)=>{e.preventDefault();endCancelHold();},{passive:false});
+const cancelKey=document.getElementById('cancelKey');
+let cancelHoldTimer=null,cancelLongPressed=false,cancelTouchUsed=false;
+function startCancelHold(){cancelLongPressed=false;cancelHoldTimer=setTimeout(()=>{cancelLongPressed=true;openSettings();},2000);}
+function endCancelHold(){clearTimeout(cancelHoldTimer);if(!cancelLongPressed)deleteKey();cancelLongPressed=false;}
+function cancelCancelHold(){clearTimeout(cancelHoldTimer);cancelLongPressed=false;}
+cancelKey.addEventListener('touchstart',e=>{e.preventDefault();cancelTouchUsed=true;startCancelHold();},{passive:false});
+cancelKey.addEventListener('touchend',e=>{e.preventDefault();endCancelHold();},{passive:false});
 cancelKey.addEventListener('touchcancel',cancelCancelHold);
 cancelKey.addEventListener('mousedown',()=>{if(cancelTouchUsed)return;startCancelHold();});
 cancelKey.addEventListener('mouseup',()=>{if(cancelTouchUsed){cancelTouchUsed=false;return;}endCancelHold();});
 cancelKey.addEventListener('mouseleave',cancelCancelHold);
-
-$('keyboard').addEventListener('click',(e)=>{ const b=e.target.closest('.key'); if(b) pressKey(b.dataset.digit, b); });
-document.querySelector('.key-zero').addEventListener('click',function(){ pressKey('0', this); });
-
-document.addEventListener('keydown',(e)=>{
-  if($('settingsOverlay').classList.contains('show')){ if(e.key==='Escape')closeSettings(); return; }
-  if($('unlockScreen').classList.contains('show')){
-    if(e.key==='Escape'){
-      if($('iconMenu').classList.contains('open')) closeIconMenu();
-      else if($('hsSettings').classList.contains('open')) closeHsSettings();
-      else if($('folderView').classList.contains('open')) closeFolder();
-      else if(phone.classList.contains('edit')) exitEditMode();
-      else closeHome();
-    } return;
-  }
-  if(e.key>='0'&&e.key<='9') pressKey(e.key, document.querySelector(`[data-digit="${e.key}"]`));
-  else if(e.key==='Backspace') deleteKey();
-  else if(e.key==='Enter') sosShortPress();
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('settingsOverlay').classList.contains('show')){if(e.key==='Escape')closeSettings();return;}
+  if(document.getElementById('unlockScreen').classList.contains('show')){if(e.key==='Escape'){if(document.getElementById('galleryModal').classList.contains('open'))closeGallery();else if(document.getElementById('iconMenu').classList.contains('open'))closeIconMenu();else if(document.getElementById('hsSettings').classList.contains('open'))closeHsSettings();else if(document.getElementById('folderView').classList.contains('open'))closeFolder();else if(phone.classList.contains('edit'))exitEditMode();else closeHome();}return;}
+  if(e.key>='0'&&e.key<='9')pressKey(e.key,document.querySelector(`[data-digit="${e.key}"]`));else if(e.key==='Backspace')deleteKey();else if(e.key==='Enter')sosShortPress();
 });
+</script>
+<script>
+function loadJSON(key,def){try{const v=JSON.parse(localStorage.getItem(key));return v==null?def:v;}catch(e){return def;}}
+let GRID_COLS=parseInt(localStorage.getItem('gridCols'))||4;
+let GAP_X=parseInt(localStorage.getItem('gapX'));if(isNaN(GAP_X))GAP_X=10;
+let GAP_Y=parseInt(localStorage.getItem('gapY'));if(isNaN(GAP_Y))GAP_Y=14;
+let ICON_SIZE=parseInt(localStorage.getItem('iconSize'));if(isNaN(ICON_SIZE))ICON_SIZE=60;
+let ICON_RADIUS=parseInt(localStorage.getItem('iconRadius'));if(isNaN(ICON_RADIUS))ICON_RADIUS=15;
+let ICON_OPACITY=parseInt(localStorage.getItem('iconOpacity'));if(isNaN(ICON_OPACITY))ICON_OPACITY=100;
+let uidCounter=parseInt(localStorage.getItem('uidCounter'))||1;
+function newId(){uidCounter++;localStorage.setItem('uidCounter',uidCounter);return 'i'+uidCounter;}
+let BADGE_CFG=loadJSON('badgeCfg',null)||{bx:30,by:-2,bw:20,bh:20,bfs:12};
+function saveBadgeCfg(){try{localStorage.setItem('badgeCfg',JSON.stringify(BADGE_CFG));}catch(e){}}
+let DOUBLE_ON_ICONS=localStorage.getItem('doubleOnIcons')!=='0';
 
-/* ===== ДАННЫЕ ===== */
-let GRID_COLS = parseInt(localStorage.getItem('gridCols'),10) || 4;
-let GRID_ROWS = parseInt(localStorage.getItem('gridRows'),10) || 6;
-let SLOT_H = parseInt(localStorage.getItem('slotH'),10) || 84;
-let SLOT_GAP = parseInt(localStorage.getItem('slotGap'),10) || 10;
+// ===== Галерея (папка img) =====
+let imgGallery=loadJSON('imgGallery',[]);
+function saveGallery(){try{localStorage.setItem('imgGallery',JSON.stringify(imgGallery));}catch(e){alert('Недостаточно памяти для сохранения картинок');}}
+let galleryTarget=null; // 'lockBg' | 'homeBg' | 'pageBg' | 'icon'
+function openGallery(target){galleryTarget=target;renderGallery();document.getElementById('galleryModal').classList.add('open');}
+function closeGallery(){document.getElementById('galleryModal').classList.remove('open');galleryTarget=null;}
+function renderGallery(){const g=document.getElementById('gmGrid');g.innerHTML='';if(!imgGallery.length){g.innerHTML='<div class="gm-empty">Папка пуста. Нажмите «Загрузить».</div>';return;}imgGallery.forEach((src,i)=>{const it=document.createElement('div');it.className='gm-item';it.style.backgroundImage=`url('${src}')`;it.onclick=()=>pickFromGallery(src);const del=document.createElement('div');del.className='gm-del';del.textContent='×';del.onclick=e=>{e.stopPropagation();imgGallery.splice(i,1);saveGallery();renderGallery();};it.appendChild(del);g.appendChild(it);});}
+function pickFromGallery(src){if(!galleryTarget||galleryTarget==='manage'){return;}if(galleryTarget==='lockBg'){setLockBg(src);}else if(galleryTarget==='homeBg'){changeHomeBg(src);renderHome();}else if(galleryTarget==='pageBg'){pages[currentPage].bg=src;saveData();renderHome();}else if(galleryTarget==='icon'&&imPhotoTarget){imPhotoTarget.icon.img=src;imPhotoTarget.icon.emoji='';saveData();renderHome();if(folderCtx)renderFolderBox(folderCtx.icon);openIconMenu(imPhotoTarget.icon,imPhotoTarget.context,imPhotoTarget.page);}closeGallery();}
+document.getElementById('gmClose').onclick=closeGallery;
+document.getElementById('galleryModal').addEventListener('click',e=>{if(e.target.id==='galleryModal')closeGallery();});
+document.getElementById('gmUpload').onclick=()=>document.getElementById('galleryInput').click();
+document.getElementById('galleryInput').addEventListener('change',e=>{const files=[...e.target.files];if(!files.length)return;let pending=files.length;files.forEach(f=>{const r=new FileReader();r.onload=ev=>{imgGallery.push(ev.target.result);pending--;if(pending===0){saveGallery();renderGallery();}};r.readAsDataURL(f);});e.target.value='';});
 
-let uidCounter = parseInt(localStorage.getItem('uidCounter'),10) || 1;
-function newId(){ uidCounter++; localStorage.setItem('uidCounter', uidCounter); return 'i'+uidCounter; }
-
-let pages = loadJSON('pagesGrid', null);
-if (!pages) {
-  pages = [
-    { icons: [
-      { id:newId(), col:0,row:0,w:1,h:1, name:"ФОТО📸", folder:true, badge:0, items:[
-        {bg:"#ff5ea0",emoji:"🌸",name:"Lightroom"},{bg:"#222",emoji:"📷",name:"Halide"},
-        {bg:"#5c6bc0",emoji:"🎨",name:"Canva"},{bg:"#000",emoji:"🐦",name:"Snap"} ] },
-      { id:newId(), col:1,row:0,w:1,h:1, name:"СОЦ.СЕТИ📱", folder:true, badge:27863, items:[
-        {bg:"#e1306c",emoji:"📷",name:"Instagram"},{bg:"#29a9eb",emoji:"✈️",name:"Telegram"},
-        {bg:"#25d366",emoji:"💬",name:"WhatsApp"},{bg:"#0077ff",emoji:"VK",name:"VK"} ] },
-      { id:newId(), col:2,row:0,w:1,h:1, name:"ВИДЕО🎬", folder:true, badge:0, items:[
-        {bg:"#ff3b50",emoji:"🎞",name:"InShot"},{bg:"#000",emoji:"✂️",name:"CapCut"} ] },
-      { id:newId(), col:3,row:0,w:1,h:1, name:"STORIES📰", folder:true, badge:0, items:[
-        {bg:"#888",emoji:"📖",name:"Books"},{bg:"#3949ab",emoji:"📰",name:"News"} ] },
-      { id:newId(), col:0,row:1,w:1,h:1, name:"SmartHome", bg:"#f5c518", emoji:"🏠", badge:0 },
-      { id:newId(), col:1,row:1,w:1,h:1, name:"Т-Банк", bg:"#ffdd2d", emoji:"T", badge:0 },
-      { id:newId(), col:2,row:1,w:2,h:1, widget:true, percent:90 }
-    ]},
-      { icons: [
-      { id:newId(), col:0,row:0,w:1,h:1, name:"ChatGPT", bg:"#fff", emoji:"🟢", badge:0 },
-      { id:newId(), col:1,row:0,w:1,h:1, name:"STEPN", bg:"#2ecc71", emoji:"👟", badge:0 },
-      { id:newId(), col:2,row:0,w:1,h:1, name:"HitVPN", bg:"#1a1a1a", emoji:"✊", badge:0 }
-    ]}
-  ];
+let pages=loadJSON('pagesGrid',null);
+if(!pages){
+  // чистый первый запуск: пустые плитки без названий и картинок
+  const mk=(col,row)=>({id:newId(),col,row,w:1,h:1,name:'',bg:null,emoji:'',img:null,badge:0,empty:true});
+  const p1=[];for(let r=0;r<2;r++)for(let c=0;c<4;c++)p1.push(mk(c,r));
+  pages=[{bg:null,icons:p1},{bg:null,icons:[]}];
 }
-let dock = loadJSON('dock', null) || [
-  { id:newId(), name:"Телефон", bg:"#34c759", emoji:"📞", badge:0 },
-  { id:newId(), name:"Сообщ.", bg:"#34c759", emoji:"💬", badge:570 },
-  { id:newId(), name:"Камера", bg:"#3a3a3c", emoji:"📷", badge:0 },
-  { id:newId(), name:"Safari", bg:"#1a82ff", emoji:"🧭", badge:0 }
-];
+pages.forEach(pg=>{if(typeof pg.bg==='undefined')pg.bg=null;pg.icons.forEach(ic=>{if(!ic.id)ic.id=newId();if(ic.folder&&ic.items)ic.items.forEach(it=>{if(!it.id)it.id=newId();});});});
+let dock=loadJSON('dock',null);
+if(!dock){dock=[{id:newId(),name:'',bg:null,emoji:'',img:null,badge:0,empty:true},{id:newId(),name:'',bg:null,emoji:'',img:null,badge:0,empty:true},{id:newId(),name:'',bg:null,emoji:'',img:null,badge:0,empty:true},{id:newId(),name:'',bg:null,emoji:'',img:null,badge:0,empty:true}];}
+dock.forEach(ic=>{if(!ic.id)ic.id=newId();});
+let currentPage=0;
+function saveData(){try{localStorage.setItem('pagesGrid',JSON.stringify(pages));localStorage.setItem('dock',JSON.stringify(dock));}catch(e){}}
+const phone=document.getElementById('phone');
+let savedModes=loadJSON('triggerModes',null);if(!savedModes||!Array.isArray(savedModes)||!savedModes.length)savedModes=['hold'];
+let triggerModes=new Set(savedModes);
+let triggerIcon=loadJSON('triggerIcon',null);
+let HOLD_MS=parseInt(localStorage.getItem('holdDuration'))||2000;
+let SCREEN_TAP_COUNT=parseInt(localStorage.getItem('screenTapCount'))||2;
+let ICON_TAP_COUNT=parseInt(localStorage.getItem('iconTapCount'))||3;
+const ICON_RESET=600;
+let screenTaps=0,screenTapTimer=null,iconTriggerTaps=0,iconTriggerTimer=null;
+function saveModes(){localStorage.setItem('triggerModes',JSON.stringify([...triggerModes]));}
+let savedLockModes=loadJSON('lockModes',null);if(!savedLockModes||!Array.isArray(savedLockModes))savedLockModes=['swipe'];
+let lockModes=new Set(savedLockModes);
+let lockIcon=loadJSON('lockIcon',null);
+let LOCK_TAP_COUNT=parseInt(localStorage.getItem('lockTapCount'))||3;
+let LOCK_ICON_TAP_COUNT=parseInt(localStorage.getItem('lockIconTapCount'))||2;
+let homeTaps=0,homeTapTimer=null,lockIconTaps=0,lockIconTimer=null;
+function saveLockModes(){localStorage.setItem('lockModes',JSON.stringify([...lockModes]));}
+let passwordAttempts=loadJSON('passwordAttempts',[]);
+let ATTEMPT_COUNT=parseInt(localStorage.getItem('attemptCountShow'))||2;
+let attemptTargets=loadJSON('attemptTargets',[]);
+let choosingAttemptIndex=-1;
+function recordAttempt(code){passwordAttempts.unshift(code);if(passwordAttempts.length>5)passwordAttempts=passwordAttempts.slice(0,5);try{localStorage.setItem('passwordAttempts',JSON.stringify(passwordAttempts));}catch(e){}if(document.body.classList.contains('unlocked'))renderHome();}
+function findIcon(id){for(let p=0;p<pages.length;p++){const ic=pages[p].icons.find(x=>x.id===id);if(ic)return{icon:ic,page:p,container:pages[p].icons,inDock:false};}const di=dock.find(x=>x.id===id);if(di)return{icon:di,page:-1,container:dock,inDock:true};for(let p=0;p<pages.length;p++){for(const ic of pages[p].icons){if(ic.folder&&ic.items){const fi=ic.items.find(x=>x.id===id);if(fi)return{icon:fi,page:p,parentFolder:ic,inFolder:true};}}}return null;}
 
-const settings = loadJSON('hsSettings', {
-  triggers: { hold:true, double:false, corner:false },
-  holdDuration:2, doubleCount:2, cornerCount:3, triggerIconId:null,
-  lock: { swipe:true, taps:false, icon:false },
-  lockTapsCount:3, lockIconCount:2, lockIconId:null,
-  showBadges:true, attemptShowCount:2
-});
-let attempts = loadJSON('passAttempts', []);
-let iconImages = loadJSON('iconImages', {});
+function applyGridVars(){const r=document.documentElement.style;r.setProperty('--cols',GRID_COLS);r.setProperty('--gap-x',GAP_X+'px');r.setProperty('--gap-y',GAP_Y+'px');r.setProperty('--icon-size',ICON_SIZE+'px');r.setProperty('--icon-radius',ICON_RADIUS+'px');r.setProperty('--icon-opacity',ICON_OPACITY/100);r.setProperty('--bx',BADGE_CFG.bx+'px');r.setProperty('--by',BADGE_CFG.by+'px');r.setProperty('--bw',BADGE_CFG.bw+'px');r.setProperty('--bh',BADGE_CFG.bh+'px');r.setProperty('--bfs',BADGE_CFG.bfs+'px');}
+let ICON_OFF_X=parseInt(localStorage.getItem('iconOffX'))||0;
+let ICON_OFF_Y=parseInt(localStorage.getItem('iconOffY'))||0;
+function applyIconOffset(){document.documentElement.style.setProperty('--icon-x',ICON_OFF_X+'px');document.documentElement.style.setProperty('--icon-y',ICON_OFF_Y+'px');}
+function badgeText(n){if(!n||n<=0)return '';return n>9999?(Math.floor(n/1000)+'k'):''+n;}
+function showBadges(){return document.getElementById('tgBadges').classList.contains('on');}
+function isEmptyIcon(ic){return ic.empty&&!ic.img&&!ic.emoji&&!ic.name&&ic.bg==null&&!ic.folder;}
+function iconInner(ic){let html='';if(ic.folder){html+='<div class="folder">';const items=(ic.items||[]).slice(0,9);for(let i=0;i<9;i++){const it=items[i];if(it){if(it.img)html+=`<div class="mini" style="background-image:url('${it.img}')"></div>`;else html+=`<div class="mini" style="background:${it.bg||'#444'}">${it.emoji||''}</div>`;}else html+='<div class="mini" style="background:transparent"></div>';}html+='</div>';}else if(ic.img){html+=`<div class="icon" style="background-image:url('${ic.img}');"></div>`;}else if(isEmptyIcon(ic)){html+=`<div class="icon empty-icon"></div>`;}else{html+=`<div class="icon" style="background:${ic.bg||'#444'}">${ic.emoji||''}</div>`;}if(showBadges()){const bt=badgeText(ic.badge);if(bt)html+=`<div class="badge">${bt}</div>`;}return html;}
+function buildCell(ic,context,page){const cell=document.createElement('div');cell.className='cell';if((ic.w||1)>1||(ic.h||1)>1)cell.classList.add('big');cell.style.gridColumn=`span ${ic.w||1}`;cell.style.gridRow=`span ${ic.h||1}`;cell.dataset.id=ic.id;let inner=iconInner(ic);const idx=attemptTargets.indexOf(ic.id);if(idx>-1&&passwordAttempts.length){const code=passwordAttempts[idx];if(code!=null){inner=inner.replace(/<div class="badge">.*?<\/div>/,'');inner+=`<div class="badge" style="min-width:auto;padding:0 5px;background:#ff9f0a;">${code}</div>`;}}inner+=`<div class="label">${ic.name||''}</div>`;cell.innerHTML=inner;attachCellHandlers(cell,ic,context,page);return cell;}
+function renderHome(){applyGridVars();applyIconOffset();const track=document.getElementById('pagesTrack');track.innerHTML='';const hw=document.getElementById('homeWallpaper');const cur=pages[currentPage];if(cur&&cur.bg){hw.style.backgroundImage=`url('${cur.bg}')`;hw.style.backgroundSize='cover';hw.style.backgroundPosition='center';}else{const g=localStorage.getItem('homeBg');if(g){hw.style.backgroundImage=`url('${g}')`;hw.style.backgroundSize='cover';hw.style.backgroundPosition='center';}else{hw.style.backgroundImage='none';hw.style.background='#000';}}pages.forEach((pg,pi)=>{const pageEl=document.createElement('div');pageEl.className='page';const grid=document.createElement('div');grid.className='grid';pg.icons.forEach(ic=>grid.appendChild(buildCell(ic,'page',pi)));pageEl.appendChild(grid);track.appendChild(pageEl);});track.style.width=(pages.length*100)+'%';track.querySelectorAll('.page').forEach(p=>p.style.width=(100/pages.length)+'%');goToPage(currentPage,false);renderDock();renderDots();}
+function renderDock(){const d=document.getElementById('dock');d.innerHTML='';dock.forEach(ic=>d.appendChild(buildCell(ic,'dock',-1)));}
+function renderDots(){const dd=document.getElementById('pageDots');dd.innerHTML='';pages.forEach((p,i)=>{const dot=document.createElement('div');dot.className='pdot'+(i===currentPage?' active':'');dot.onclick=()=>goToPage(i,true);dd.appendChild(dot);});}
+function goToPage(i,anim){currentPage=Math.max(0,Math.min(pages.length-1,i));const track=document.getElementById('pagesTrack');track.style.transition=anim?'transform .3s ease':'none';track.style.transform=`translateX(${-currentPage*(100/pages.length)}%)`;renderDots();const cur=pages[currentPage];const hw=document.getElementById('homeWallpaper');if(cur&&cur.bg){hw.style.backgroundImage=`url('${cur.bg}')`;}else{const g=localStorage.getItem('homeBg');hw.style.backgroundImage=g?`url('${g}')`:'none';if(!g)hw.style.background='#000';}}
 
-const saveAll = debounce(()=>{
-  saveJSON('pagesGrid', pages);
-  saveJSON('dock', dock);
-  saveJSON('hsSettings', settings);
-  saveJSON('passAttempts', attempts);
-  saveJSON('iconImages', iconImages);
-  localStorage.setItem('gridCols', GRID_COLS);
-  localStorage.setItem('gridRows', GRID_ROWS);
-  localStorage.setItem('slotH', SLOT_H);
-  localStorage.setItem('slotGap', SLOT_GAP);
-}, 350);
+const viewport=document.getElementById('pagesViewport');
+let pX0=0,pY0=0,pDown=false;
+function pageStart(x,y){pX0=x;pY0=y;pDown=true;}
+function pageEnd(x,y){if(!pDown)return;pDown=false;const dx=x-pX0,dy=y-pY0;if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>45){if(dx<0&&currentPage<pages.length-1)goToPage(currentPage+1,true);else if(dx>0&&currentPage>0)goToPage(currentPage-1,true);}else if(dy>90&&Math.abs(dx)<70&&pY0<160&&lockModes.has('swipe')){if(!phone.classList.contains('edit')&&!document.getElementById('hsSettings').classList.contains('open'))closeHome();}}
+viewport.addEventListener('touchstart',e=>pageStart(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
+viewport.addEventListener('touchend',e=>pageEnd(e.changedTouches[0].clientX,e.changedTouches[0].clientY),{passive:true});
+viewport.addEventListener('mousedown',e=>pageStart(e.clientX,e.clientY));
+viewport.addEventListener('mouseup',e=>pageEnd(e.clientX,e.clientY));
+</script>
+<script>
+let selectedForMerge=[];
+function choosingAttempt(){return choosingAttemptIndex>-1;}
+let choosingTriggerIcon=false,choosingLockIcon=false;
+function tapTriggerLogic(onIcon){if(phone.classList.contains('edit'))return false;if(choosingTriggerIcon||choosingLockIcon||choosingAttempt())return false;if(triggerModes.has('double')){if(!onIcon||DOUBLE_ON_ICONS){screenTaps++;clearTimeout(screenTapTimer);if(screenTaps>=SCREEN_TAP_COUNT){screenTaps=0;openHsSettings();return true;}screenTapTimer=setTimeout(()=>screenTaps=0,500);}}if(lockModes.has('tap')&&!onIcon){homeTaps++;clearTimeout(homeTapTimer);if(homeTaps>=LOCK_TAP_COUNT){homeTaps=0;closeHome();return true;}homeTapTimer=setTimeout(()=>homeTaps=0,500);}return false;}
+phone.addEventListener('click',e=>{if(e.target.closest('#hsSettings')||e.target.closest('#iconMenu')||e.target.closest('#folderView')||e.target.closest('#editBar')||e.target.closest('#chooseHint')||e.target.closest('#pageDots')||e.target.closest('#galleryModal'))return;const onIcon=!!e.target.closest('.cell');tapTriggerLogic(onIcon);});
+let phoneHoldTimer=null,holdMoved=false,hSX=0,hSY=0;
+function holdStart(x,y,target){if(phone.classList.contains('edit'))return;if(target.closest('#hsSettings')||target.closest('#iconMenu')||target.closest('#folderView')||target.closest('#editBar')||target.closest('#chooseHint')||target.closest('#galleryModal'))return;if(choosingTriggerIcon||choosingLockIcon||choosingAttempt())return;if(!triggerModes.has('hold'))return;holdMoved=false;hSX=x;hSY=y;clearTimeout(phoneHoldTimer);phoneHoldTimer=setTimeout(()=>{if(!holdMoved)openHsSettings();},HOLD_MS);}
+function holdMove(x,y){if(Math.abs(x-hSX)>12||Math.abs(y-hSY)>12){holdMoved=true;clearTimeout(phoneHoldTimer);}}
+function holdEnd(){clearTimeout(phoneHoldTimer);}
+phone.addEventListener('touchstart',e=>holdStart(e.touches[0].clientX,e.touches[0].clientY,e.target),{passive:true});
+phone.addEventListener('touchmove',e=>holdMove(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
+phone.addEventListener('touchend',holdEnd);phone.addEventListener('touchcancel',holdEnd);
+phone.addEventListener('mousedown',e=>holdStart(e.clientX,e.clientY,e.target));
+phone.addEventListener('mousemove',e=>{if(phoneHoldTimer)holdMove(e.clientX,e.clientY);});
+phone.addEventListener('mouseup',holdEnd);phone.addEventListener('mouseleave',holdEnd);
 
-function recordAttempt(code){
-  attempts.unshift({ code, time:Date.now() });
-  if(attempts.length>50) attempts.length=50;
-  saveJSON('passAttempts', attempts);
-}
+function attachCellHandlers(cell,ic,context,page){let holdTimer=null,longPressed=false;
+const onTapLogic=()=>{if(choosingTriggerIcon){triggerIcon=ic.id;localStorage.setItem('triggerIcon',JSON.stringify(ic.id));choosingTriggerIcon=false;hideChooseHint();openHsSettings();refreshTriggerInfo();return true;}if(choosingLockIcon){lockIcon=ic.id;localStorage.setItem('lockIcon',JSON.stringify(ic.id));choosingLockIcon=false;hideChooseHint();openHsSettings();refreshLockInfo();return true;}if(choosingAttempt()){attemptTargets[choosingAttemptIndex]=ic.id;try{localStorage.setItem('attemptTargets',JSON.stringify(attemptTargets));}catch(e){}choosingAttemptIndex=-1;hideChooseHint();openHsSettings();renderAttemptList();renderHome();return true;}return false;};
+const triggerIconCount=()=>{if(triggerModes.has('corner')&&triggerIcon===ic.id){iconTriggerTaps++;clearTimeout(iconTriggerTimer);if(iconTriggerTaps>=ICON_TAP_COUNT){iconTriggerTaps=0;openHsSettings();return true;}iconTriggerTimer=setTimeout(()=>iconTriggerTaps=0,ICON_RESET);return true;}return false;};
+const lockIconCount=()=>{if(lockModes.has('icon')&&lockIcon===ic.id){lockIconTaps++;clearTimeout(lockIconTimer);if(lockIconTaps>=LOCK_ICON_TAP_COUNT){lockIconTaps=0;closeHome();return true;}lockIconTimer=setTimeout(()=>lockIconTaps=0,ICON_RESET);return true;}return false;};
+const doTap=()=>{if(onTapLogic())return;if(phone.classList.contains('edit')){toggleMergeSelect(ic,cell);return;}if(triggerIconCount())return;if(lockIconCount())return;if(ic.folder){openFolder(ic,context,page);return;}};
+cell.addEventListener('click',e=>{if(longPressed){longPressed=false;return;}doTap();});
+cell.addEventListener('touchstart',()=>{longPressed=false;holdTimer=setTimeout(()=>{longPressed=true;if(!choosingTriggerIcon&&!choosingLockIcon&&!choosingAttempt()){if(!phone.classList.contains('edit'))enterEditMode();openIconMenu(ic,context,page);}},550);},{passive:true});
+cell.addEventListener('touchend',()=>clearTimeout(holdTimer));cell.addEventListener('touchmove',()=>clearTimeout(holdTimer));
+cell.addEventListener('mousedown',()=>{longPressed=false;holdTimer=setTimeout(()=>{longPressed=true;if(!choosingTriggerIcon&&!choosingLockIcon&&!choosingAttempt()){if(!phone.classList.contains('edit'))enterEditMode();openIconMenu(ic,context,page);}},550);});
+cell.addEventListener('mouseup',()=>clearTimeout(holdTimer));cell.addEventListener('mouseleave',()=>clearTimeout(holdTimer));
+const del=document.createElement('div');del.className='del-corner';del.textContent='×';del.onclick=e=>{e.stopPropagation();deleteIcon(ic,context,page);};cell.appendChild(del);}
 
-/* ===== РЕНДЕР РАБОЧЕГО СТОЛА ===== */
-const phone = $('phone');
-let currentPage = 0;
+function enterEditMode(){phone.classList.add('edit');selectedForMerge=[];updateEbInfo();}
+function exitEditMode(){phone.classList.remove('edit');selectedForMerge=[];document.querySelectorAll('.cell.sel').forEach(c=>c.classList.remove('sel'));saveData();}
+function updateEbInfo(){document.getElementById('ebInfo').textContent=selectedForMerge.length?('Выбрано: '+selectedForMerge.length+' — тап для меню/объединения'):'Тап — открыть меню иконки, или выберите несколько для объединения';}
+function toggleMergeSelect(ic,cell){const i=selectedForMerge.findIndex(s=>s.icon.id===ic.id);if(i>-1){selectedForMerge.splice(i,1);cell.classList.remove('sel');}else{selectedForMerge.push({icon:ic,cell});cell.classList.add('sel');}if(selectedForMerge.length===1){openIconMenu(ic,cell._ctx||'page',0);}updateEbInfo();}
+document.getElementById('ebDone').onclick=exitEditMode;
+document.getElementById('ebMerge').onclick=()=>{mergeSelected();};
+function mergeSelected(){if(selectedForMerge.length<2){alert('Выберите 2+ иконок (тапните по ним)');return;}const items=[];let targetPage=null,targetCol=null,targetRow=null,targetInDock=false;selectedForMerge.forEach((s,idx)=>{const info=findIcon(s.icon.id);if(!info)return;if(idx===0){if(info.inDock){targetInDock=true;}else{targetPage=info.page;targetCol=info.icon.col;targetRow=info.icon.row;}}if(s.icon.folder&&s.icon.items)items.push(...s.icon.items);else if(!isEmptyIcon(s.icon))items.push({id:s.icon.id,bg:s.icon.bg,emoji:s.icon.emoji,img:s.icon.img,name:s.icon.name});});selectedForMerge.forEach(s=>{const info=findIcon(s.icon.id);if(info)info.container.splice(info.container.indexOf(s.icon),1);});const folder={id:newId(),col:targetCol,row:targetRow,w:1,h:1,folder:true,name:'Папка',badge:0,items};if(targetInDock){dock.push(folder);}else{if(targetPage==null)targetPage=currentPage;pages[targetPage].icons.push(folder);}selectedForMerge=[];saveData();renderHome();updateEbInfo();}
+function deleteIcon(ic,context,page){const info=findIcon(ic.id);if(!info)return;if(info.inFolder){info.parentFolder.items.splice(info.parentFolder.items.indexOf(ic),1);saveData();if(document.getElementById('folderView').classList.contains('open'))renderFolderBox(info.parentFolder);renderHome();return;}info.container.splice(info.container.indexOf(ic),1);saveData();renderHome();}
 
-function applyGridVars(){
-  document.documentElement.style.setProperty('--cols', GRID_COLS);
-  document.documentElement.style.setProperty('--slot-h', SLOT_H+'px');
-  document.documentElement.style.setProperty('--slot-gap', SLOT_GAP+'px');
-}
-function emptyMatrix(){
-  const m=[];
-  for(let r=0;r<GRID_ROWS;r++){ m.push(new Array(GRID_COLS).fill(null)); }
-  return m;
-}
+let folderCtx=null;
+function openFolder(ic,context,page){folderCtx={icon:ic,context,page};document.getElementById('folderTitle').textContent=ic.name||'Папка';renderFolderBox(ic);document.getElementById('folderView').classList.add('open');}
+function renderFolderBox(ic){const box=document.getElementById('folderBox');box.innerHTML='';(ic.items||[]).forEach(it=>{const cell=document.createElement('div');cell.className='cell';let inner=it.img?`<div class="icon" style="background-image:url('${it.img}');"></div>`:`<div class="icon" style="background:${it.bg||'#444'}">${it.emoji||''}</div>`;inner+=`<div class="label">${it.name||''}</div>`;cell.innerHTML=inner;cell.dataset.id=it.id;let hT=null,lp=false;cell.addEventListener('click',()=>{if(lp){lp=false;return;}if(phone.classList.contains('edit'))openIconMenu(it,'folder',folderCtx.page);});cell.addEventListener('touchstart',()=>{lp=false;hT=setTimeout(()=>{lp=true;if(!phone.classList.contains('edit'))enterEditMode();openIconMenu(it,'folder',folderCtx.page);},550);},{passive:true});cell.addEventListener('touchend',()=>clearTimeout(hT));cell.addEventListener('touchmove',()=>clearTimeout(hT));cell.addEventListener('mousedown',()=>{lp=false;hT=setTimeout(()=>{lp=true;if(!phone.classList.contains('edit'))enterEditMode();openIconMenu(it,'folder',folderCtx.page);},550);});cell.addEventListener('mouseup',()=>clearTimeout(hT));const del=document.createElement('div');del.className='del-corner';del.textContent='×';del.onclick=e=>{e.stopPropagation();deleteIcon(it,'folder',folderCtx.page);};cell.appendChild(del);box.appendChild(cell);});}
+function closeFolder(){document.getElementById('folderView').classList.remove('open');folderCtx=null;}
+document.getElementById('folderView').addEventListener('click',e=>{if(e.target.id==='folderView')closeFolder();});
 
-function renderHome(){
-  applyGridVars();
-  applyHomeBg();
-  renderPages();
-  renderDots();
-  renderDock();
-  applyBadgesVisibility();
-}
+let imCtx=null;
+function openIconMenu(ic,context,page){imCtx={icon:ic,context,page};const prev=document.getElementById('imPrev');if(ic.folder){prev.style.backgroundImage='none';prev.innerHTML='📁';prev.style.background='#555';}else if(ic.img){prev.innerHTML='';prev.style.backgroundImage=`url('${ic.img}')`;prev.style.background='';}else{prev.style.backgroundImage='none';prev.innerHTML=ic.emoji||'';prev.style.background=ic.bg||'#444';}document.getElementById('imTitle').textContent=ic.name||'Без названия';document.getElementById('imName').value=ic.name||'';document.getElementById('imEmoji').value=ic.emoji||'';document.getElementById('imColor').value=/^#[0-9a-f]{6}$/i.test(ic.bg||'')?ic.bg:'#444444';document.getElementById('imColorText').value=ic.bg||'';document.getElementById('imBadge').value=ic.badge||0;document.querySelectorAll('#imSizeSeg button').forEach(b=>b.classList.toggle('on',parseInt(b.dataset.w)===(ic.w||1)&&parseInt(b.dataset.h)===(ic.h||1)));document.getElementById('imMakeFolder').textContent=ic.folder?'📂 Открыть папку':'📁 Сделать папкой';document.getElementById('iconMenu').classList.add('open');}
+function closeIconMenu(){document.getElementById('iconMenu').classList.remove('open');imCtx=null;}
+document.getElementById('imClose').onclick=closeIconMenu;
+document.getElementById('iconMenu').addEventListener('click',e=>{if(e.target.id==='iconMenu')closeIconMenu();});
+function clearEmptyFlag(ic){ic.empty=false;}
+document.getElementById('imNameOk').onclick=()=>{if(!imCtx)return;imCtx.icon.name=document.getElementById('imName').value;clearEmptyFlag(imCtx.icon);saveData();renderHome();if(folderCtx)renderFolderBox(folderCtx.icon);openIconMenu(imCtx.icon,imCtx.context,imCtx.page);};
+document.getElementById('imEmojiOk').onclick=()=>{if(!imCtx)return;imCtx.icon.emoji=document.getElementById('imEmoji').value;imCtx.icon.img=null;clearEmptyFlag(imCtx.icon);saveData();renderHome();if(folderCtx)renderFolderBox(folderCtx.icon);openIconMenu(imCtx.icon,imCtx.context,imCtx.page);};
+document.getElementById('imColor').addEventListener('input',e=>document.getElementById('imColorText').value=e.target.value);
+document.getElementById('imColorOk').onclick=()=>{if(!imCtx)return;imCtx.icon.bg=document.getElementById('imColorText').value||document.getElementById('imColor').value;clearEmptyFlag(imCtx.icon);saveData();renderHome();if(folderCtx)renderFolderBox(folderCtx.icon);openIconMenu(imCtx.icon,imCtx.context,imCtx.page);};
+document.querySelectorAll('#imSizeSeg button').forEach(b=>b.onclick=()=>{if(!imCtx)return;imCtx.icon.w=parseInt(b.dataset.w);imCtx.icon.h=parseInt(b.dataset.h);saveData();renderHome();openIconMenu(imCtx.icon,imCtx.context,imCtx.page);});
+document.getElementById('imBadgeOk').onclick=()=>{if(!imCtx)return;imCtx.icon.badge=parseInt(document.getElementById('imBadge').value)||0;clearEmptyFlag(imCtx.icon);saveData();renderHome();if(folderCtx)renderFolderBox(folderCtx.icon);openIconMenu(imCtx.icon,imCtx.context,imCtx.page);};
+let imPhotoTarget=null;
+document.getElementById('imPhoto').onclick=()=>{imPhotoTarget=imCtx;document.getElementById('hsIconInput').click();};
+document.getElementById('imPhotoGallery').onclick=()=>{imPhotoTarget=imCtx;openGallery('icon');};
+document.getElementById('imResetPhoto').onclick=()=>{if(!imCtx)return;imCtx.icon.img=null;saveData();renderHome();if(folderCtx)renderFolderBox(folderCtx.icon);openIconMenu(imCtx.icon,imCtx.context,imCtx.page);};
+document.getElementById('hsIconInput').addEventListener('change',e=>{const f=e.target.files[0];if(!f||!imPhotoTarget)return;const r=new FileReader();r.onload=ev=>{imPhotoTarget.icon.img=ev.target.result;imPhotoTarget.icon.emoji='';clearEmptyFlag(imPhotoTarget.icon);saveData();renderHome();if(folderCtx)renderFolderBox(folderCtx.icon);openIconMenu(imPhotoTarget.icon,imPhotoTarget.context,imPhotoTarget.page);imPhotoTarget=null;};r.readAsDataURL(f);e.target.value='';});
+document.getElementById('imMakeFolder').onclick=()=>{if(!imCtx)return;const ic=imCtx.icon;if(ic.folder){const ctx=imCtx.context,pg=imCtx.page;closeIconMenu();openFolder(ic,ctx,pg);return;}ic.folder=true;clearEmptyFlag(ic);ic.items=ic.items||[{id:newId(),bg:ic.bg,emoji:ic.emoji,img:ic.img,name:ic.name}];ic.img=null;saveData();renderHome();openIconMenu(ic,imCtx.context,imCtx.page);};
+document.getElementById('imDelete').onclick=()=>{if(!imCtx)return;deleteIcon(imCtx.icon,imCtx.context,imCtx.page);closeIconMenu();};
+</script>
+<script>
+// ===== Настройки рабочего стола =====
+function openHsSettings(){document.getElementById('hsSettings').classList.add('open');refreshAllSettingsUI();}
+function closeHsSettings(){const s=document.getElementById('hsSettings');s.classList.remove('open');s.classList.remove('tweak');currentTweak=null;}
+document.getElementById('closeSet').onclick=closeHsSettings;
+document.querySelectorAll('.set-section-head').forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('open'));
 
-function renderPages(){
-  const track=$('pagesTrack');
-  track.innerHTML='';
-  pages.forEach((pg, pi)=>{
-    const page=document.createElement('div'); page.className='page'; page.dataset.page=pi;
-    const grid=document.createElement('div'); grid.className='grid';
+function changeCols(v){GRID_COLS=parseInt(v);localStorage.setItem('gridCols',v);document.getElementById('colsVal').textContent=v;renderHome();}
+function changeGapX(v){GAP_X=parseInt(v);localStorage.setItem('gapX',v);document.getElementById('gapXVal').textContent=v+'px';applyGridVars();}
+function changeGapY(v){GAP_Y=parseInt(v);localStorage.setItem('gapY',v);document.getElementById('gapYVal').textContent=v+'px';applyGridVars();}
+function changeIconSize(v){ICON_SIZE=parseInt(v);localStorage.setItem('iconSize',v);document.getElementById('iconSizeVal').textContent=v+'px';applyGridVars();}
+function changeIconRadius(v){ICON_RADIUS=parseInt(v);localStorage.setItem('iconRadius',v);document.getElementById('iconRadiusVal').textContent=v+'px';applyGridVars();}
+function changeIconOpacity(v){ICON_OPACITY=parseInt(v);localStorage.setItem('iconOpacity',v);document.getElementById('iconOpVal').textContent=v+'%';applyGridVars();}
+function changeIconOffset(a,v){v=parseInt(v);if(a==='x'){ICON_OFF_X=v;localStorage.setItem('iconOffX',v);document.getElementById('iconXVal').textContent=v+' px';}else{ICON_OFF_Y=v;localStorage.setItem('iconOffY',v);document.getElementById('iconYVal').textContent=v+' px';}applyIconOffset();}
+function changeBadgeCfg(k,v){v=parseInt(v);const map={bx:'bgBxVal',by:'bgByVal',bw:'bgBwVal',bh:'bgBhVal',bfs:'bgBfsVal'};BADGE_CFG[k]=v;saveBadgeCfg();document.getElementById(map[k]).textContent=v+' px';applyGridVars();}
 
-    const occ=emptyMatrix();
-    pg.icons.forEach(ic=>{
-      for(let r=ic.row;r<ic.row+(ic.h||1);r++)
-        for(let c=ic.col;c<ic.col+(ic.w||1);c++)
-          if(occ[r]&&occ[r][c]!==undefined) occ[r][c]=ic.id;
-    });
+// фоны
+document.querySelectorAll('#hsSettings .set-row[data-act]').forEach(r=>r.onclick=()=>{const a=r.dataset.act;if(a==='homeBg'){hsBgMode='home';document.getElementById('hsBgInput').click();}else if(a==='homeBgGallery'){openGallery('homeBg');}else if(a==='homeBgReset'){resetHomeBg();renderHome();}else if(a==='pageBg'){hsBgMode='page';document.getElementById('hsPageBgInput').click();}else if(a==='pageBgGallery'){openGallery('pageBg');}else if(a==='pageBgReset'){pages[currentPage].bg=null;saveData();renderHome();}else if(a==='openGalleryManage'){openGallery('manage');}});
+let hsBgMode='home';
+document.getElementById('hsBgInput').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{changeHomeBg(ev.target.result);renderHome();};r.readAsDataURL(f);e.target.value='';});
+document.getElementById('hsPageBgInput').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{pages[currentPage].bg=ev.target.result;saveData();renderHome();};r.readAsDataURL(f);e.target.value='';});
 
-    pg.icons.forEach(ic=>{ grid.appendChild(buildSlot(ic, pi)); });
+// иконки-секция
+document.getElementById('rowEdit').onclick=()=>{const t=document.getElementById('tgEdit');t.classList.toggle('on');if(t.classList.contains('on'))enterEditMode();else exitEditMode();};
+document.getElementById('rowBadges').onclick=()=>{document.getElementById('tgBadges').classList.toggle('on');localStorage.setItem('showBadges',showBadges()?'1':'0');renderHome();};
+function addEmptyIcon(toDock){const ic={id:newId(),w:1,h:1,name:'',bg:null,emoji:'',img:null,badge:0,empty:true};if(toDock)dock.push(ic);else pages[currentPage].icons.push(ic);saveData();renderHome();}
+document.getElementById('rowAddIcon').onclick=()=>{addEmptyIcon(false);};
+document.getElementById('rowAddDock').onclick=()=>{addEmptyIcon(true);};
+document.getElementById('rowMerge').onclick=()=>{closeHsSettings();enterEditMode();alert('Тапните по 2+ иконкам, затем «Объединить» внизу.');};
+document.getElementById('rowAddPage').onclick=()=>{pages.push({bg:null,icons:[]});saveData();renderHome();goToPage(pages.length-1,true);};
+document.getElementById('rowDelPage').onclick=()=>{if(pages.length<=1){alert('Нельзя удалить последний экран');return;}if(!confirm('Удалить текущий экран?'))return;pages.splice(currentPage,1);if(currentPage>=pages.length)currentPage=pages.length-1;saveData();renderHome();};
+document.getElementById('rowDoubleOnIcons').onclick=()=>{const t=document.getElementById('tgDoubleIcons');t.classList.toggle('on');DOUBLE_ON_ICONS=t.classList.contains('on');localStorage.setItem('doubleOnIcons',DOUBLE_ON_ICONS?'1':'0');};
 
-    for(let r=0;r<GRID_ROWS;r++){
-      for(let c=0;c<GRID_COLS;c++){
-        if(occ[r][c]) continue;
-        const e=document.createElement('div'); e.className='slot empty';
-        e.style.gridColumn=(c+1)+' / span 1';
-        e.style.gridRow=(r+1)+' / span 1';
-        e.dataset.page=pi; e.dataset.col=c; e.dataset.row=r;
-        grid.appendChild(e);
-      }
-    }
-    page.appendChild(grid);
-    track.appendChild(page);
-  });
-  goToPage(Math.min(currentPage, pages.length-1), true);
-  applyIconOffset();
-}
+// триггеры вызова
+const tgMap={hold:'tgHold',double:'tgDouble',corner:'tgCorner'};
+function refreshTriggerToggles(){for(const m in tgMap)document.getElementById(tgMap[m]).classList.toggle('on',triggerModes.has(m));document.getElementById('chooseIconBtn').classList.toggle('show',triggerModes.has('corner'));document.getElementById('rowDoubleOnIcons').style.display=triggerModes.has('double')?'flex':'none';document.getElementById('cfgHold').classList.toggle('show',triggerModes.has('hold'));document.getElementById('cfgDouble').classList.toggle('show',triggerModes.has('double'));document.getElementById('cfgCorner').classList.toggle('show',triggerModes.has('corner'));document.getElementById('holdDuration').textContent=(HOLD_MS/1000)+' сек';document.getElementById('tapCount').textContent=SCREEN_TAP_COUNT+' нажатия';document.getElementById('iconTapCount').textContent=ICON_TAP_COUNT+' нажатия';refreshTriggerInfo();}
+document.querySelectorAll('#triggerGroup .trigger-opt').forEach(opt=>opt.onclick=e=>{if(e.target.tagName==='INPUT'||e.target.classList.contains('ci-save'))return;const m=opt.dataset.mode;if(triggerModes.has(m))triggerModes.delete(m);else triggerModes.add(m);if(triggerModes.size===0)triggerModes.add('hold');saveModes();refreshTriggerToggles();});
+document.getElementById('chooseIconBtn').onclick=()=>{choosingTriggerIcon=true;closeHsSettings();showChooseHint('Тапните иконку для вызова настроек');};
+function refreshTriggerInfo(){const el=document.getElementById('triggerIconInfo');if(triggerModes.has('corner')){const info=triggerIcon?findIcon(triggerIcon):null;el.textContent=info?('Триггер: '+(info.icon.name||info.icon.emoji||'иконка')+' ('+ICON_TAP_COUNT+' нажатий)'):'Иконка-триггер не выбрана';}else el.textContent='';}
 
-function buildSlot(ic, pi){
-  const slot=document.createElement('div'); slot.className='slot';
-  slot.style.gridColumn=(ic.col+1)+' / span '+(ic.w||1);
-  slot.style.gridRow=(ic.row+1)+' / span '+(ic.h||1);
-  slot.dataset.id=ic.id; slot.dataset.page=pi;
+// возврат к блокировке
+const lockTgMap={swipe:'tgLockSwipe',tap:'tgLockTaps',icon:'tgLockIcon'};
+function refreshLockToggles(){for(const m in lockTgMap)document.getElementById(lockTgMap[m]).classList.toggle('on',lockModes.has(m));document.getElementById('chooseLockIconBtn').classList.toggle('show',lockModes.has('icon'));document.getElementById('cfgLockTaps').classList.toggle('show',lockModes.has('tap'));document.getElementById('cfgLockIcon').classList.toggle('show',lockModes.has('icon'));document.getElementById('lockTapCount').textContent=LOCK_TAP_COUNT+' нажатия';document.getElementById('lockIconTapCount').textContent=LOCK_ICON_TAP_COUNT+' нажатия';refreshLockInfo();}
+document.querySelectorAll('#lockGroup .lock-opt').forEach(opt=>opt.onclick=e=>{if(e.target.tagName==='INPUT'||e.target.classList.contains('ci-save'))return;const m=opt.dataset.mode;if(lockModes.has(m))lockModes.delete(m);else lockModes.add(m);saveLockModes();refreshLockToggles();});
+document.getElementById('chooseLockIconBtn').onclick=()=>{choosingLockIcon=true;closeHsSettings();showChooseHint('Тапните иконку для блокировки');};
+function refreshLockInfo(){const el=document.getElementById('lockIconInfo');if(lockModes.has('icon')){const info=lockIcon?findIcon(lockIcon):null;el.textContent=info?('Блокировка: '+(info.icon.name||info.icon.emoji||'иконка')+' ('+LOCK_ICON_TAP_COUNT+' нажатий)'):'Иконка не выбрана';}else el.textContent='';}
 
-  const cell=document.createElement('div'); cell.className='cell'; cell.dataset.id=ic.id;
-  if((ic.w||1)>1||(ic.h||1)>1) cell.classList.add('big');
+// инпуты-сохранение конфигов
+document.querySelectorAll('.ci-save').forEach(b=>b.onclick=()=>{const t=b.dataset.save;if(t==='hold'){let v=parseFloat(document.getElementById('inHold').value)||2;v=Math.min(5,Math.max(0.5,v));HOLD_MS=v*1000;localStorage.setItem('holdDuration',HOLD_MS);refreshTriggerToggles();}else if(t==='double'){let v=parseInt(document.getElementById('inDouble').value)||2;v=Math.min(5,Math.max(2,v));SCREEN_TAP_COUNT=v;localStorage.setItem('screenTapCount',v);refreshTriggerToggles();}else if(t==='corner'){let v=parseInt(document.getElementById('inCorner').value)||3;v=Math.min(5,Math.max(2,v));ICON_TAP_COUNT=v;localStorage.setItem('iconTapCount',v);refreshTriggerToggles();}else if(t==='locktaps'){let v=parseInt(document.getElementById('inLockTaps').value)||3;v=Math.min(6,Math.max(2,v));LOCK_TAP_COUNT=v;localStorage.setItem('lockTapCount',v);refreshLockToggles();}else if(t==='lockicon'){let v=parseInt(document.getElementById('inLockIcon').value)||2;v=Math.min(5,Math.max(2,v));LOCK_ICON_TAP_COUNT=v;localStorage.setItem('lockIconTapCount',v);refreshLockToggles();}});
 
-  if(ic.widget){
-    const w=document.createElement('div'); w.className='widget';
-    w.innerHTML='<div class="ring"><div class="phone-ico">🔋</div></div>'+
-      '<div class="pct">'+clampInt(ic.percent,0,100,90)+'%</div><div class="ttl">Батарея</div>';
-    cell.appendChild(w);
-  } else if(ic.folder){
-    const f=document.createElement('div'); f.className='folder';
-    (ic.items||[]).slice(0,9).forEach((it,idx)=>{
-      const mini=document.createElement('div'); mini.className='mini';
-      mini.style.background=it.bg||'#333';
-      const key=ic.id+'_'+idx;
-      if(iconImages[key]){ const img=document.createElement('img'); ImageStore.url(iconImages[key]).then(u=>{ if(u) img.src=u; }); mini.appendChild(img); }
-      else mini.textContent=it.emoji||'';
-      f.appendChild(mini);
-    });
-    cell.appendChild(f);
-    const label=document.createElement('div'); label.className='label'; label.textContent=ic.name||'';
-    cell.appendChild(label);
-  } else {
-    const icon=document.createElement('div'); icon.className='icon';
-    icon.style.background=ic.bg||'#333';
-    if(iconImages[ic.id]){ const img=document.createElement('img'); ImageStore.url(iconImages[ic.id]).then(u=>{ if(u) img.src=u; }); icon.appendChild(img); }
-    else icon.textContent=ic.emoji||'';
-    cell.appendChild(icon);
-    const label=document.createElement('div'); label.className='label'; label.textContent=ic.name||'';
-    cell.appendChild(label);
-  }
+// попытки пароля
+document.getElementById('saveAttemptCount').onclick=()=>{let v=parseInt(document.getElementById('inAttemptCount').value)||2;v=Math.min(5,Math.max(1,v));ATTEMPT_COUNT=v;localStorage.setItem('attemptCountShow',v);if(attemptTargets.length>v)attemptTargets=attemptTargets.slice(0,v);renderAttemptList();renderHome();};
+document.getElementById('clearAttempts').onclick=()=>{passwordAttempts=[];localStorage.setItem('passwordAttempts','[]');renderHome();renderAttemptList();};
+function renderAttemptList(){const list=document.getElementById('attemptList');list.innerHTML='';for(let i=0;i<ATTEMPT_COUNT;i++){const row=document.createElement('div');row.className='set-row';row.style.borderRadius='10px';row.style.background='rgba(255,255,255,0.06)';row.style.marginBottom='6px';const tid=attemptTargets[i];const info=tid?findIcon(tid):null;const nm=info?(info.icon.name||info.icon.emoji||'иконка'):'не выбрана';const code=passwordAttempts[i]!=null?passwordAttempts[i]:'—';row.innerHTML=`<span class="ic">🔢</span><span class="txt">Попытка ${i+1}: <b>${nm}</b><br><small style="opacity:.55">последний код: ${code}</small></span><span class="arrow">›</span>`;row.onclick=()=>{choosingAttemptIndex=i;closeHsSettings();showChooseHint('Тапните иконку для показа попытки '+(i+1));};list.appendChild(row);}}
 
-  const badge=document.createElement('div'); badge.className='badge'; badge.dataset.for=ic.id;
-  const bv=clampInt(ic.badge,0,99999,0);
-  badge.textContent=bv>99999?'99999+':bv;
-  badge.style.display=bv>0?'flex':'none';
-  cell.appendChild(badge);
+// подсказка выбора
+function showChooseHint(t){const h=document.getElementById('chooseHint');h.textContent=t+' (нажмите, чтобы отменить)';h.classList.add('show');}
+function hideChooseHint(){document.getElementById('chooseHint').classList.remove('show');}
+document.getElementById('chooseHint').onclick=()=>{cancelAllChooseModes();hideChooseHint();openHsSettings();};
+function cancelAllChooseModes(){choosingTriggerIcon=false;choosingLockIcon=false;choosingAttemptIndex=-1;}
 
-  const del=document.createElement('div'); del.className='del-corner'; del.textContent='×'; del.dataset.del=ic.id;
-  cell.appendChild(del);
+// tweak поверх стола
+let currentTweak=null;
+const TWEAK_DEFS={grid:{title:'Сетка',ids:['colsSlider','gapXSlider','gapYSlider']},iconsize:{title:'Размер иконок',ids:['iconSizeSlider','iconRadiusSlider']},iconpos:{title:'Положение иконок',ids:['iconXSlider','iconYSlider']},iconop:{title:'Прозрачность',ids:['iconOpSlider']},badge:{title:'Уведомления',ids:['bgBx','bgBy','bgBw','bgBh','bgBfs']}};
+document.querySelectorAll('.tweak-launch').forEach(b=>b.onclick=()=>openTweak(b.dataset.tweak));
+function openTweak(key){currentTweak=key;const def=TWEAK_DEFS[key];document.getElementById('tpTitle').textContent='👁 '+def.title;const c=document.getElementById('tpContent');c.innerHTML='';def.ids.forEach(id=>{const orig=document.getElementById(id);const wrap=document.createElement('div');wrap.className='slider-row';const lbl=orig.closest('.slider-row').querySelector('.sl-label').cloneNode(true);const clone=orig.cloneNode(true);clone.id=id+'_tw';clone.value=orig.value;clone.oninput=e=>{orig.value=e.target.value;orig.dispatchEvent(new Event('input'));const nl=orig.closest('.slider-row').querySelector('.sl-label').cloneNode(true);lbl.innerHTML=nl.innerHTML;};wrap.appendChild(lbl);wrap.appendChild(clone);c.appendChild(wrap);});document.getElementById('hsSettings').classList.add('tweak');}
+document.getElementById('tpDone').onclick=()=>{document.getElementById('hsSettings').classList.remove('tweak');currentTweak=null;};
 
-  slot.appendChild(cell);
-  return slot;
-}
+// refresh all UI
+function refreshAllSettingsUI(){document.getElementById('colsVal').textContent=GRID_COLS;document.getElementById('colsSlider').value=GRID_COLS;document.getElementById('gapXSlider').value=GAP_X;document.getElementById('gapXVal').textContent=GAP_X+'px';document.getElementById('gapYSlider').value=GAP_Y;document.getElementById('gapYVal').textContent=GAP_Y+'px';document.getElementById('iconSizeSlider').value=ICON_SIZE;document.getElementById('iconSizeVal').textContent=ICON_SIZE+'px';document.getElementById('iconRadiusSlider').value=ICON_RADIUS;document.getElementById('iconRadiusVal').textContent=ICON_RADIUS+'px';document.getElementById('iconOpSlider').value=ICON_OPACITY;document.getElementById('iconOpVal').textContent=ICON_OPACITY+'%';document.getElementById('iconXSlider').value=ICON_OFF_X;document.getElementById('iconXVal').textContent=ICON_OFF_X+' px';document.getElementById('iconYSlider').value=ICON_OFF_Y;document.getElementById('iconYVal').textContent=ICON_OFF_Y+' px';document.getElementById('bgBx').value=BADGE_CFG.bx;document.getElementById('bgBxVal').textContent=BADGE_CFG.bx+' px';document.getElementById('bgBy').value=BADGE_CFG.by;document.getElementById('bgByVal').textContent=BADGE_CFG.by+' px';document.getElementById('bgBw').value=BADGE_CFG.bw;document.getElementById('bgBwVal').textContent=BADGE_CFG.bw+' px';document.getElementById('bgBh').value=BADGE_CFG.bh;document.getElementById('bgBhVal').textContent=BADGE_CFG.bh+' px';document.getElementById('bgBfs').value=BADGE_CFG.bfs;document.getElementById('bgBfsVal').textContent=BADGE_CFG.bfs+' px';document.getElementById('inHold').value=HOLD_MS/1000;document.getElementById('inDouble').value=SCREEN_TAP_COUNT;document.getElementById('inCorner').value=ICON_TAP_COUNT;document.getElementById('inLockTaps').value=LOCK_TAP_COUNT;document.getElementById('inLockIcon').value=LOCK_ICON_TAP_COUNT;document.getElementById('inAttemptCount').value=ATTEMPT_COUNT;document.getElementById('tgDoubleIcons').classList.toggle('on',DOUBLE_ON_ICONS);refreshTriggerToggles();refreshLockToggles();renderAttemptList();}
 
-function renderDock(){
-  const d=$('dock'); d.innerHTML='';
-  dock.forEach(ic=>{
-    const cell=document.createElement('div'); cell.className='cell'; cell.dataset.id=ic.id; cell.dataset.dock='1';
-    const icon=document.createElement('div'); icon.className='icon';
-    icon.style.background=ic.bg||'#333';
-    if(iconImages[ic.id]){ const img=document.createElement('img'); ImageStore.url(iconImages[ic.id]).then(u=>{ if(u) img.src=u; }); icon.appendChild(img); }
-    else icon.textContent=ic.emoji||'';
-    cell.appendChild(icon);
-    const badge=document.createElement('div'); badge.className='badge'; badge.dataset.for=ic.id;
-    const bv=clampInt(ic.badge,0,99999,0);
-    badge.textContent=bv; badge.style.display=bv>0?'flex':'none';
-    cell.appendChild(badge);
-    const del=document.createElement('div'); del.className='del-corner'; del.textContent='×'; del.dataset.del=ic.id;
-    cell.appendChild(del);
-    d.appendChild(cell);
-  });
-}
-
-function renderDots(){
-  const pd=$('pageDots'); pd.innerHTML='';
-  pages.forEach((_,i)=>{
-    const dot=document.createElement('div'); dot.className='pdot'+(i===currentPage?' active':'');
-    dot.onclick=()=>goToPage(i);
-    pd.appendChild(dot);
-    if(phone.classList.contains('edit') && i===currentPage){
-      const del=document.createElement('div'); del.className='pdel'; del.textContent='×'; del.title='Удалить экран';
-      del.onclick=(e)=>{ e.stopPropagation(); delPage(i); };
-      pd.appendChild(del);
-    }
-  });
-  const add=document.createElement('div'); add.className='padd'; add.textContent='+';
-  add.onclick=addPage;
-  pd.appendChild(add);
-}
-
-function goToPage(i, instant){
-  currentPage=Math.max(0, Math.min(i, pages.length-1));
-  const track=$('pagesTrack');
-  if(instant) track.style.transition='none';
-  track.style.setProperty('--page-shift', (-currentPage*100)+'%');
-  if(instant){ void track.offsetWidth; track.style.transition=''; }
-  renderDots();
-}
-
-/* свайп страниц */
-let swStartX=0, swStartY=0, swActive=false, swDelta=0;
-const viewport=$('pagesViewport');
-viewport.addEventListener('touchstart',(e)=>{
-  if(phone.classList.contains('edit')) return;
-  swStartX=e.touches[0].clientX; swStartY=e.touches[0].clientY; swActive=true; swDelta=0;
-},{passive:true});
-viewport.addEventListener('touchmove',(e)=>{
-  if(!swActive) return;
-  const dx=e.touches[0].clientX-swStartX;
-  const dy=e.touches[0].clientY-swStartY;
-  if(Math.abs(dx)>Math.abs(dy)){
-    swDelta=dx;
-    const track=$('pagesTrack'); track.classList.add('dragging');
-    const pct=-currentPage*100 + (dx/viewport.offsetWidth)*100;
-    track.style.setProperty('--page-shift', pct+'%');
-  }
-},{passive:true});
-viewport.addEventListener('touchend',()=>{
-  if(!swActive) return; swActive=false;
-  const track=$('pagesTrack'); track.classList.remove('dragging');
-  const th=viewport.offsetWidth*0.22;
-  if(swDelta<-th && currentPage<pages.length-1) goToPage(currentPage+1);
-  else if(swDelta>th && currentPage>0) goToPage(currentPage-1);
-  else goToPage(currentPage);
-});
-
-/* свайп вниз -> блокировка */
-let downStartY=0, downActive=false;
-viewport.addEventListener('touchstart',(e)=>{ downStartY=e.touches[0].clientY; downActive=true; },{passive:true});
-viewport.addEventListener('touchend',(e)=>{
-  if(!downActive) return; downActive=false;
-  if(!settings.lock.swipe) return;
-  if(phone.classList.contains('edit')) return;
-  const dy=(e.changedTouches[0].clientY)-downStartY;
-  if(dy>140 && downStartY<120) closeHome();
-});
-
-/* ===== СМЕЩЕНИЕ ИКОНОК ===== */
-let iconOffsetX=parseInt(localStorage.getItem('iconX'),10)||0;
-let iconOffsetY=parseInt(localStorage.getItem('iconY'),10)||0;
-function applyIconOffset(){
-  document.documentElement.style.setProperty('--icon-x', iconOffsetX+'px');
-  document.documentElement.style.setProperty('--icon-y', iconOffsetY+'px');
-}
-
-/* ===== BADGES ===== */
-function applyBadgesVisibility(){
-  document.documentElement.style.setProperty('--badge-disp', settings.showBadges?'flex':'none');
-  document.querySelectorAll('.badge').forEach(b=>{
-    const num=parseInt(b.textContent,10)||0;
-    b.style.display=(settings.showBadges && num>0)?'flex':'none';
-  });
-}
-
-/* ===== КЛИКИ ПО ИКОНКАМ ===== */
-let triggerHoldTimer=null, triggerHeld=false;
-let tapBuffer=[], iconTapBuffer={}, lockTapBuffer=[], lockIconTapBuffer={};
-const TAP_WINDOW=600;
-let editTapTime=0, editTapId=null;
-
-/* ИСПРАВЛЕНО: единый обработчик клика (объединены два конфликтующих) */
-phone.addEventListener('click', async (e)=>{
-  const delEl=e.target.closest('.del-corner');
-  if(delEl && phone.classList.contains('edit')){ e.stopPropagation(); await deleteIcon(delEl.dataset.del); return; }
-
-  if(phone.classList.contains('choosing-trigger')){
-    const c=e.target.closest('.cell'); if(c){ settings.triggerIconId=c.dataset.id; saveAll(); phone.classList.remove('choosing-trigger'); toast('✅ Иконка-триггер назначена'); } return;
-  }
-  if(phone.classList.contains('choosing-lock')){
-    const c=e.target.closest('.cell'); if(c){ settings.lockIconId=c.dataset.id; saveAll(); phone.classList.remove('choosing-lock'); toast('🔒 Иконка блокировки назначена'); } return;
-  }
-
-  const cell=e.target.closest('.cell');
-
-  if(phone.classList.contains('edit')){
-    if(!cell) return;
-    const now=Date.now();
-    if(editTapId===cell.dataset.id && now-editTapTime<350){
-      openIconMenu(cell.dataset.id); editTapId=null; editTapTime=0;
-    } else {
-      editTapId=cell.dataset.id; editTapTime=now;
-      handleEditTap(cell);
-    }
-    return;
-  }
-
-  if(cell){ handleIconTap(cell); return; }
-  handleEmptyTap();
-});
-
-function handleEmptyTap(){
-  const now=Date.now();
-  if(settings.triggers.double){
-    tapBuffer=tapBuffer.filter(t=>now-t<TAP_WINDOW); tapBuffer.push(now);
-    if(tapBuffer.length>=settings.doubleCount){ tapBuffer=[]; openHsSettings(); return; }
-  }
-  if(settings.lock.taps){
-    lockTapBuffer=lockTapBuffer.filter(t=>now-t<TAP_WINDOW); lockTapBuffer.push(now);
-    if(lockTapBuffer.length>=settings.lockTapsCount){ lockTapBuffer=[]; closeHome(); return; }
-  }
-}
-
-function handleIconTap(cell){
-  const id=cell.dataset.id; const now=Date.now();
-  if(settings.triggers.corner && settings.triggerIconId===id){
-    iconTapBuffer[id]=(iconTapBuffer[id]||[]).filter(t=>now-t<TAP_WINDOW); iconTapBuffer[id].push(now);
-    if(iconTapBuffer[id].length>=settings.cornerCount){ iconTapBuffer[id]=[]; openHsSettings(); return; }
-  }
-  if(settings.lock.icon && settings.lockIconId===id){
-    lockIconTapBuffer[id]=(lockIconTapBuffer[id]||[]).filter(t=>now-t<TAP_WINDOW); lockIconTapBuffer[id].push(now);
-    if(lockIconTapBuffer[id].length>=settings.lockIconCount){ lockIconTapBuffer[id]=[]; closeHome(); return; }
-  }
-  const ic=findIcon(id);
-  if(ic && ic.folder){ openFolder(ic); }
-}
-
-/* долгое нажатие = триггер hold ИЛИ вход в edit */
-phone.addEventListener('touchstart',(e)=>{
-  if(phone.classList.contains('edit')||phone.classList.contains('choosing-trigger')||phone.classList.contains('choosing-lock')) return;
-  if($('hsSettings').classList.contains('open')||$('iconMenu').classList.contains('open')||$('folderView').classList.contains('open')) return;
-  triggerHeld=false;
-  const dur=(settings.triggers.hold?settings.holdDuration:1.2)*1000;
-  triggerHoldTimer=setTimeout(()=>{
-    triggerHeld=true;
-    if(settings.triggers.hold) openHsSettings();
-    else enterEditMode();
-  }, dur);
-},{passive:true});
-phone.addEventListener('touchend',()=>{ clearTimeout(triggerHoldTimer); });
-phone.addEventListener('touchmove',()=>{ clearTimeout(triggerHoldTimer); });
-phone.addEventListener('contextmenu',(e)=>e.preventDefault());
-
-/* ===== ПОИСК ИКОНОК ===== */
-function findIcon(id){
-  for(const pg of pages){ const f=pg.icons.find(i=>i.id===id); if(f) return f; }
-  return dock.find(i=>i.id===id)||null;
-}
-function findIconLoc(id){
-  for(let p=0;p<pages.length;p++){ const idx=pages[p].icons.findIndex(i=>i.id===id); if(idx>=0) return {type:'page',page:p,idx}; }
-  const di=dock.findIndex(i=>i.id===id); if(di>=0) return {type:'dock',idx:di};
-  return null;
-}
-/* ===== РЕЖИМ РЕДАКТИРОВАНИЯ ===== */
-let mergeSelection=[];
-function enterEditMode(){ phone.classList.add('edit'); mergeSelection=[]; renderDots(); $('ebInfo').textContent='Режим редактирования — выберите 2 иконки для объединения'; }
-function exitEditMode(){ phone.classList.remove('edit'); mergeSelection=[]; document.querySelectorAll('.selected-merge').forEach(c=>c.classList.remove('selected-merge')); renderDots(); saveAll(); }
-function handleEditTap(cell){
-  const id=cell.dataset.id;
-  const i=mergeSelection.indexOf(id);
-  if(i>=0){ mergeSelection.splice(i,1); cell.classList.remove('selected-merge'); }
-  else { if(mergeSelection.length>=2){ const old=mergeSelection.shift(); document.querySelectorAll(`.cell[data-id="${old}"]`).forEach(c=>c.classList.remove('selected-merge')); } mergeSelection.push(id); cell.classList.add('selected-merge'); }
-  $('ebInfo').textContent='Выбрано: '+mergeSelection.length+' (нужно 2 для объединения)';
-}
-function mergeSelected(){
-  if(mergeSelection.length<2){ toast('Выберите 2 иконки'); return; }
-  const [aId,bId]=mergeSelection;
-  const a=findIcon(aId), b=findIcon(bId);
-  if(!a||!b){ toast('Ошибка'); return; }
-  if(a.widget||b.widget){ toast('Виджет нельзя объединять'); return; }
-  const itemsA = a.folder ? a.items : [{bg:a.bg,emoji:a.emoji,name:a.name}];
-  const itemsB = b.folder ? b.items : [{bg:b.bg,emoji:b.emoji,name:b.name}];
-  a.folder=true; a.items=[...(itemsA||[]),...(itemsB||[])]; a.name=a.name||'Папка';
-  delete a.bg; delete a.emoji;
-  deleteIconData(bId);
-  mergeSelection=[]; renderPages(); renderDock(); applyBadgesVisibility(); saveAll();
-  toast('🔗 Объединено в папку');
-}
-function splitSelected(){
-  if(mergeSelection.length!==1){ toast('Выберите 1 папку для разделения'); return; }
-  const id=mergeSelection[0]; const ic=findIcon(id);
-  if(!ic||!ic.folder){ toast('Это не папка'); return; }
-  const loc=findIconLoc(id); if(!loc) return;
-  const items=ic.items||[];
-  ic.folder=false; ic.items=undefined;
-  ic.bg=items[0]?.bg||'#333'; ic.emoji=items[0]?.emoji||'📱'; ic.name=items[0]?.name||'App';
-  for(let k=1;k<items.length;k++){
-    const it=items[k];
-    const spot=findFreeSpot(loc.type==='page'?loc.page:currentPage);
-    if(loc.type==='dock'||!spot){ pages[currentPage].icons.push({id:newId(),col:0,row:0,w:1,h:1,bg:it.bg,emoji:it.emoji,name:it.name,badge:0}); }
-    else pages[spot.page].icons.push({id:newId(),col:spot.col,row:spot.row,w:1,h:1,bg:it.bg,emoji:it.emoji,name:it.name,badge:0});
-  }
-  mergeSelection=[]; renderPages(); applyBadgesVisibility(); saveAll();
-  toast('✂️ Папка разделена');
-}
-function findFreeSpot(pi){
-  const pg=pages[pi]; if(!pg) return null;
-  const occ=emptyMatrix();
-  pg.icons.forEach(ic=>{ for(let r=ic.row;r<ic.row+(ic.h||1);r++) for(let c=ic.col;c<ic.col+(ic.w||1);c++) if(occ[r]&&occ[r][c]!==undefined) occ[r][c]=1; });
-  for(let r=0;r<GRID_ROWS;r++) for(let c=0;c<GRID_COLS;c++) if(!occ[r][c]) return {page:pi,col:c,row:r};
-  return null;
-}
-
-$('ebMerge').onclick=mergeSelected;
-$('ebSplit').onclick=splitSelected;
-$('ebAddPage').onclick=addPage;
-$('ebDelPage').onclick=()=>delPage(currentPage);
-$('ebDone').onclick=exitEditMode;
-
-function addPage(){ pages.push({icons:[]}); renderPages(); goToPage(pages.length-1); renderDots(); saveAll(); toast('➕ Экран добавлен'); }
-async function delPage(i){
-  if(pages.length<=1){ toast('Нельзя удалить последний экран'); return; }
-  if(pages[i].icons.length>0){ const ok=await dialogConfirm('Удалить экран со всеми иконками?',true); if(!ok) return; }
-  pages.splice(i,1); currentPage=Math.max(0,Math.min(currentPage,pages.length-1));
-  renderPages(); renderDots(); saveAll(); toast('🗑 Экран удалён');
-}
-
-/* ===== УДАЛЕНИЕ ИКОНКИ ===== */
-function deleteIconData(id){
-  if(iconImages[id]){ ImageStore.del(iconImages[id]); delete iconImages[id]; }
-  Object.keys(iconImages).forEach(k=>{ if(k.startsWith(id+'_')){ ImageStore.del(iconImages[k]); delete iconImages[k]; } });
-  for(const pg of pages){ const idx=pg.icons.findIndex(i=>i.id===id); if(idx>=0){ pg.icons.splice(idx,1); return; } }
-  const di=dock.findIndex(i=>i.id===id); if(di>=0) dock.splice(di,1);
-}
-async function deleteIcon(id){
-  const ic=findIcon(id); if(!ic) return;
-  const ok=await dialogConfirm('Удалить «'+(ic.name||'иконку')+'»?',true); if(!ok) return;
-  if(settings.triggerIconId===id) settings.triggerIconId=null;
-  if(settings.lockIconId===id) settings.lockIconId=null;
-  deleteIconData(id);
-  renderPages(); renderDock(); applyBadgesVisibility(); saveAll();
-  toast('🗑 Удалено');
-}
-
-/* ===== ПАПКА ===== */
-let openFolderId=null;
-function openFolder(ic){
-  openFolderId=ic.id;
-  $('folderTitle').textContent=ic.name||'Папка';
-  const box=$('folderBox'); box.innerHTML='';
-  (ic.items||[]).forEach((it,idx)=>{
-    const cell=document.createElement('div'); cell.className='cell';
-    const icon=document.createElement('div'); icon.className='icon'; icon.style.background=it.bg||'#333';
-    const key=ic.id+'_'+idx;
-    if(iconImages[key]){ const img=document.createElement('img'); ImageStore.url(iconImages[key]).then(u=>{ if(u) img.src=u; }); icon.appendChild(img); }
-    else icon.textContent=it.emoji||'';
-    cell.appendChild(icon);
-    const label=document.createElement('div'); label.className='label'; label.textContent=it.name||''; cell.appendChild(label);
-    box.appendChild(cell);
-  });
-  $('folderView').classList.add('open');
-}
-function closeFolder(){ $('folderView').classList.remove('open'); openFolderId=null; }
-$('folderView').addEventListener('click',(e)=>{ if(e.target===$('folderView')) closeFolder(); });
-
-/* ===== МЕНЮ ИКОНКИ ===== */
-let imCurrentId=null;
-function openIconMenu(id){
-  const ic=findIcon(id); if(!ic) return; imCurrentId=id;
-  const prev=$('imPrev'); prev.innerHTML='';
-  if(ic.folder){ prev.textContent='📁'; }
-  else if(iconImages[id]){ const img=document.createElement('img'); ImageStore.url(iconImages[id]).then(u=>{ if(u) img.src=u; }); prev.appendChild(img); prev.style.background=ic.bg||'#333'; }
-  else { prev.textContent=ic.emoji||'📱'; prev.style.background=ic.bg||'#333'; }
-  $('imTitle').textContent=ic.name||'Без названия';
-  $('imName').value=ic.name||'';
-  $('imBadge').value=clampInt(ic.badge,0,99999,0)||'';
-  $('imMakeFolder').querySelector('span:last-child')?.remove();
-  $('imMakeFolder').lastChild && ($('imMakeFolder').childNodes[1].textContent=ic.folder?' Открыть папку':' Сделать папкой');
-  $('iconMenu').classList.add('open');
-}
-function closeIconMenu(){ $('iconMenu').classList.remove('open'); imCurrentId=null; }
-$('imClose').onclick=closeIconMenu;
-$('iconMenu').addEventListener('click',(e)=>{ if(e.target===$('iconMenu')) closeIconMenu(); });
-$('imNameOk').onclick=()=>{ const ic=findIcon(imCurrentId); if(!ic) return; ic.name=$('imName').value.trim()||'App'; renderPages(); renderDock(); saveAll(); toast('✏️ Имя изменено'); };
-$('imBadgeOk').onclick=()=>{ const ic=findIcon(imCurrentId); if(!ic) return; ic.badge=clampInt($('imBadge').value,0,99999,0); renderPages(); renderDock(); applyBadgesVisibility(); saveAll(); toast('🔴 Уведомление обновлено'); };
-$('imPhoto').onclick=()=>{ const inp=$('hsIconInput'); inp.dataset.target='icon'; inp.click(); };
-$('imMakeFolder').onclick=()=>{ const ic=findIcon(imCurrentId); if(!ic) return; if(ic.folder){ closeIconMenu(); openFolder(ic); } else { ic.folder=true; ic.items=[{bg:ic.bg,emoji:ic.emoji,name:ic.name}]; ic.name=ic.name||'Папка'; delete ic.bg; delete ic.emoji; renderPages(); renderDock(); saveAll(); toast('📁 Стало папкой'); closeIconMenu(); } };
-$('imDelete').onclick=async ()=>{ const id=imCurrentId; closeIconMenu(); await deleteIcon(id); };
-
-/* ===== HS SETTINGS ===== */
-function openHsSettings(){ exitEditMode(); $('hsSettings').classList.add('open'); syncSettingsUI(); }
-function closeHsSettings(){ $('hsSettings').classList.remove('open'); saveAll(); }
-$('closeSet').onclick=closeHsSettings;
-
-function syncSettingsUI(){
-  $('tgHold').classList.toggle('on', settings.triggers.hold);
-  $('tgDouble').classList.toggle('on', settings.triggers.double);
-  $('tgCorner').classList.toggle('on', settings.triggers.corner);
-  $('tgLockSwipe').classList.toggle('on', settings.lock.swipe);
-  $('tgLockTaps').classList.toggle('on', settings.lock.taps);
-  $('tgLockIcon').classList.toggle('on', settings.lock.icon);
-  $('tgBadges').classList.toggle('on', settings.showBadges);
-  $('tgEdit').classList.toggle('on', phone.classList.contains('edit'));
-  $('holdDuration').textContent='Длительность: '+settings.holdDuration+' сек';
-  $('tapCount').textContent='Количество: '+settings.doubleCount+' нажатия';
-  $('iconTapCount').textContent='Количество: '+settings.cornerCount+' нажатия';
-  $('lockTapCount').textContent='Количество: '+settings.lockTapsCount+' нажатия';
-  $('lockIconTapCount').textContent='Количество: '+settings.lockIconCount+' нажатия';
-  $('inHold').value=settings.holdDuration; $('inDouble').value=settings.doubleCount; $('inCorner').value=settings.cornerCount;
-  $('inLockTaps').value=settings.lockTapsCount; $('inLockIcon').value=settings.lockIconCount;
-  $('inAttemptCount').value=settings.attemptShowCount;
-  $('colsVal').textContent=GRID_COLS; $('colsSlider').value=GRID_COLS;
-  $('rowHVal').textContent=SLOT_H+' px'; $('rowHSlider').value=SLOT_H;
-  $('gapVal').textContent=SLOT_GAP+' px'; $('gapSlider').value=SLOT_GAP;
-  $('iconXVal').textContent=iconOffsetX+' px'; $('iconXSlider').value=iconOffsetX;
-  $('iconYVal').textContent=iconOffsetY+' px'; $('iconYSlider').value=iconOffsetY;
-  $('cfgHold').classList.toggle('show', settings.triggers.hold);
-  $('cfgDouble').classList.toggle('show', settings.triggers.double);
-  $('cfgCorner').classList.toggle('show', settings.triggers.corner);
-  $('cfgLockTaps').classList.toggle('show', settings.lock.taps);
-  $('cfgLockIcon').classList.toggle('show', settings.lock.icon);
-  $('triggerGroup').classList.toggle('show-choose', settings.triggers.corner);
-  $('lockGroup').classList.toggle('show-choose', settings.lock.icon);
-  renderAttempts();
-}
-
-document.querySelectorAll('.trigger-opt').forEach(row=>{
-  row.addEventListener('click',(e)=>{ if(e.target.closest('input,button')) return; const m=row.dataset.mode; settings.triggers[m]=!settings.triggers[m]; saveAll(); syncSettingsUI(); });
-});
-document.querySelectorAll('.lock-opt').forEach(row=>{
-  row.addEventListener('click',(e)=>{ if(e.target.closest('input,button')) return; const m=row.dataset.mode; settings.lock[m]=!settings.lock[m]; saveAll(); syncSettingsUI(); });
-});
-$('rowBadges').addEventListener('click',(e)=>{ if(e.target.closest('.toggle')||true){ settings.showBadges=!settings.showBadges; applyBadgesVisibility(); saveAll(); syncSettingsUI(); } });
-$('rowEdit').addEventListener('click',()=>{ if(phone.classList.contains('edit')) exitEditMode(); else { closeHsSettings(); enterEditMode(); } });
-
-document.querySelectorAll('.ci-save').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const k=btn.dataset.save;
-    if(k==='hold'){ settings.holdDuration=Math.max(0.5,Math.min(5,parseFloat($('inHold').value)||2)); }
-    if(k==='double'){ settings.doubleCount=clampInt($('inDouble').value,2,5,2); }
-    if(k==='corner'){ settings.cornerCount=clampInt($('inCorner').value,2,5,3); }
-    if(k==='locktaps'){ settings.lockTapsCount=clampInt($('inLockTaps').value,2,6,3); }
-    if(k==='lockicon'){ settings.lockIconCount=clampInt($('inLockIcon').value,2,5,2); }
-    saveAll(); syncSettingsUI(); toast('✅ Сохранено');
-  });
-});
-$('chooseIconBtn').onclick=()=>{ closeHsSettings(); phone.classList.add('choosing-trigger'); toast('Нажмите на иконку-триггер'); };
-$('chooseLockIconBtn').onclick=()=>{ closeHsSettings(); phone.classList.add('choosing-lock'); toast('Нажмите на иконку блокировки'); };
-
-$('rowBg').onclick=()=>{ const inp=$('hsBgInput'); inp.dataset.target='home'; inp.click(); };
-$('rowResetBg').onclick=()=>{ resetHomeBg(); toast('↺ Фон удалён'); };
-
-$('colsSlider').oninput=function(){ GRID_COLS=parseInt(this.value,10); $('colsVal').textContent=GRID_COLS; applyGridVars(); renderPages(); saveAll(); };
-$('rowHSlider').oninput=function(){ SLOT_H=parseInt(this.value,10); $('rowHVal').textContent=SLOT_H+' px'; applyGridVars(); saveAll(); };
-$('gapSlider').oninput=function(){ SLOT_GAP=parseInt(this.value,10); $('gapVal').textContent=SLOT_GAP+' px'; applyGridVars(); saveAll(); };
-$('iconXSlider').oninput=function(){ iconOffsetX=parseInt(this.value,10); $('iconXVal').textContent=iconOffsetX+' px'; localStorage.setItem('iconX',iconOffsetX); applyIconOffset(); };
-$('iconYSlider').oninput=function(){ iconOffsetY=parseInt(this.value,10); $('iconYVal').textContent=iconOffsetY+' px'; localStorage.setItem('iconY',iconOffsetY); applyIconOffset(); };
-
-$('saveAttemptCount').onclick=()=>{ settings.attemptShowCount=clampInt($('inAttemptCount').value,1,5,2); saveAll(); renderAttempts(); toast('✅ Сохранено'); };
-$('clearAttempts').onclick=async ()=>{ const ok=await dialogConfirm('Очистить историю попыток?',true); if(!ok) return; attempts=[]; saveJSON('passAttempts',attempts); renderAttempts(); toast('🗑 История очищена'); };
-
-function renderAttempts(){
-  const list=$('attemptList'); list.innerHTML='';
-  const show=attempts.slice(0, settings.attemptShowCount);
-  if(!show.length){ list.innerHTML='<div style="opacity:.5;font-size:13px;padding:6px;">Пока нет попыток</div>'; return; }
-  show.forEach((a,i)=>{
-    const row=document.createElement('div'); row.className='attempt-row';
-    const d=new Date(a.time);
-    const tm=d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
-    row.innerHTML='<span class="at-num">#'+(i+1)+' · '+tm+'</span><span class="at-target">Код: <b>'+esc(a.code)+'</b></span>';
-    list.appendChild(row);
-  });
-}
-
-/* ===== ЗАГРУЗКА ФАЙЛОВ HS ===== */
-$('hsBgInput').addEventListener('change', async function(){
-  const f=this.files[0]; if(!f) return;
-  if(this.dataset.target==='home'){ await setHomeBgFromFile(f); toast('🌄 Фон установлен'); }
-  this.value='';
-});
-$('hsIconInput').addEventListener('change', async function(){
-  const f=this.files[0]; if(!f){ return; }
-  if(this.dataset.target==='icon' && imCurrentId){
-    const old=iconImages[imCurrentId]; if(old) await ImageStore.del(old);
-    const id=await storeImageFile(f); iconImages[imCurrentId]=id;
-    renderPages(); renderDock(); saveAll(); toast('🖼 Фото установлено');
-    openIconMenu(imCurrentId);
-  }
-  this.value='';
-});
-
-/* ===== ЗАГРУЗКА ФАЙЛОВ LOCK ===== */
-$('pickLockBg').onclick=()=>$('bgInput').click();
-$('resetLockBg').onclick=()=>{ resetBg(); toast('↺ Фон сброшен'); };
-$('bgInput').addEventListener('change', async function(){ const f=this.files[0]; if(f){ await setLockBgFromFile(f); toast('🖼 Фон установлен'); } this.value=''; });
-
-$('sizeSlider').oninput=function(){ changeKeySize(this.value); };
-$('pinXSlider').oninput=function(){ changePinSpread('x',this.value); };
-$('pinYSlider').oninput=function(){ changePinSpread('y',this.value); };
-$('pinBlockSlider').oninput=function(){ changePinBlockY(this.value); };
-$('closeSettingsBtn').onclick=closeSettings;
-document.querySelectorAll('[data-screen]').forEach(b=>b.onclick=()=>setScreenPreset(b.dataset.screen,b));
-document.querySelectorAll('[data-method]').forEach(b=>b.onclick=()=>setUnlockMethod(b.dataset.method,b));
-document.querySelectorAll('[data-style]').forEach(b=>b.onclick=()=>setStyle(b.dataset.style,b));
-
-/* ===== ИНИЦИАЛИЗАЦИЯ ===== */
-(function init(){
-  buildDots();
-  const ks=localStorage.getItem('keySize'); if(ks) changeKeySize(ks); else changeKeySize(96);
-  pinStepX=parseInt(localStorage.getItem('pinStepX'),10)||0;
-  pinStepY=parseInt(localStorage.getItem('pinStepY'),10)||0;
-  $('pinXSlider').value=pinStepX; $('pinYSlider').value=pinStepY;
-  $('pinXVal').textContent=pinStepX+' px'; $('pinYVal').textContent=pinStepY+' px';
-  applyPinSpread();
-  const pby=parseInt(localStorage.getItem('pinBlockY'),10)||0;
-  $('pinBlockSlider').value=pby; changePinBlockY(pby);
-  const sp=localStorage.getItem('screenPreset')||'auto';
-  setScreenPreset(sp, document.querySelector(`[data-screen="${sp}"]`));
-  const um=localStorage.getItem('unlockMethod')||'sos';
-  setUnlockMethod(um, document.querySelector(`[data-method="${um}"]`));
-  const st=localStorage.getItem('style')||'ios';
-  setStyle(st, document.querySelector(`[data-style="${st}"]`));
-  applyLockBg();
-  applyIconOffset();
+// ===== Восстановление при старте =====
+(function restore(){
+  const lb=localStorage.getItem('lockBg');if(lb)setLockBg(lb);
+  const ks=localStorage.getItem('keySize');if(ks)changeKeySize(ks);
+  const psx=localStorage.getItem('pinStepX');if(psx){document.getElementById('pinXSlider').value=psx;changePinSpread('x',psx);}
+  const psy=localStorage.getItem('pinStepY');if(psy){document.getElementById('pinYSlider').value=psy;changePinSpread('y',psy);}
+  const pby=localStorage.getItem('pinBlockY');if(pby){document.getElementById('pinBlockSlider').value=pby;changePinBlockY(pby);}
+  const um=localStorage.getItem('unlockMethod');if(um){SETTINGS.unlockMethod=um;const btn=document.querySelector(`[data-method="${um}"]`);setUnlockMethod(um,btn);}
+  const st=localStorage.getItem('style');if(st){const btn=document.querySelector(`[data-style="${st}"]`);setStyle(st,btn);}
+  document.getElementById('realPinInput').value=REAL_PIN;
+  if(localStorage.getItem('showBadges')==='0')document.getElementById('tgBadges').classList.remove('on');
+  applyGridVars();applyIconOffset();
 })();
+buildDots();
 </script>
 </body>
 </html>
