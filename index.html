@@ -101,10 +101,9 @@ body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; te
 .folder .mini img { width:100%; height:100%; object-fit:cover; }
 .label { margin-top:4px; font-size:12px; text-align:center; text-shadow:0 1px 3px rgba(0,0,0,0.6); max-width:90%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:opacity 0.2s ease; }
 
-#phone:not(.edit) .grid .cell .icon,
-#phone:not(.edit) .grid .cell .folder,
-#phone:not(.edit) .grid .cell .label { opacity:0; }
+/* ИСПРАВЛЕНО: убраны opacity:0, иконки видны вне edit */
 #phone:not(.edit) .grid .cell { background:transparent; }
+#phone:not(.edit) #dock .cell { background:transparent; }
 
 #phone.edit .grid .cell { outline:2px solid #ff3b30; outline-offset:-2px; border-radius:15px; }
 #phone.edit .grid .cell.selected-merge { outline:2px solid #30d158; box-shadow:0 0 0 3px rgba(48,209,88,0.35); }
@@ -114,19 +113,13 @@ body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; te
 
 .badge { position:absolute; top:-4px; right:8px; z-index:3; min-width:20px; height:20px; padding:0 5px; background:#ff3b30; border-radius:12px; border:1.5px solid #000; color:#fff; font-size:12px; font-weight:700; display:var(--badge-disp,flex); align-items:center; justify-content:center; }
 .attempt-badge { background:#ff3b30; display:flex !important; }
-#phone:not(.edit) .badge { opacity:0; }
-#phone:not(.edit) .attempt-badge { opacity:1; }
 
 .del-corner { display:none; position:absolute; top:-8px; left:2px; width:22px; height:22px; border-radius:50%; background:#e0e0e0; color:#000; font-size:16px; font-weight:700; align-items:center; justify-content:center; z-index:6; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.4); }
-#phone.edit .grid .cell .del-corner { display:flex; }
+#phone.edit .grid .cell .del-corner, #phone.edit #dock .cell .del-corner { display:flex; }
 
 #phone.choosing-trigger .cell, #phone.choosing-attempt .cell, #phone.choosing-lock .cell { cursor:pointer; }
-#phone.choosing-trigger .grid .cell .icon, #phone.choosing-trigger .grid .cell .folder, #phone.choosing-trigger .grid .cell .label,
-#phone.choosing-attempt .grid .cell .icon, #phone.choosing-attempt .grid .cell .folder, #phone.choosing-attempt .grid .cell .label,
-#phone.choosing-lock .grid .cell .icon, #phone.choosing-lock .grid .cell .folder, #phone.choosing-lock .grid .cell .label { opacity:1; }
 #phone.choosing-trigger .grid .cell, #phone.choosing-attempt .grid .cell, #phone.choosing-lock .grid .cell { outline:2px solid #0a84ff; outline-offset:-2px; border-radius:15px; }
 #phone.choosing-trigger::after { content:'Нажмите на иконку для назначения'; position:absolute; top:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); padding:10px 18px; border-radius:14px; font-size:14px; z-index:60; white-space:nowrap; }
-#phone.choosing-attempt::after { content:'Выберите иконку для попытки'; position:absolute; top:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); padding:10px 18px; border-radius:14px; font-size:14px; z-index:60; white-space:nowrap; }
 #phone.choosing-lock::after { content:'Выберите иконку для блокировки'; position:absolute; top:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); padding:10px 18px; border-radius:14px; font-size:14px; z-index:60; white-space:nowrap; }
 
 #editBar { display:none; position:absolute; bottom:0; left:0; right:0; z-index:65; background:rgba(20,20,20,0.92); backdrop-filter:blur(14px); padding:12px 14px calc(12px + env(safe-area-inset-bottom)); flex-wrap:wrap; gap:8px; justify-content:center; }
@@ -153,10 +146,8 @@ body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; te
 #phone.edit #pageDots .pdel { display:flex; }
 
 #search { align-self:center; margin:6px 0 12px; background:rgba(120,120,120,0.3); backdrop-filter:blur(12px); padding:7px 18px; border-radius:18px; font-size:14px; display:flex; gap:6px; align-items:center; cursor:pointer; }
-#phone:not(.edit) #search { opacity:0; }
 #dock { margin:0 12px 16px; background:rgba(120,120,120,0.28); backdrop-filter:blur(20px); border-radius:32px; padding:12px 14px; display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
-#phone:not(.edit) #dock { background:transparent; backdrop-filter:none; }
-#phone:not(.edit) #dock .cell .icon, #phone:not(.edit) #dock .cell .folder { opacity:0; }
+#phone:not(.edit) #dock { background:rgba(120,120,120,0.28); }
 #phone.edit #dock .cell { outline:2px solid #ff3b30; outline-offset:-2px; border-radius:15px; }
 #dock .cell { height:60px; }
 #dock .label { display:none; }
@@ -167,7 +158,6 @@ body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; te
 #folderBox { width:300px; min-height:300px; background:rgba(180,180,180,0.18); border:1px solid rgba(255,255,255,0.18); border-radius:34px; padding:26px 22px; display:grid; grid-template-columns:repeat(3,1fr); gap:22px 18px; align-content:start; }
 #folderBox .cell { height:84px; }
 #folderBox .cell .icon { width:58px; height:58px; }
-#folderBox .cell .label, #folderBox .cell .icon, #folderBox .cell .folder { opacity:1 !important; }
 
 #iconMenu { position:absolute; inset:0; z-index:70; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); backdrop-filter:blur(6px); animation:fadeIn 0.2s ease; }
 #iconMenu.open { display:flex; }
@@ -225,34 +215,49 @@ body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; te
 .attempt-row { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.06); border-radius:12px; padding:10px 12px; }
 .attempt-row .at-num { font-size:13px; opacity:0.7; min-width:90px; }
 .attempt-row .at-target { flex:1; font-size:13px; opacity:0.9; }
-.attempt-row .at-btn { background:rgba(48,209,88,0.2); border:1px solid #30d158; color:#30d158; border-radius:10px; padding:7px 12px; font-size:13px; cursor:pointer; white-space:nowrap; }
-.attempt-row .at-btn:active { transform:scale(0.96); }
+
+#toastWrap { position:fixed; left:50%; bottom:40px; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
+.toast { background:rgba(30,30,32,0.95); color:#fff; padding:12px 20px; border-radius:14px; font-size:14px; box-shadow:0 6px 24px rgba(0,0,0,0.5); max-width:80vw; text-align:center; animation:toastIn 0.25s ease; }
+@keyframes toastIn { from{opacity:0;transform:translateY(14px);} to{opacity:1;transform:translateY(0);} }
+.toast.out { animation:toastOut 0.3s ease forwards; }
+@keyframes toastOut { to{opacity:0;transform:translateY(14px);} }
+
+#dialogOverlay { position:fixed; inset:0; z-index:9998; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.55); backdrop-filter:blur(6px); }
+#dialogOverlay.show { display:flex; }
+.dlg-card { width:300px; max-width:88%; background:#1c1c1e; border:1px solid rgba(255,255,255,0.12); border-radius:20px; padding:22px 20px 16px; box-shadow:0 12px 40px rgba(0,0,0,0.6); animation:imPop 0.2s ease; }
+.dlg-msg { color:#fff; font-size:15px; line-height:1.5; text-align:center; margin-bottom:18px; white-space:pre-line; }
+.dlg-btns { display:flex; gap:10px; }
+.dlg-btns button { flex:1; border:none; border-radius:12px; padding:12px; font-size:15px; cursor:pointer; }
+.dlg-cancel { background:rgba(255,255,255,0.12); color:#fff; }
+.dlg-ok { background:#0a84ff; color:#fff; font-weight:600; }
+.dlg-ok.danger { background:#ff3b30; }
+.dlg-btns button:active { transform:scale(0.96); }
 </style>
 </head>
 <body class="style-ios">
 <div id="device">
   <div class="wallpaper" id="wallpaper"></div>
-  <input type="file" id="bgInput" accept="image/*" onchange="changeBg(event)">
+  <input type="file" id="bgInput" accept="image/*">
 
   <div class="lock-screen" id="lockScreen">
     <div class="top-label" id="topLabel">Смахните вверх для Face ID<br>или введите код-пароль</div>
     <div class="dots-container" id="dotsContainer"></div>
     <div class="passcode-section">
       <div class="keyboard" id="keyboard">
-        <div class="key" data-digit="1" onclick="pressKey('1',this)"><span class="key-number">1</span><span class="key-letters">&nbsp;</span></div>
-        <div class="key" data-digit="2" onclick="pressKey('2',this)"><span class="key-number">2</span><span class="key-letters">АБВГ<br>ABC</span></div>
-        <div class="key" data-digit="3" onclick="pressKey('3',this)"><span class="key-number">3</span><span class="key-letters">ДЕЖЗ<br>DEF</span></div>
-        <div class="key" data-digit="4" onclick="pressKey('4',this)"><span class="key-number">4</span><span class="key-letters">ИЙКЛ<br>GHI</span></div>
-        <div class="key" data-digit="5" onclick="pressKey('5',this)"><span class="key-number">5</span><span class="key-letters">МНОП<br>JKL</span></div>
-        <div class="key" data-digit="6" onclick="pressKey('6',this)"><span class="key-number">6</span><span class="key-letters">РСТУ<br>MNO</span></div>
-        <div class="key" data-digit="7" onclick="pressKey('7',this)"><span class="key-number">7</span><span class="key-letters">ФХЦЧ<br>PQRS</span></div>
-        <div class="key" data-digit="8" onclick="pressKey('8',this)"><span class="key-number">8</span><span class="key-letters">ШЩЪЫ<br>TUV</span></div>
-        <div class="key" data-digit="9" onclick="pressKey('9',this)"><span class="key-number">9</span><span class="key-letters">ЬЭЮЯ<br>WXYZ</span></div>
+        <button class="key" data-digit="1" type="button"><span class="key-number">1</span><span class="key-letters">&nbsp;</span></button>
+        <button class="key" data-digit="2" type="button"><span class="key-number">2</span><span class="key-letters">АБВГ<br>ABC</span></button>
+        <button class="key" data-digit="3" type="button"><span class="key-number">3</span><span class="key-letters">ДЕЖЗ<br>DEF</span></button>
+        <button class="key" data-digit="4" type="button"><span class="key-number">4</span><span class="key-letters">ИЙКЛ<br>GHI</span></button>
+        <button class="key" data-digit="5" type="button"><span class="key-number">5</span><span class="key-letters">МНОП<br>JKL</span></button>
+        <button class="key" data-digit="6" type="button"><span class="key-number">6</span><span class="key-letters">РСТУ<br>MNO</span></button>
+        <button class="key" data-digit="7" type="button"><span class="key-number">7</span><span class="key-letters">ФХЦЧ<br>PQRS</span></button>
+        <button class="key" data-digit="8" type="button"><span class="key-number">8</span><span class="key-letters">ШЩЪЫ<br>TUV</span></button>
+        <button class="key" data-digit="9" type="button"><span class="key-number">9</span><span class="key-letters">ЬЭЮЯ<br>WXYZ</span></button>
       </div>
       <div class="bottom-row">
-        <button class="btn-sos" id="sosKey">SOS</button>
-        <div class="key-zero" data-digit="0" onclick="pressKey('0',this)"><span class="key-number">0</span></div>
-        <button class="btn-cancel" id="cancelKey">Отменить</button>
+        <button class="btn-sos" id="sosKey" type="button">SOS</button>
+        <button class="key-zero" data-digit="0" type="button"><span class="key-number">0</span></button>
+        <button class="btn-cancel" id="cancelKey" type="button">Отменить</button>
       </div>
     </div>
   </div>
@@ -260,58 +265,58 @@ body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; te
   <div class="settings-overlay" id="settingsOverlay">
     <div class="settings-header">
       <div class="settings-title">⚙️ Настройки блокировки</div>
-      <button class="settings-close" onclick="closeSettings()">Готово</button>
+      <button class="settings-close" id="closeSettingsBtn" type="button">Готово</button>
     </div>
     <div class="settings-block">
       <div class="settings-block-title">Размер кнопок ввода</div>
-      <input type="range" class="size-slider" id="sizeSlider" min="60" max="120" value="96" oninput="changeKeySize(this.value)">
+      <input type="range" class="size-slider" id="sizeSlider" min="60" max="120" value="96">
       <div class="size-value" id="sizeValue">96 px</div>
     </div>
     <div class="settings-block">
       <div class="settings-block-title">Смещение цифр (относительно центра «5»)</div>
       <div class="slider-row">
         <div class="sl-label"><span>По горизонтали</span><span id="pinXVal">0 px</span></div>
-        <input type="range" class="size-slider" id="pinXSlider" min="-40" max="40" value="0" oninput="changePinSpread('x',this.value)">
+        <input type="range" class="size-slider" id="pinXSlider" min="-40" max="40" value="0">
       </div>
       <div class="slider-row">
         <div class="sl-label"><span>По вертикали</span><span id="pinYVal">0 px</span></div>
-        <input type="range" class="size-slider" id="pinYSlider" min="-40" max="40" value="0" oninput="changePinSpread('y',this.value)">
+        <input type="range" class="size-slider" id="pinYSlider" min="-40" max="40" value="0">
       </div>
     </div>
     <div class="settings-block">
       <div class="settings-block-title">Смещение блока цифр (по вертикали)</div>
       <div class="slider-row">
         <div class="sl-label"><span>Сдвиг блока</span><span id="pinBlockVal">0 px</span></div>
-        <input type="range" class="size-slider" id="pinBlockSlider" min="-200" max="100" value="0" oninput="changePinBlockY(this.value)">
+        <input type="range" class="size-slider" id="pinBlockSlider" min="-200" max="100" value="0">
       </div>
     </div>
     <div class="settings-block">
       <div class="settings-block-title">Размер экрана (устройство)</div>
       <div class="option-row">
-        <button class="option-btn active" data-screen="auto" onclick="setScreenPreset('auto', this)">Авто</button>
-        <button class="option-btn" data-screen="iphone11" onclick="setScreenPreset('iphone11', this)">iPhone 11</button>
+        <button class="option-btn active" data-screen="auto" type="button">Авто</button>
+        <button class="option-btn" data-screen="iphone11" type="button">iPhone 11</button>
       </div>
       <div class="settings-hint">iPhone 11 — 828×1792 (414×896 CSS px)</div>
     </div>
     <div class="settings-block">
       <div class="settings-block-title">Фон экрана блокировки</div>
-      <button class="bg-pick-btn" onclick="document.getElementById('bgInput').click()">🖼 Выбрать из галереи</button>
-      <button class="bg-pick-btn" style="margin-top:10px;" onclick="resetBg()">↺ Сбросить фон</button>
+      <button class="bg-pick-btn" id="pickLockBg" type="button">🖼 Выбрать из галереи</button>
+      <button class="bg-pick-btn" id="resetLockBg" style="margin-top:10px;" type="button">↺ Сбросить фон</button>
     </div>
     <div class="settings-block">
       <div class="settings-block-title">Метод разблокировки</div>
       <div class="option-row">
-        <button class="option-btn active" data-method="sos" onclick="setUnlockMethod('sos', this)">SOS</button>
-        <button class="option-btn" data-method="attempts" onclick="setUnlockMethod('attempts', this)">3 попытки</button>
-        <button class="option-btn" data-method="instant" onclick="setUnlockMethod('instant', this)">Сразу</button>
+        <button class="option-btn active" data-method="sos" type="button">SOS</button>
+        <button class="option-btn" data-method="attempts" type="button">3 попытки</button>
+        <button class="option-btn" data-method="instant" type="button">Сразу</button>
       </div>
       <div class="settings-hint" id="methodHint">Нажмите SOS, затем введите код</div>
     </div>
     <div class="settings-block">
       <div class="settings-block-title">Стиль экрана блокировки</div>
       <div class="option-row">
-        <button class="option-btn active" data-style="ios" onclick="setStyle('ios', this)">🍎 iOS</button>
-        <button class="option-btn" data-style="android" onclick="setStyle('android', this)">🤖 Android</button>
+        <button class="option-btn active" data-style="ios" type="button">🍎 iOS</button>
+        <button class="option-btn" data-style="android" type="button">🤖 Android</button>
       </div>
     </div>
     <div class="settings-hint">Меню: долгое нажатие на «Отменить» (2 сек)</div>
@@ -327,11 +332,11 @@ body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; te
 
       <div id="editBar">
         <div class="eb-info" id="ebInfo">Режим редактирования</div>
-        <button class="primary" id="ebMerge">🔗 Объединить</button>
-        <button class="warn" id="ebSplit">✂️ Разделить</button>
-        <button id="ebAddPage">➕ Экран</button>
-        <button class="danger" id="ebDelPage">🗑 Экран</button>
-        <button id="ebDone">✓ Готово</button>
+        <button class="primary" id="ebMerge" type="button">🔗 Объединить</button>
+        <button class="warn" id="ebSplit" type="button">✂️ Разделить</button>
+        <button id="ebAddPage" type="button">➕ Экран</button>
+        <button class="danger" id="ebDelPage" type="button">🗑 Экран</button>
+        <button id="ebDone" type="button">✓ Готово</button>
       </div>
 
       <div id="folderView">
@@ -340,7 +345,7 @@ body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; te
       </div>
 
       <div id="iconMenu">
-        <div class="im-card" onclick="event.stopPropagation()">
+        <div class="im-card" id="imCard">
           <div class="im-head">
             <div class="im-prev" id="imPrev">📱</div>
             <div class="im-title" id="imTitle">Иконка</div>
@@ -348,17 +353,17 @@ body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; te
           <div class="im-sub">Название</div>
           <div class="im-row">
             <input type="text" id="imName" placeholder="Название иконки">
-            <button class="im-ok" id="imNameOk">OK</button>
+            <button class="im-ok" id="imNameOk" type="button">OK</button>
           </div>
           <div class="im-sub">Уведомление (число на значке, 0 = убрать)</div>
           <div class="im-row">
             <input type="number" id="imBadge" min="0" max="99999" placeholder="0 = нет">
-            <button class="im-ok" id="imBadgeOk">OK</button>
+            <button class="im-ok" id="imBadgeOk" type="button">OK</button>
           </div>
-          <button class="im-btn" id="imPhoto"><span class="imi">🖼</span> Изменить фон / фото</button>
-          <button class="im-btn" id="imMakeFolder"><span class="imi">📁</span> Сделать папкой / открыть</button>
-          <button class="im-btn danger" id="imDelete"><span class="imi">🗑</span> Удалить иконку</button>
-          <button class="im-close" id="imClose">Закрыть</button>
+          <button class="im-btn" id="imPhoto" type="button"><span class="imi">🖼</span> Изменить фон / фото</button>
+          <button class="im-btn" id="imMakeFolder" type="button"><span class="imi">📁</span> Сделать папкой / открыть</button>
+          <button class="im-btn danger" id="imDelete" type="button"><span class="imi">🗑</span> Удалить иконку</button>
+          <button class="im-close" id="imClose" type="button">Закрыть</button>
         </div>
       </div>
 
@@ -376,15 +381,15 @@ body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; te
         <div class="set-group" style="padding:14px 16px;">
           <div class="slider-row">
             <div class="sl-label"><span>Колонок</span><span id="colsVal">4</span></div>
-            <input type="range" class="size-slider" id="colsSlider" min="3" max="6" value="4" oninput="changeCols(this.value)">
+            <input type="range" class="size-slider" id="colsSlider" min="3" max="6" value="4">
           </div>
           <div class="slider-row">
             <div class="sl-label"><span>Высота строки</span><span id="rowHVal">84 px</span></div>
-            <input type="range" class="size-slider" id="rowHSlider" min="60" max="120" value="84" oninput="changeRowH(this.value)">
+            <input type="range" class="size-slider" id="rowHSlider" min="60" max="120" value="84">
           </div>
           <div class="slider-row">
             <div class="sl-label"><span>Промежуток</span><span id="gapVal">10 px</span></div>
-            <input type="range" class="size-slider" id="gapSlider" min="0" max="24" value="10" oninput="changeGap(this.value)">
+            <input type="range" class="size-slider" id="gapSlider" min="0" max="24" value="10">
           </div>
         </div>
 
@@ -392,11 +397,11 @@ body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; te
         <div class="set-group" style="padding:14px 16px;">
           <div class="slider-row">
             <div class="sl-label"><span>По горизонтали</span><span id="iconXVal">0 px</span></div>
-            <input type="range" class="size-slider" id="iconXSlider" min="-60" max="60" value="0" oninput="changeIconOffset('x',this.value)">
+            <input type="range" class="size-slider" id="iconXSlider" min="-60" max="60" value="0">
           </div>
           <div class="slider-row">
             <div class="sl-label"><span>По вертикали</span><span id="iconYVal">0 px</span></div>
-            <input type="range" class="size-slider" id="iconYSlider" min="-60" max="120" value="0" oninput="changeIconOffset('y',this.value)">
+            <input type="range" class="size-slider" id="iconYSlider" min="-60" max="120" value="0">
           </div>
         </div>
 
@@ -411,19 +416,19 @@ body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; te
           <div class="set-row trigger-opt" data-mode="hold"><span class="ic">⏱️</span><span class="txt">Долгое нажатие<br><small style="opacity:.55" id="holdDuration">Длительность: 2 сек</small></span><div class="toggle" id="tgHold"></div></div>
           <div class="config-inline" id="cfgHold">
             <div class="ci-label">Длительность удержания (в секундах)</div>
-            <div class="ci-row"><input type="number" id="inHold" step="0.1" min="0.5" max="5" value="2"><span class="ci-unit">сек</span><button class="ci-save" data-save="hold">OK</button></div>
+            <div class="ci-row"><input type="number" id="inHold" step="0.1" min="0.5" max="5" value="2"><span class="ci-unit">сек</span><button class="ci-save" data-save="hold" type="button">OK</button></div>
             <div class="ci-hint">Допустимо от 0.5 до 5 секунд</div>
           </div>
           <div class="set-row trigger-opt" data-mode="double"><span class="ic">👆</span><span class="txt">Множественное нажатие (подряд)<br><small style="opacity:.55" id="tapCount">Количество: 2 нажатия</small></span><div class="toggle" id="tgDouble"></div></div>
           <div class="config-inline" id="cfgDouble">
             <div class="ci-label">Количество быстрых нажатий по пустому месту</div>
-            <div class="ci-row"><input type="number" id="inDouble" step="1" min="2" max="5" value="2"><span class="ci-unit">раз</span><button class="ci-save" data-save="double">OK</button></div>
+            <div class="ci-row"><input type="number" id="inDouble" step="1" min="2" max="5" value="2"><span class="ci-unit">раз</span><button class="ci-save" data-save="double" type="button">OK</button></div>
             <div class="ci-hint">Нажатия должны идти подряд (быстро). От 2 до 5</div>
           </div>
           <div class="set-row trigger-opt" data-mode="corner"><span class="ic">🎯</span><span class="txt">Нажатия по иконке<br><small style="opacity:.55" id="iconTapCount">Количество: 3 нажатия</small></span><div class="toggle" id="tgCorner"></div></div>
           <div class="config-inline" id="cfgCorner">
             <div class="ci-label">Количество нажатий по иконке</div>
-            <div class="ci-row"><input type="number" id="inCorner" step="1" min="2" max="5" value="3"><span class="ci-unit">раз</span><button class="ci-save" data-save="corner">OK</button></div>
+            <div class="ci-row"><input type="number" id="inCorner" step="1" min="2" max="5" value="3"><span class="ci-unit">раз</span><button class="ci-save" data-save="corner" type="button">OK</button></div>
             <div class="ci-hint">Допустимо от 2 до 5</div>
           </div>
           <div class="choose-btn" id="chooseIconBtn">📌 Выбрать иконку-триггер</div>
@@ -435,34 +440,34 @@ body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; te
           <div class="set-row lock-opt" data-mode="taps"><span class="ic">👆</span><span class="txt">Множественное нажатие (подряд)<br><small style="opacity:.55" id="lockTapCount">Количество: 3 нажатия</small></span><div class="toggle" id="tgLockTaps"></div></div>
           <div class="config-inline" id="cfgLockTaps">
             <div class="ci-label">Количество быстрых нажатий по пустому месту</div>
-            <div class="ci-row"><input type="number" id="inLockTaps" step="1" min="2" max="6" value="3"><span class="ci-unit">раз</span><button class="ci-save" data-save="locktaps">OK</button></div>
+            <div class="ci-row"><input type="number" id="inLockTaps" step="1" min="2" max="6" value="3"><span class="ci-unit">раз</span><button class="ci-save" data-save="locktaps" type="button">OK</button></div>
             <div class="ci-hint">Нажатия должны идти подряд. От 2 до 6</div>
           </div>
           <div class="set-row lock-opt" data-mode="icon"><span class="ic">🔒</span><span class="txt">Нажатия по иконке<br><small style="opacity:.55" id="lockIconTapCount">Количество: 2 нажатия</small></span><div class="toggle" id="tgLockIcon"></div></div>
           <div class="config-inline" id="cfgLockIcon">
             <div class="ci-label">Количество нажатий по иконке блокировки</div>
-            <div class="ci-row"><input type="number" id="inLockIcon" step="1" min="2" max="5" value="2"><span class="ci-unit">раз</span><button class="ci-save" data-save="lockicon">OK</button></div>
+            <div class="ci-row"><input type="number" id="inLockIcon" step="1" min="2" max="5" value="2"><span class="ci-unit">раз</span><button class="ci-save" data-save="lockicon" type="button">OK</button></div>
             <div class="ci-hint">Допустимо от 2 до 5</div>
           </div>
           <div class="choose-btn" id="chooseLockIconBtn">🔒 Выбрать иконку блокировки</div>
         </div>
 
-        <div class="set-section-title">Попытки ввода пароля на иконках</div>
+        <div class="set-section-title">Попытки ввода пароля</div>
         <div class="set-group" style="padding:14px 16px;">
-                   <div class="ci-label" style="font-size:13px;opacity:0.8;margin-bottom:8px;">Сколько последних попыток показывать</div>
+          <div class="ci-label" style="font-size:13px;opacity:0.8;margin-bottom:8px;">Сколько последних попыток показывать</div>
           <div class="ci-row" style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
             <input type="number" id="inAttemptCount" step="1" min="1" max="5" value="2" style="flex:1;background:rgba(255,255,255,0.12);border:1px solid rgba(255,159,10,0.5);color:#fff;border-radius:10px;padding:10px 12px;font-size:15px;outline:none;">
             <span style="font-size:13px;opacity:0.7;">шт.</span>
-            <button id="saveAttemptCount" style="background:rgba(48,209,88,0.2);border:1px solid #30d158;color:#30d158;border-radius:10px;padding:10px 16px;font-size:14px;cursor:pointer;">OK</button>
+            <button id="saveAttemptCount" style="background:rgba(48,209,88,0.2);border:1px solid #30d158;color:#30d158;border-radius:10px;padding:10px 16px;font-size:14px;cursor:pointer;" type="button">OK</button>
           </div>
           <div style="font-size:12px;opacity:0.5;margin-bottom:6px;">Допустимо от 1 до 5</div>
           <div style="display:flex;gap:8px;margin-bottom:12px;">
-            <button id="clearAttempts" style="flex:1;background:rgba(255,59,48,0.18);border:1px solid #ff3b30;color:#ff453a;border-radius:10px;padding:9px;font-size:13px;cursor:pointer;">🗑 Очистить историю попыток</button>
+            <button id="clearAttempts" style="flex:1;background:rgba(255,59,48,0.18);border:1px solid #ff3b30;color:#ff453a;border-radius:10px;padding:9px;font-size:13px;cursor:pointer;" type="button">🗑 Очистить историю попыток</button>
           </div>
           <div id="attemptList"></div>
         </div>
 
-        <button id="closeSet">Готово</button>
+        <button id="closeSet" type="button">Готово</button>
       </div>
 
       <input type="file" id="hsBgInput" accept="image/*">
@@ -470,13 +475,109 @@ body.style-android .btn-sos, body.style-android .btn-cancel { font-size:15px; te
     </div>
   </div>
 </div>
-<script>
+
+<div id="toastWrap"></div>
+<div id="dialogOverlay">
+  <div class="dlg-card">
+    <div class="dlg-msg" id="dlgMsg"></div>
+    <div class="dlg-btns" id="dlgBtns"></div>
+  </div>
+</div>
+            <script>
+'use strict';
+
+/* ===== УТИЛИТЫ ===== */
+const $ = id => document.getElementById(id);
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+function clampInt(v, min, max, def){ v=parseInt(v,10); if(isNaN(v)) v=def; return Math.max(min, Math.min(max, v)); }
+function loadJSON(key, def){ try { const v=JSON.parse(localStorage.getItem(key)); return v==null?def:v; } catch(e){ return def; } }
+function saveJSON(key, val){ try { localStorage.setItem(key, JSON.stringify(val)); return true; } catch(e){ toast('⚠️ Не удалось сохранить (нет места)'); return false; } }
+
+/* ===== TOAST ===== */
+function toast(msg, ms=2200){
+  const wrap=$('toastWrap');
+  const el=document.createElement('div'); el.className='toast'; el.textContent=msg;
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.classList.add('out'); setTimeout(()=>el.remove(), 320); }, ms);
+}
+
+/* ===== ДИАЛОГИ ===== */
+function dialogConfirm(msg, danger=false){
+  return new Promise(resolve=>{
+    $('dlgMsg').textContent=msg;
+    const btns=$('dlgBtns'); btns.innerHTML='';
+    const cancel=document.createElement('button'); cancel.className='dlg-cancel'; cancel.textContent='Отмена';
+    cancel.onclick=()=>{ $('dialogOverlay').classList.remove('show'); resolve(false); };
+    const ok=document.createElement('button'); ok.className='dlg-ok'+(danger?' danger':''); ok.textContent='Удалить';
+    ok.onclick=()=>{ $('dialogOverlay').classList.remove('show'); resolve(true); };
+    btns.appendChild(cancel); btns.appendChild(ok);
+    $('dialogOverlay').classList.add('show');
+  });
+}
+
+/* ===== ХРАНИЛИЩЕ КАРТИНОК (IndexedDB) ===== */
+const ImageStore = (()=>{
+  let dbPromise=null;
+  const cache=new Map();
+  function open(){
+    if(dbPromise) return dbPromise;
+    dbPromise=new Promise((resolve,reject)=>{
+      const req=indexedDB.open('lockScreenImages', 1);
+      req.onupgradeneeded=()=>{ if(!req.result.objectStoreNames.contains('images')) req.result.createObjectStore('images'); };
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error);
+    });
+    return dbPromise;
+  }
+  async function put(id, blob){
+    const db=await open();
+    return new Promise((res,rej)=>{
+      const tx=db.transaction('images','readwrite');
+      tx.objectStore('images').put(blob, id);
+      tx.oncomplete=res; tx.onerror=()=>rej(tx.error);
+    });
+  }
+  async function getBlob(id){
+    const db=await open();
+    return new Promise((res,rej)=>{
+      const tx=db.transaction('images','readonly');
+      const r=tx.objectStore('images').get(id);
+      r.onsuccess=()=>res(r.result||null); r.onerror=()=>rej(r.error);
+    });
+  }
+  /* ИСПРАВЛЕНО: очистка кэша перед return */
+  async function del(id){
+    if(cache.has(id)){ URL.revokeObjectURL(cache.get(id)); cache.delete(id); }
+    const db=await open();
+    return new Promise((res)=>{
+      const tx=db.transaction('images','readwrite');
+      tx.objectStore('images').delete(id);
+      tx.oncomplete=res; tx.onerror=res;
+    });
+  }
+  async function url(id){
+    if(!id) return null;
+    if(cache.has(id)) return cache.get(id);
+    const blob=await getBlob(id);
+    if(!blob) return null;
+    const u=URL.createObjectURL(blob);
+    cache.set(id, u);
+    return u;
+  }
+  return { put, url, del };
+})();
+
+let imgIdCounter = parseInt(localStorage.getItem('imgIdCounter'),10) || 0;
+function newImgId(){ imgIdCounter++; localStorage.setItem('imgIdCounter', imgIdCounter); return 'img'+imgIdCounter; }
+async function storeImageFile(file){ const id=newImgId(); await ImageStore.put(id, file); return id; }
+
 /* ===== ЭКРАН БЛОКИРОВКИ ===== */
 const SETTINGS = { codeLength: 4, unlockMethod: 'sos', attemptsToUnlock: 3 };
 let currentInput = '', attemptCount = 0, sosArmed = false;
 
 function buildDots() {
-  const c = document.getElementById('dotsContainer'); c.innerHTML = '';
+  const c = $('dotsContainer'); c.innerHTML = '';
   for (let i = 0; i < SETTINGS.codeLength; i++) { const d = document.createElement('div'); d.className = 'dot'; c.appendChild(d); }
 }
 function updateDots() { document.querySelectorAll('.dot').forEach((dot, i) => dot.classList.toggle('filled', i < currentInput.length)); }
@@ -494,7 +595,7 @@ function checkCode() {
   if (SETTINGS.unlockMethod === 'attempts') { if (attemptCount >= SETTINGS.attemptsToUnlock) { doUnlock(); return; } wrongPasswordAnimation(); }
 }
 function wrongPasswordAnimation() {
-  const dots = document.getElementById('dotsContainer'); dots.classList.add('wrong-animation');
+  const dots = $('dotsContainer'); dots.classList.add('wrong-animation');
   document.querySelectorAll('.dot').forEach(d => { d.style.background = '#ff3b30'; d.style.borderColor = '#ff3b30'; });
   setTimeout(() => {
     dots.classList.remove('wrong-animation');
@@ -504,50 +605,51 @@ function wrongPasswordAnimation() {
 }
 function doUnlock() {
   document.body.classList.add('unlocked');
-  document.getElementById('unlockScreen').classList.add('show');
+  $('unlockScreen').classList.add('show');
   renderHome();
 }
 function closeHome() {
   closeFolder(); closeHsSettings(); closeIconMenu();
   exitEditMode();
   phone.classList.remove('choosing-trigger', 'choosing-attempt', 'choosing-lock');
-  document.getElementById('unlockScreen').classList.remove('show');
+  $('unlockScreen').classList.remove('show');
   document.body.classList.remove('unlocked');
   resetScreen();
 }
 function resetScreen() { currentInput = ''; attemptCount = 0; sosArmed = false; updateDots(); }
 
 /* ===== ФОН БЛОКИРОВКИ ===== */
-function changeBg(event) {
-  const file = event.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const wp = document.getElementById('wallpaper');
-    wp.style.backgroundImage = `url('${e.target.result}')`; wp.style.backgroundSize = 'cover'; wp.style.backgroundPosition = 'center';
-    try { localStorage.setItem('lockBg', e.target.result); } catch (err) { alert('Не удалось сохранить фон (слишком большой файл).'); }
-  };
-  reader.readAsDataURL(file); event.target.value = '';
+async function setLockBgFromFile(file){ const id=await storeImageFile(file); localStorage.setItem('lockBgId', id); applyLockBg(); }
+async function applyLockBg(){
+  const id=localStorage.getItem('lockBgId'); const wp=$('wallpaper');
+  if(!id){ wp.style.backgroundImage='none'; wp.style.background='#000'; return; }
+  const u=await ImageStore.url(id);
+  if(u){ wp.style.backgroundImage=`url('${u}')`; wp.style.backgroundSize='cover'; wp.style.backgroundPosition='center'; }
 }
 function resetBg() {
-  const wp = document.getElementById('wallpaper');
-  wp.style.backgroundImage = 'none'; wp.style.background = '#000'; localStorage.removeItem('lockBg');
+  const id=localStorage.getItem('lockBgId'); if(id) ImageStore.del(id);
+  localStorage.removeItem('lockBgId');
+  const wp=$('wallpaper'); wp.style.backgroundImage='none'; wp.style.background='#000';
 }
 
 /* ===== ФОН РАБОЧЕГО СТОЛА ===== */
-function changeHomeBg(dataUrl) {
-  const hw = document.getElementById('homeWallpaper');
-  hw.style.backgroundImage = `url('${dataUrl}')`; hw.style.backgroundSize = 'cover'; hw.style.backgroundPosition = 'center';
-  try { localStorage.setItem('homeBg', dataUrl); } catch (err) { alert('Не удалось сохранить фон (слишком большой файл).'); }
+async function setHomeBgFromFile(file){ const id=await storeImageFile(file); localStorage.setItem('homeBgId', id); applyHomeBg(); }
+async function applyHomeBg(){
+  const id=localStorage.getItem('homeBgId'); const hw=$('homeWallpaper');
+  if(!id){ hw.style.backgroundImage='none'; hw.style.background='#000'; return; }
+  const u=await ImageStore.url(id);
+  if(u){ hw.style.backgroundImage=`url('${u}')`; hw.style.backgroundSize='cover'; hw.style.backgroundPosition='center'; }
 }
 function resetHomeBg() {
-  const hw = document.getElementById('homeWallpaper');
-  hw.style.backgroundImage = 'none'; hw.style.background = '#000'; localStorage.removeItem('homeBg');
+  const id=localStorage.getItem('homeBgId'); if(id) ImageStore.del(id);
+  localStorage.removeItem('homeBgId');
+  const hw=$('homeWallpaper'); hw.style.backgroundImage='none'; hw.style.background='#000';
 }
 
 /* ===== РАЗМЕР / СМЕЩЕНИЕ КЛАВИШ ===== */
 function changeKeySize(val) {
   document.documentElement.style.setProperty('--key-size', val + 'px');
-  document.getElementById('sizeValue').textContent = val + ' px'; localStorage.setItem('keySize', val);
+  $('sizeValue').textContent = val + ' px'; localStorage.setItem('keySize', val);
 }
 let pinStepX = 0, pinStepY = 0;
 const KEY_POS = { '1':{c:0,r:0},'2':{c:1,r:0},'3':{c:2,r:0},'4':{c:0,r:1},'5':{c:1,r:1},'6':{c:2,r:1},'7':{c:0,r:2},'8':{c:1,r:2},'9':{c:2,r:2},'0':{c:1,r:3} };
@@ -559,18 +661,18 @@ function applyPinSpread() {
   });
 }
 function changePinSpread(axis, val) {
-  val = parseInt(val);
-  if (axis === 'x') { pinStepX = val; document.getElementById('pinXVal').textContent = val + ' px'; localStorage.setItem('pinStepX', val); }
-  else { pinStepY = val; document.getElementById('pinYVal').textContent = val + ' px'; localStorage.setItem('pinStepY', val); }
+  val = parseInt(val,10);
+  if (axis === 'x') { pinStepX = val; $('pinXVal').textContent = val + ' px'; localStorage.setItem('pinStepX', val); }
+  else { pinStepY = val; $('pinYVal').textContent = val + ' px'; localStorage.setItem('pinStepY', val); }
   applyPinSpread();
 }
 function changePinBlockY(val) {
-  val = parseInt(val);
+  val = parseInt(val,10);
   document.documentElement.style.setProperty('--pin-block-y', val + 'px');
-  document.getElementById('pinBlockVal').textContent = val + ' px'; localStorage.setItem('pinBlockY', val);
+  $('pinBlockVal').textContent = val + ' px'; localStorage.setItem('pinBlockY', val);
 }
 function setScreenPreset(type, btn) {
-  const device = document.getElementById('device');
+  const device = $('device');
   document.querySelectorAll('[data-screen]').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
   if (type === 'iphone11') { device.classList.add('preset'); device.style.width='414px'; device.style.height='896px'; device.style.maxWidth='100vw'; device.style.maxHeight='100vh'; }
@@ -580,23 +682,24 @@ function setScreenPreset(type, btn) {
 function setUnlockMethod(method, btn) {
   SETTINGS.unlockMethod = method;
   document.querySelectorAll('[data-method]').forEach(b => b.classList.remove('active')); if (btn) btn.classList.add('active');
-  const hint = document.getElementById('methodHint');
+  const hint = $('methodHint');
   if (method==='sos') hint.textContent='Нажмите SOS, затем введите код';
   else if (method==='attempts') hint.textContent='Разблокировка после 3 попыток ввода';
   else hint.textContent='Разблокировка с первого ввода';
+  localStorage.setItem('unlockMethod', method);
   resetScreen();
 }
 function setStyle(style, btn) {
   document.body.classList.remove('style-ios','style-android'); document.body.classList.add('style-'+style);
   document.querySelectorAll('[data-style]').forEach(b => b.classList.remove('active')); if (btn) btn.classList.add('active');
-  document.getElementById('topLabel').innerHTML = style==='android' ? 'Введите PIN-код' : 'Смахните вверх для Face ID<br>или введите код-пароль';
+  $('topLabel').innerHTML = style==='android' ? 'Введите PIN-код' : 'Смахните вверх для Face ID<br>или введите код-пароль';
   localStorage.setItem('style', style);
 }
-function openSettings() { document.getElementById('settingsOverlay').classList.add('show'); }
-function closeSettings() { document.getElementById('settingsOverlay').classList.remove('show'); }
+function openSettings() { $('settingsOverlay').classList.add('show'); }
+function closeSettings() { $('settingsOverlay').classList.remove('show'); }
 
 /* ===== SOS ===== */
-const sosKey = document.getElementById('sosKey');
+const sosKey = $('sosKey');
 let sosHoldTimer=null, sosLongPressed=false, sosTouchUsed=false;
 function startSosHold(){ sosLongPressed=false; sosHoldTimer=setTimeout(()=>{ sosLongPressed=true; toggleCodeLength(); },3000); }
 function endSosHold(){ clearTimeout(sosHoldTimer); if(!sosLongPressed) sosShortPress(); sosLongPressed=false; }
@@ -611,7 +714,7 @@ sosKey.addEventListener('mouseup',()=>{if(sosTouchUsed){sosTouchUsed=false;retur
 sosKey.addEventListener('mouseleave',cancelSosHold);
 
 /* ===== ОТМЕНИТЬ ===== */
-const cancelKey = document.getElementById('cancelKey');
+const cancelKey = $('cancelKey');
 let cancelHoldTimer=null, cancelLongPressed=false, cancelTouchUsed=false;
 function startCancelHold(){ cancelLongPressed=false; cancelHoldTimer=setTimeout(()=>{cancelLongPressed=true;openSettings();},2000); }
 function endCancelHold(){ clearTimeout(cancelHoldTimer); if(!cancelLongPressed) deleteKey(); cancelLongPressed=false; }
@@ -623,14 +726,16 @@ cancelKey.addEventListener('mousedown',()=>{if(cancelTouchUsed)return;startCance
 cancelKey.addEventListener('mouseup',()=>{if(cancelTouchUsed){cancelTouchUsed=false;return;}endCancelHold();});
 cancelKey.addEventListener('mouseleave',cancelCancelHold);
 
-/* ===== ФИЗ. КЛАВИАТУРА ===== */
+$('keyboard').addEventListener('click',(e)=>{ const b=e.target.closest('.key'); if(b) pressKey(b.dataset.digit, b); });
+document.querySelector('.key-zero').addEventListener('click',function(){ pressKey('0', this); });
+
 document.addEventListener('keydown',(e)=>{
-  if(document.getElementById('settingsOverlay').classList.contains('show')){ if(e.key==='Escape')closeSettings(); return; }
-  if(document.getElementById('unlockScreen').classList.contains('show')){
+  if($('settingsOverlay').classList.contains('show')){ if(e.key==='Escape')closeSettings(); return; }
+  if($('unlockScreen').classList.contains('show')){
     if(e.key==='Escape'){
-      if(document.getElementById('iconMenu').classList.contains('open')) closeIconMenu();
-      else if(document.getElementById('hsSettings').classList.contains('open')) closeHsSettings();
-      else if(document.getElementById('folderView').classList.contains('open')) closeFolder();
+      if($('iconMenu').classList.contains('open')) closeIconMenu();
+      else if($('hsSettings').classList.contains('open')) closeHsSettings();
+      else if($('folderView').classList.contains('open')) closeFolder();
       else if(phone.classList.contains('edit')) exitEditMode();
       else closeHome();
     } return;
@@ -640,15 +745,13 @@ document.addEventListener('keydown',(e)=>{
   else if(e.key==='Enter') sosShortPress();
 });
 
-/* ===== ДАННЫЕ: СЕТОЧНАЯ МОДЕЛЬ ===== */
-function loadJSON(key, def){ try { const v=JSON.parse(localStorage.getItem(key)); return v==null?def:v; } catch(e){ return def; } }
+/* ===== ДАННЫЕ ===== */
+let GRID_COLS = parseInt(localStorage.getItem('gridCols'),10) || 4;
+let GRID_ROWS = parseInt(localStorage.getItem('gridRows'),10) || 6;
+let SLOT_H = parseInt(localStorage.getItem('slotH'),10) || 84;
+let SLOT_GAP = parseInt(localStorage.getItem('slotGap'),10) || 10;
 
-let GRID_COLS = parseInt(localStorage.getItem('gridCols')) || 4;
-let GRID_ROWS = parseInt(localStorage.getItem('gridRows')) || 6;
-let SLOT_H = parseInt(localStorage.getItem('slotH')) || 84;
-let SLOT_GAP = parseInt(localStorage.getItem('slotGap')) || 10;
-
-let uidCounter = parseInt(localStorage.getItem('uidCounter')) || 1;
+let uidCounter = parseInt(localStorage.getItem('uidCounter'),10) || 1;
 function newId(){ uidCounter++; localStorage.setItem('uidCounter', uidCounter); return 'i'+uidCounter; }
 
 let pages = loadJSON('pagesGrid', null);
@@ -669,7 +772,7 @@ if (!pages) {
       { id:newId(), col:1,row:1,w:1,h:1, name:"Т-Банк", bg:"#ffdd2d", emoji:"T", badge:0 },
       { id:newId(), col:2,row:1,w:2,h:1, widget:true, percent:90 }
     ]},
-    { icons: [
+      { icons: [
       { id:newId(), col:0,row:0,w:1,h:1, name:"ChatGPT", bg:"#fff", emoji:"🟢", badge:0 },
       { id:newId(), col:1,row:0,w:1,h:1, name:"STEPN", bg:"#2ecc71", emoji:"👟", badge:0 },
       { id:newId(), col:2,row:0,w:1,h:1, name:"HitVPN", bg:"#1a1a1a", emoji:"✊", badge:0 }
@@ -680,646 +783,594 @@ let dock = loadJSON('dock', null) || [
   { id:newId(), name:"Телефон", bg:"#34c759", emoji:"📞", badge:0 },
   { id:newId(), name:"Сообщ.", bg:"#34c759", emoji:"💬", badge:570 },
   { id:newId(), name:"Камера", bg:"#3a3a3c", emoji:"📷", badge:0 },
-  { id:newId(), name:"Почта", bg:"#fff", emoji:"✉️", badge:2738 }
+  { id:newId(), name:"Safari", bg:"#1a82ff", emoji:"🧭", badge:0 }
 ];
+
+const settings = loadJSON('hsSettings', {
+  triggers: { hold:true, double:false, corner:false },
+  holdDuration:2, doubleCount:2, cornerCount:3, triggerIconId:null,
+  lock: { swipe:true, taps:false, icon:false },
+  lockTapsCount:3, lockIconCount:2, lockIconId:null,
+  showBadges:true, attemptShowCount:2
+});
+let attempts = loadJSON('passAttempts', []);
+let iconImages = loadJSON('iconImages', {});
+
+const saveAll = debounce(()=>{
+  saveJSON('pagesGrid', pages);
+  saveJSON('dock', dock);
+  saveJSON('hsSettings', settings);
+  saveJSON('passAttempts', attempts);
+  saveJSON('iconImages', iconImages);
+  localStorage.setItem('gridCols', GRID_COLS);
+  localStorage.setItem('gridRows', GRID_ROWS);
+  localStorage.setItem('slotH', SLOT_H);
+  localStorage.setItem('slotGap', SLOT_GAP);
+}, 350);
+
+function recordAttempt(code){
+  attempts.unshift({ code, time:Date.now() });
+  if(attempts.length>50) attempts.length=50;
+  saveJSON('passAttempts', attempts);
+}
+
+/* ===== РЕНДЕР РАБОЧЕГО СТОЛА ===== */
+const phone = $('phone');
 let currentPage = 0;
-function saveData() {
-  try {
-    localStorage.setItem('pagesGrid', JSON.stringify(pages));
-    localStorage.setItem('dock', JSON.stringify(dock));
-  } catch(e){}
+
+function applyGridVars(){
+  document.documentElement.style.setProperty('--cols', GRID_COLS);
+  document.documentElement.style.setProperty('--slot-h', SLOT_H+'px');
+  document.documentElement.style.setProperty('--slot-gap', SLOT_GAP+'px');
+}
+function emptyMatrix(){
+  const m=[];
+  for(let r=0;r<GRID_ROWS;r++){ m.push(new Array(GRID_COLS).fill(null)); }
+  return m;
 }
 
-const phone = document.getElementById('phone');
-let openFolderPos = null;
-
-/* ===== ТРИГГЕРЫ ВЫЗОВА ===== */
-let savedModes = loadJSON('triggerModes', null);
-if (!savedModes || !Array.isArray(savedModes) || !savedModes.length) savedModes = ['hold'];
-let triggerModes = new Set(savedModes);
-let triggerIcon = loadJSON('triggerIcon', null);
-let HOLD_MS = parseInt(localStorage.getItem('holdDuration')) || 2000;
-let SCREEN_TAP_COUNT = parseInt(localStorage.getItem('screenTapCount')) || 2;
-let ICON_TAP_COUNT = parseInt(localStorage.getItem('iconTapCount')) || 3;
-let ICON_RESET = 600;
-const FAST_TAP_WINDOW = 350;
-let pressTimer=null, screenTaps=0, screenTapTimer=null, iconTaps=0, iconTimer=null;
-function saveModes(){ localStorage.setItem('triggerModes', JSON.stringify([...triggerModes])); }
-
-/* ===== ВОЗВРАТ К БЛОКИРОВКЕ ===== */
-let savedLockModes = loadJSON('lockModes', null);
-if (!savedLockModes || !Array.isArray(savedLockModes)) savedLockModes = ['swipe'];
-let lockModes = new Set(savedLockModes);
-let lockIcon = loadJSON('lockIcon', null);
-let LOCK_TAP_COUNT = parseInt(localStorage.getItem('lockTapCount')) || 3;
-let LOCK_ICON_TAP_COUNT = parseInt(localStorage.getItem('lockIconTapCount')) || 2;
-let lockTaps=0, lockTapTimer=null, lockIconTaps=0, lockIconTimer=null;
-let swipeStartY=null, swipeStartX=null, swipeStartTime=0;
-function saveLockModes(){ localStorage.setItem('lockModes', JSON.stringify([...lockModes])); }
-
-/* ===== ПОПЫТКИ НА ИКОНКАХ ===== */
-let passwordAttempts = loadJSON('passwordAttempts', []);
-let ATTEMPT_COUNT = parseInt(localStorage.getItem('attemptCount')) || 2;
-let attemptTargets = loadJSON('attemptTargets', []);
-let choosingAttemptIndex = -1;
-function recordAttempt(code){ passwordAttempts.unshift(code); if(passwordAttempts.length>5) passwordAttempts=passwordAttempts.slice(0,5); try{localStorage.setItem('passwordAttempts', JSON.stringify(passwordAttempts));}catch(e){} }
-
-/* ===== ЦЕЛИ ===== */
-function sameTarget(a,b){
-  if(!a||!b) return false;
-  if(a.type!==b.type) return false;
-  if(a.type==='app') return a.p===b.p && a.id===b.id;
-  if(a.type==='dock') return a.id===b.id;
-  if(a.type==='folder') return a.pid===b.pid && a.idx===b.idx;
-  return false;
-}
-function getCell(pos){
-  if(!pos) return null;
-  if(pos.type==='app'){ const pg=pages[pos.p]; if(!pg) return null; return pg.icons.find(ic=>ic.id===pos.id)||null; }
-  if(pos.type==='dock') return dock.find(d=>d.id===pos.id)||null;
-  if(pos.type==='folder'){ const parent = findIconById(pos.pid); return parent && parent.items ? parent.items[pos.idx] : null; }
-  return null;
-}
-function findIconById(id){
-  for(const pg of pages){ const f=pg.icons.find(ic=>ic.id===id); if(f) return f; }
-  const d=dock.find(x=>x.id===id); if(d) return d;
-  return null;
-}
-function targetLabel(pos){ if(!pos) return 'не выбрана'; const c=getCell(pos); return c ? (c.name||'без имени') : 'не найдена'; }
-
-/* ===== ПОПЫТКИ: список настроек ===== */
-function buildAttemptList(){
-  const list=document.getElementById('attemptList'); list.innerHTML='';
-  for(let i=0;i<ATTEMPT_COUNT;i++){
-    const row=document.createElement('div'); row.className='attempt-row';
-    const numLabel = i===0?'Последняя':(i===1?'Предпоследняя':`${i+1}-я с конца`);
-    row.innerHTML=`<span class="at-num">${numLabel}</span><span class="at-target">${targetLabel(attemptTargets[i])}</span><button class="at-btn">📌 Иконка</button>`;
-    row.querySelector('.at-btn').onclick=()=>{ choosingAttemptIndex=i; closeHsSettings(); phone.classList.add('choosing-attempt'); };
-    list.appendChild(row);
-  }
-}
-function assignAttemptIcon(pos){
-  if(pos.type==='folder'){ alert('Целью может быть только иконка на экране или в доке.'); return; }
-  attemptTargets[choosingAttemptIndex]=pos; localStorage.setItem('attemptTargets', JSON.stringify(attemptTargets));
-  phone.classList.remove('choosing-attempt');
-  const idx=choosingAttemptIndex; choosingAttemptIndex=-1;
-  alert(`Для попытки №${idx+1} назначена иконка: ${getCell(pos)?.name||'без имени'}`);
-  renderHome();
-}
-function findIconElement(pos){
-  const cells = pos.type==='dock' ? document.querySelectorAll('#dock .cell') : document.querySelectorAll('#pagesTrack .cell');
-  for(const cell of cells){ if(sameTarget(cell._pos,pos)) return cell; }
-  return null;
-}
-function showAttemptBadges(){
-  document.querySelectorAll('.attempt-badge').forEach(b=>b.remove());
-  for(let i=0;i<ATTEMPT_COUNT;i++){
-    const pos=attemptTargets[i], code=passwordAttempts[i];
-    if(!pos||!code) continue;
-    const el=findIconElement(pos); if(!el) continue;
-    const badge=document.createElement('div'); badge.className='badge attempt-badge'; badge.textContent=code;
-    el.appendChild(badge);
-  }
-}
-
-/* ===== HTML ИКОНОК ===== */
-function makeIconHTML(item){
-  if(item.img) return `<div class="icon" style="background:${item.bg||'#333'}"><img src="${item.img}"></div>`;
-  return `<div class="icon" style="background:${item.bg||'#333'}">${item.emoji||'📱'}</div>`;
-}
-function makeFolderHTML(item){
-  let mini=''; (item.items||[]).slice(0,9).forEach(it=>{
-     mini += it.img ? `<div class="mini" style="background:${it.bg||'#333'}"><img src="${it.img}"></div>` : `<div class="mini" style="background:${it.bg||'#333'}">${it.emoji||''}</div>`;
-  });
-  return `<div class="folder">${mini}</div>`;
-}
-
-/* ===== ОБЪЕДИНЕНИЕ ===== */
-let mergeSelection = [];
-
-function attachCellEvents(cell,pos){
-  cell._pos=pos;
-  cell.addEventListener('click',(e)=>{
-    const item=getCell(pos);
-    if(phone.classList.contains('choosing-trigger')){ assignTriggerIcon(pos); return; }
-    if(phone.classList.contains('choosing-attempt')){ assignAttemptIcon(pos); return; }
-    if(phone.classList.contains('choosing-lock')){ assignLockIcon(pos); return; }
-    if(phone.classList.contains('edit')){
-      if(!item || item.widget) return;
-      toggleMergeSelect(cell,pos);
-      return;
-    }
-    if(triggerIcon && sameTarget(triggerIcon,pos)){ handleTriggerIconTap(); return; }
-    if(lockIcon && sameTarget(lockIcon,pos)){ handleLockIconTap(); return; }
-    if(item && item.folder) openFolder(pos);
-  });
-  let lpTimer=null, lpFired=false;
-  const startLP=()=>{ if(!phone.classList.contains('edit')) return; lpFired=false; lpTimer=setTimeout(()=>{ lpFired=true; const it=getCell(pos); if(it && !it.widget) openIconMenu(pos); },500); };
-  const endLP=()=>{ clearTimeout(lpTimer); };
-  cell.addEventListener('pointerdown',startLP);
-  cell.addEventListener('pointerup',endLP);
-  cell.addEventListener('pointerleave',endLP);
-  cell.addEventListener('pointercancel',endLP);
-}
-
-function toggleMergeSelect(cell,pos){
-  if(pos.type!=='app') return;
-  const id=pos.id;
-  const i=mergeSelection.indexOf(id);
-  if(i>=0){ mergeSelection.splice(i,1); cell.classList.remove('selected-merge'); }
-  else { mergeSelection.push(id); cell.classList.add('selected-merge'); }
-  updateEditInfo();
-}
-function updateEditInfo(){
-  const info=document.getElementById('ebInfo');
-  if(mergeSelection.length===0) info.textContent='Режим редактирования — выберите блоки для объединения';
-  else info.textContent='Выбрано блоков: '+mergeSelection.length;
-}
-
-function buildCell(item,pos){
-  const cell=document.createElement('div');
-  cell.className='cell';
-  if(item.folder) cell.classList.add('folder-cell');
-  if((item.w&&item.w>1)||(item.h&&item.h>1)) cell.classList.add('big');
-  if(item.widget){
-    cell.classList.add('widget-cell');
-    cell.innerHTML=`<div class="widget"><div class="ring"><div class="phone-ico">📱</div></div><div class="pct">${item.percent||90}%</div><div class="ttl">Заряд</div></div>`;
-  } else {
-    cell.innerHTML = (item.folder ? makeFolderHTML(item) : makeIconHTML(item)) + `<div class="label">${item.name||''}</div>`;
-  }
-  if(item.badge>0 && !item.widget){
-    const b=document.createElement('div'); b.className='badge';
-    b.textContent = item.badge>999?'999+':item.badge;
-    cell.appendChild(b);
-  }
-  if(pos.type!=='folder' && !item.widget){
-    const del=document.createElement('div'); del.className='del-corner'; del.textContent='−';
-    del.onclick=(e)=>{ e.stopPropagation(); deleteIcon(pos); };
-    cell.appendChild(del);
-  }
-  attachCellEvents(cell,pos);
-  if(pos.type==='app' && mergeSelection.includes(item.id)) cell.classList.add('selected-merge');
-  return cell;
-}
-
-/* ===== РЕНДЕР СЕТКИ ===== */
 function renderHome(){
-  const track=document.getElementById('pagesTrack');
+  applyGridVars();
+  applyHomeBg();
+  renderPages();
+  renderDots();
+  renderDock();
+  applyBadgesVisibility();
+}
+
+function renderPages(){
+  const track=$('pagesTrack');
   track.innerHTML='';
-  track.style.setProperty('--icon-x', (localStorage.getItem('iconOffX')||0)+'px');
-  track.style.setProperty('--icon-y', (localStorage.getItem('iconOffY')||0)+'px');
-
-  pages.forEach((page,p)=>{
-    const pageEl=document.createElement('div'); pageEl.className='page';
+  pages.forEach((pg, pi)=>{
+    const page=document.createElement('div'); page.className='page'; page.dataset.page=pi;
     const grid=document.createElement('div'); grid.className='grid';
-    grid.style.setProperty('--cols',GRID_COLS);
-    grid.style.setProperty('--slot-h',SLOT_H+'px');
-    grid.style.setProperty('--slot-gap',SLOT_GAP+'px');
 
-    const occupied={};
-    const markOcc=(ic)=>{ for(let r=ic.row;r<ic.row+(ic.h||1);r++) for(let c=ic.col;c<ic.col+(ic.w||1);c++) occupied[r+'_'+c]=true; };
-
-    page.icons.forEach(ic=>{
-      if(ic.col<0) ic.col=0; if(ic.row<0) ic.row=0;
-      if(ic.col+(ic.w||1)>GRID_COLS) ic.col=Math.max(0,GRID_COLS-(ic.w||1));
-      markOcc(ic);
+    const occ=emptyMatrix();
+    pg.icons.forEach(ic=>{
+      for(let r=ic.row;r<ic.row+(ic.h||1);r++)
+        for(let c=ic.col;c<ic.col+(ic.w||1);c++)
+          if(occ[r]&&occ[r][c]!==undefined) occ[r][c]=ic.id;
     });
 
-    page.icons.forEach(ic=>{
-      const cell=buildCell(ic,{type:'app',p,id:ic.id});
-      cell.style.gridColumn = (ic.col+1)+' / span '+(ic.w||1);
-      cell.style.gridRow = (ic.row+1)+' / span '+(ic.h||1);
-      grid.appendChild(cell);
-    });
+    pg.icons.forEach(ic=>{ grid.appendChild(buildSlot(ic, pi)); });
 
     for(let r=0;r<GRID_ROWS;r++){
       for(let c=0;c<GRID_COLS;c++){
-        if(occupied[r+'_'+c]) continue;
-        const slot=document.createElement('div'); slot.className='slot empty';
-        slot.style.gridColumn=(c+1)+' / span 1';
-        slot.style.gridRow=(r+1)+' / span 1';
-        slot.onclick=()=>{ if(phone.classList.contains('edit')) addIconAt(p,c,r); };
-        grid.appendChild(slot);
+        if(occ[r][c]) continue;
+        const e=document.createElement('div'); e.className='slot empty';
+        e.style.gridColumn=(c+1)+' / span 1';
+        e.style.gridRow=(r+1)+' / span 1';
+        e.dataset.page=pi; e.dataset.col=c; e.dataset.row=r;
+        grid.appendChild(e);
       }
     }
-
-    pageEl.appendChild(grid);
-    track.appendChild(pageEl);
+    page.appendChild(grid);
+    track.appendChild(page);
   });
-
-  const dockEl=document.getElementById('dock');
-  dockEl.innerHTML='';
-  dock.forEach((item)=>dockEl.appendChild(buildCell(item,{type:'dock',id:item.id})));
-
-  if(currentPage>=pages.length) currentPage=pages.length-1;
-  if(currentPage<0) currentPage=0;
-  goToPage(currentPage,false);
-  buildPageDots();
-  showAttemptBadges();
+  goToPage(Math.min(currentPage, pages.length-1), true);
+  applyIconOffset();
 }
 
-/* ===== СТРАНИЦЫ ===== */
-function pageWidth(){ return document.getElementById('pagesViewport').clientWidth; }
-function goToPage(idx,animate=true){
-  currentPage=Math.max(0,Math.min(idx,pages.length-1));
-  const track=document.getElementById('pagesTrack');
-  if(!animate) track.classList.add('dragging'); else track.classList.remove('dragging');
-  track.style.setProperty('--page-shift', (-currentPage*pageWidth())+'px');
-  if(!animate){ void track.offsetWidth; track.classList.remove('dragging'); }
-  buildPageDots();
+function buildSlot(ic, pi){
+  const slot=document.createElement('div'); slot.className='slot';
+  slot.style.gridColumn=(ic.col+1)+' / span '+(ic.w||1);
+  slot.style.gridRow=(ic.row+1)+' / span '+(ic.h||1);
+  slot.dataset.id=ic.id; slot.dataset.page=pi;
+
+  const cell=document.createElement('div'); cell.className='cell'; cell.dataset.id=ic.id;
+  if((ic.w||1)>1||(ic.h||1)>1) cell.classList.add('big');
+
+  if(ic.widget){
+    const w=document.createElement('div'); w.className='widget';
+    w.innerHTML='<div class="ring"><div class="phone-ico">🔋</div></div>'+
+      '<div class="pct">'+clampInt(ic.percent,0,100,90)+'%</div><div class="ttl">Батарея</div>';
+    cell.appendChild(w);
+  } else if(ic.folder){
+    const f=document.createElement('div'); f.className='folder';
+    (ic.items||[]).slice(0,9).forEach((it,idx)=>{
+      const mini=document.createElement('div'); mini.className='mini';
+      mini.style.background=it.bg||'#333';
+      const key=ic.id+'_'+idx;
+      if(iconImages[key]){ const img=document.createElement('img'); ImageStore.url(iconImages[key]).then(u=>{ if(u) img.src=u; }); mini.appendChild(img); }
+      else mini.textContent=it.emoji||'';
+      f.appendChild(mini);
+    });
+    cell.appendChild(f);
+    const label=document.createElement('div'); label.className='label'; label.textContent=ic.name||'';
+    cell.appendChild(label);
+  } else {
+    const icon=document.createElement('div'); icon.className='icon';
+    icon.style.background=ic.bg||'#333';
+    if(iconImages[ic.id]){ const img=document.createElement('img'); ImageStore.url(iconImages[ic.id]).then(u=>{ if(u) img.src=u; }); icon.appendChild(img); }
+    else icon.textContent=ic.emoji||'';
+    cell.appendChild(icon);
+    const label=document.createElement('div'); label.className='label'; label.textContent=ic.name||'';
+    cell.appendChild(label);
+  }
+
+  const badge=document.createElement('div'); badge.className='badge'; badge.dataset.for=ic.id;
+  const bv=clampInt(ic.badge,0,99999,0);
+  badge.textContent=bv>99999?'99999+':bv;
+  badge.style.display=bv>0?'flex':'none';
+  cell.appendChild(badge);
+
+  const del=document.createElement('div'); del.className='del-corner'; del.textContent='×'; del.dataset.del=ic.id;
+  cell.appendChild(del);
+
+  slot.appendChild(cell);
+  return slot;
 }
-function buildPageDots(){
-  const dots=document.getElementById('pageDots'); dots.innerHTML='';
+
+function renderDock(){
+  const d=$('dock'); d.innerHTML='';
+  dock.forEach(ic=>{
+    const cell=document.createElement('div'); cell.className='cell'; cell.dataset.id=ic.id; cell.dataset.dock='1';
+    const icon=document.createElement('div'); icon.className='icon';
+    icon.style.background=ic.bg||'#333';
+    if(iconImages[ic.id]){ const img=document.createElement('img'); ImageStore.url(iconImages[ic.id]).then(u=>{ if(u) img.src=u; }); icon.appendChild(img); }
+    else icon.textContent=ic.emoji||'';
+    cell.appendChild(icon);
+    const badge=document.createElement('div'); badge.className='badge'; badge.dataset.for=ic.id;
+    const bv=clampInt(ic.badge,0,99999,0);
+    badge.textContent=bv; badge.style.display=bv>0?'flex':'none';
+    cell.appendChild(badge);
+    const del=document.createElement('div'); del.className='del-corner'; del.textContent='×'; del.dataset.del=ic.id;
+    cell.appendChild(del);
+    d.appendChild(cell);
+  });
+}
+
+function renderDots(){
+  const pd=$('pageDots'); pd.innerHTML='';
   pages.forEach((_,i)=>{
-    const d=document.createElement('div'); d.className='pdot'+(i===currentPage?' active':'');
-    d.onclick=()=>goToPage(i); dots.appendChild(d);
+    const dot=document.createElement('div'); dot.className='pdot'+(i===currentPage?' active':'');
+    dot.onclick=()=>goToPage(i);
+    pd.appendChild(dot);
+    if(phone.classList.contains('edit') && i===currentPage){
+      const del=document.createElement('div'); del.className='pdel'; del.textContent='×'; del.title='Удалить экран';
+      del.onclick=(e)=>{ e.stopPropagation(); delPage(i); };
+      pd.appendChild(del);
+    }
   });
   const add=document.createElement('div'); add.className='padd'; add.textContent='+';
-  add.onclick=(e)=>{ e.stopPropagation(); addPage(); }; dots.appendChild(add);
-  const del=document.createElement('div'); del.className='pdel'; del.textContent='−';
-  del.onclick=(e)=>{ e.stopPropagation(); delPage(); }; dots.appendChild(del);
+  add.onclick=addPage;
+  pd.appendChild(add);
 }
-function addPage(){ pages.push({icons:[]}); saveData(); renderHome(); goToPage(pages.length-1); }
-function delPage(){
-  if(pages.length<=1){ alert('Нельзя удалить единственный экран.'); return; }
-  if(!confirm('Удалить текущий экран со всеми иконками?')) return;
-  pages.splice(currentPage,1); if(currentPage>=pages.length) currentPage=pages.length-1;
-  mergeSelection=[]; saveData(); renderHome();
+
+function goToPage(i, instant){
+  currentPage=Math.max(0, Math.min(i, pages.length-1));
+  const track=$('pagesTrack');
+  if(instant) track.style.transition='none';
+  track.style.setProperty('--page-shift', (-currentPage*100)+'%');
+  if(instant){ void track.offsetWidth; track.style.transition=''; }
+  renderDots();
 }
 
 /* свайп страниц */
-let pageDragX=null, pageDragStartShift=0, pageDragging=false, pageDragStartY=0;
-const viewport=document.getElementById('pagesViewport');
-viewport.addEventListener('pointerdown',(e)=>{
-  if(isBusy()) return;
-  if(document.getElementById('folderView').classList.contains('open')) return;
-  pageDragX=e.clientX; pageDragStartY=e.clientY; pageDragStartShift=-currentPage*pageWidth(); pageDragging=false;
-});
-viewport.addEventListener('pointermove',(e)=>{
-  if(pageDragX===null) return;
-  const dx=e.clientX-pageDragX, dy=e.clientY-pageDragStartY;
-  if(!pageDragging && Math.abs(dx)>10 && Math.abs(dx)>Math.abs(dy)){ pageDragging=true; document.getElementById('pagesTrack').classList.add('dragging'); }
-  if(pageDragging){
-    e.preventDefault();
-    document.getElementById('pagesTrack').style.setProperty('--page-shift',(pageDragStartShift+dx)+'px');
+let swStartX=0, swStartY=0, swActive=false, swDelta=0;
+const viewport=$('pagesViewport');
+viewport.addEventListener('touchstart',(e)=>{
+  if(phone.classList.contains('edit')) return;
+  swStartX=e.touches[0].clientX; swStartY=e.touches[0].clientY; swActive=true; swDelta=0;
+},{passive:true});
+viewport.addEventListener('touchmove',(e)=>{
+  if(!swActive) return;
+  const dx=e.touches[0].clientX-swStartX;
+  const dy=e.touches[0].clientY-swStartY;
+  if(Math.abs(dx)>Math.abs(dy)){
+    swDelta=dx;
+    const track=$('pagesTrack'); track.classList.add('dragging');
+    const pct=-currentPage*100 + (dx/viewport.offsetWidth)*100;
+    track.style.setProperty('--page-shift', pct+'%');
   }
+},{passive:true});
+viewport.addEventListener('touchend',()=>{
+  if(!swActive) return; swActive=false;
+  const track=$('pagesTrack'); track.classList.remove('dragging');
+  const th=viewport.offsetWidth*0.22;
+  if(swDelta<-th && currentPage<pages.length-1) goToPage(currentPage+1);
+  else if(swDelta>th && currentPage>0) goToPage(currentPage-1);
+  else goToPage(currentPage);
 });
-function endPageDrag(e){
-  if(pageDragX===null) return;
-  const track=document.getElementById('pagesTrack'); track.classList.remove('dragging');
-  if(pageDragging){
-    const dx=e.clientX-pageDragX, threshold=pageWidth()*0.2;
-    if(dx<-threshold && currentPage<pages.length-1) currentPage++;
-    else if(dx>threshold && currentPage>0) currentPage--;
-    goToPage(currentPage);
-  }
-  pageDragX=null; pageDragging=false;
-}
-viewport.addEventListener('pointerup',endPageDrag);
-viewport.addEventListener('pointercancel',()=>{ pageDragX=null; pageDragging=false; document.getElementById('pagesTrack').classList.remove('dragging'); goToPage(currentPage); });
-window.addEventListener('resize',()=>goToPage(currentPage,false));
 
-/* ===== ОБЪЕДИНЕНИЕ / РАЗДЕЛЕНИЕ ===== */
-function mergeSelected(){
-  if(mergeSelection.length<2){ alert('Выберите минимум 2 соседних блока.'); return; }
-  const page=pages[currentPage];
-  const sel=mergeSelection.map(id=>page.icons.find(ic=>ic.id===id)).filter(Boolean);
-  if(sel.length<2){ alert('Не все выбранные блоки на текущем экране.'); return; }
-  if(sel.some(ic=>ic.widget)){ alert('Виджеты нельзя объединять.'); return; }
-  let minC=Infinity,minR=Infinity,maxC=-1,maxR=-1;
-  sel.forEach(ic=>{ minC=Math.min(minC,ic.col); minR=Math.min(minR,ic.row);
-    maxC=Math.max(maxC,ic.col+(ic.w||1)-1); maxR=Math.max(maxR,ic.row+(ic.h||1)-1); });
-  const w=maxC-minC+1, h=maxR-minR+1;
-  const area=w*h;
-  const occ=new Set();
-  sel.forEach(ic=>{ for(let r=ic.row;r<ic.row+(ic.h||1);r++) for(let c=ic.col;c<ic.col+(ic.w||1);c++) occ.add(r+'_'+c); });
-  if(occ.size!==area){ alert('Блоки должны образовывать сплошной прямоугольник.'); return; }
-  for(const ic of page.icons){
-    if(mergeSelection.includes(ic.id)) continue;
-    for(let r=ic.row;r<ic.row+(ic.h||1);r++) for(let c=ic.col;c<ic.col+(ic.w||1);c++){
-      if(r>=minR&&r<=maxR&&c>=minC&&c<=maxC){ alert('Внутри области есть посторонняя иконка.'); return; }
-    }
+/* свайп вниз -> блокировка */
+let downStartY=0, downActive=false;
+viewport.addEventListener('touchstart',(e)=>{ downStartY=e.touches[0].clientY; downActive=true; },{passive:true});
+viewport.addEventListener('touchend',(e)=>{
+  if(!downActive) return; downActive=false;
+  if(!settings.lock.swipe) return;
+  if(phone.classList.contains('edit')) return;
+  const dy=(e.changedTouches[0].clientY)-downStartY;
+  if(dy>140 && downStartY<120) closeHome();
+});
+
+/* ===== СМЕЩЕНИЕ ИКОНОК ===== */
+let iconOffsetX=parseInt(localStorage.getItem('iconX'),10)||0;
+let iconOffsetY=parseInt(localStorage.getItem('iconY'),10)||0;
+function applyIconOffset(){
+  document.documentElement.style.setProperty('--icon-x', iconOffsetX+'px');
+  document.documentElement.style.setProperty('--icon-y', iconOffsetY+'px');
+}
+
+/* ===== BADGES ===== */
+function applyBadgesVisibility(){
+  document.documentElement.style.setProperty('--badge-disp', settings.showBadges?'flex':'none');
+  document.querySelectorAll('.badge').forEach(b=>{
+    const num=parseInt(b.textContent,10)||0;
+    b.style.display=(settings.showBadges && num>0)?'flex':'none';
+  });
+}
+
+/* ===== КЛИКИ ПО ИКОНКАМ ===== */
+let triggerHoldTimer=null, triggerHeld=false;
+let tapBuffer=[], iconTapBuffer={}, lockTapBuffer=[], lockIconTapBuffer={};
+const TAP_WINDOW=600;
+let editTapTime=0, editTapId=null;
+
+/* ИСПРАВЛЕНО: единый обработчик клика (объединены два конфликтующих) */
+phone.addEventListener('click', async (e)=>{
+  const delEl=e.target.closest('.del-corner');
+  if(delEl && phone.classList.contains('edit')){ e.stopPropagation(); await deleteIcon(delEl.dataset.del); return; }
+
+  if(phone.classList.contains('choosing-trigger')){
+    const c=e.target.closest('.cell'); if(c){ settings.triggerIconId=c.dataset.id; saveAll(); phone.classList.remove('choosing-trigger'); toast('✅ Иконка-триггер назначена'); } return;
   }
-  const base=sel[0];
-  base.col=minC; base.row=minR; base.w=w; base.h=h;
-  const removeIds=mergeSelection.filter(id=>id!==base.id);
-  page.icons=page.icons.filter(ic=>!removeIds.includes(ic.id));
-  mergeSelection=[];
-  saveData(); renderHome();
+  if(phone.classList.contains('choosing-lock')){
+    const c=e.target.closest('.cell'); if(c){ settings.lockIconId=c.dataset.id; saveAll(); phone.classList.remove('choosing-lock'); toast('🔒 Иконка блокировки назначена'); } return;
+  }
+
+  const cell=e.target.closest('.cell');
+
+  if(phone.classList.contains('edit')){
+    if(!cell) return;
+    const now=Date.now();
+    if(editTapId===cell.dataset.id && now-editTapTime<350){
+      openIconMenu(cell.dataset.id); editTapId=null; editTapTime=0;
+    } else {
+      editTapId=cell.dataset.id; editTapTime=now;
+      handleEditTap(cell);
+    }
+    return;
+  }
+
+  if(cell){ handleIconTap(cell); return; }
+  handleEmptyTap();
+});
+
+function handleEmptyTap(){
+  const now=Date.now();
+  if(settings.triggers.double){
+    tapBuffer=tapBuffer.filter(t=>now-t<TAP_WINDOW); tapBuffer.push(now);
+    if(tapBuffer.length>=settings.doubleCount){ tapBuffer=[]; openHsSettings(); return; }
+  }
+  if(settings.lock.taps){
+    lockTapBuffer=lockTapBuffer.filter(t=>now-t<TAP_WINDOW); lockTapBuffer.push(now);
+    if(lockTapBuffer.length>=settings.lockTapsCount){ lockTapBuffer=[]; closeHome(); return; }
+  }
+}
+
+function handleIconTap(cell){
+  const id=cell.dataset.id; const now=Date.now();
+  if(settings.triggers.corner && settings.triggerIconId===id){
+    iconTapBuffer[id]=(iconTapBuffer[id]||[]).filter(t=>now-t<TAP_WINDOW); iconTapBuffer[id].push(now);
+    if(iconTapBuffer[id].length>=settings.cornerCount){ iconTapBuffer[id]=[]; openHsSettings(); return; }
+  }
+  if(settings.lock.icon && settings.lockIconId===id){
+    lockIconTapBuffer[id]=(lockIconTapBuffer[id]||[]).filter(t=>now-t<TAP_WINDOW); lockIconTapBuffer[id].push(now);
+    if(lockIconTapBuffer[id].length>=settings.lockIconCount){ lockIconTapBuffer[id]=[]; closeHome(); return; }
+  }
+  const ic=findIcon(id);
+  if(ic && ic.folder){ openFolder(ic); }
+}
+
+/* долгое нажатие = триггер hold ИЛИ вход в edit */
+phone.addEventListener('touchstart',(e)=>{
+  if(phone.classList.contains('edit')||phone.classList.contains('choosing-trigger')||phone.classList.contains('choosing-lock')) return;
+  if($('hsSettings').classList.contains('open')||$('iconMenu').classList.contains('open')||$('folderView').classList.contains('open')) return;
+  triggerHeld=false;
+  const dur=(settings.triggers.hold?settings.holdDuration:1.2)*1000;
+  triggerHoldTimer=setTimeout(()=>{
+    triggerHeld=true;
+    if(settings.triggers.hold) openHsSettings();
+    else enterEditMode();
+  }, dur);
+},{passive:true});
+phone.addEventListener('touchend',()=>{ clearTimeout(triggerHoldTimer); });
+phone.addEventListener('touchmove',()=>{ clearTimeout(triggerHoldTimer); });
+phone.addEventListener('contextmenu',(e)=>e.preventDefault());
+
+/* ===== ПОИСК ИКОНОК ===== */
+function findIcon(id){
+  for(const pg of pages){ const f=pg.icons.find(i=>i.id===id); if(f) return f; }
+  return dock.find(i=>i.id===id)||null;
+}
+function findIconLoc(id){
+  for(let p=0;p<pages.length;p++){ const idx=pages[p].icons.findIndex(i=>i.id===id); if(idx>=0) return {type:'page',page:p,idx}; }
+  const di=dock.findIndex(i=>i.id===id); if(di>=0) return {type:'dock',idx:di};
+  return null;
+}
+/* ===== РЕЖИМ РЕДАКТИРОВАНИЯ ===== */
+let mergeSelection=[];
+function enterEditMode(){ phone.classList.add('edit'); mergeSelection=[]; renderDots(); $('ebInfo').textContent='Режим редактирования — выберите 2 иконки для объединения'; }
+function exitEditMode(){ phone.classList.remove('edit'); mergeSelection=[]; document.querySelectorAll('.selected-merge').forEach(c=>c.classList.remove('selected-merge')); renderDots(); saveAll(); }
+function handleEditTap(cell){
+  const id=cell.dataset.id;
+  const i=mergeSelection.indexOf(id);
+  if(i>=0){ mergeSelection.splice(i,1); cell.classList.remove('selected-merge'); }
+  else { if(mergeSelection.length>=2){ const old=mergeSelection.shift(); document.querySelectorAll(`.cell[data-id="${old}"]`).forEach(c=>c.classList.remove('selected-merge')); } mergeSelection.push(id); cell.classList.add('selected-merge'); }
+  $('ebInfo').textContent='Выбрано: '+mergeSelection.length+' (нужно 2 для объединения)';
+}
+function mergeSelected(){
+  if(mergeSelection.length<2){ toast('Выберите 2 иконки'); return; }
+  const [aId,bId]=mergeSelection;
+  const a=findIcon(aId), b=findIcon(bId);
+  if(!a||!b){ toast('Ошибка'); return; }
+  if(a.widget||b.widget){ toast('Виджет нельзя объединять'); return; }
+  const itemsA = a.folder ? a.items : [{bg:a.bg,emoji:a.emoji,name:a.name}];
+  const itemsB = b.folder ? b.items : [{bg:b.bg,emoji:b.emoji,name:b.name}];
+  a.folder=true; a.items=[...(itemsA||[]),...(itemsB||[])]; a.name=a.name||'Папка';
+  delete a.bg; delete a.emoji;
+  deleteIconData(bId);
+  mergeSelection=[]; renderPages(); renderDock(); applyBadgesVisibility(); saveAll();
+  toast('🔗 Объединено в папку');
 }
 function splitSelected(){
-  if(mergeSelection.length===0){ alert('Выберите объединённый блок.'); return; }
-  const page=pages[currentPage];
-  let changed=false;
-  mergeSelection.forEach(id=>{
-    const ic=page.icons.find(x=>x.id===id); if(!ic) return;
-    if((ic.w||1)<=1 && (ic.h||1)<=1) return;
-    ic.w=1; ic.h=1; changed=true;
+  if(mergeSelection.length!==1){ toast('Выберите 1 папку для разделения'); return; }
+  const id=mergeSelection[0]; const ic=findIcon(id);
+  if(!ic||!ic.folder){ toast('Это не папка'); return; }
+  const loc=findIconLoc(id); if(!loc) return;
+  const items=ic.items||[];
+  ic.folder=false; ic.items=undefined;
+  ic.bg=items[0]?.bg||'#333'; ic.emoji=items[0]?.emoji||'📱'; ic.name=items[0]?.name||'App';
+  for(let k=1;k<items.length;k++){
+    const it=items[k];
+    const spot=findFreeSpot(loc.type==='page'?loc.page:currentPage);
+    if(loc.type==='dock'||!spot){ pages[currentPage].icons.push({id:newId(),col:0,row:0,w:1,h:1,bg:it.bg,emoji:it.emoji,name:it.name,badge:0}); }
+    else pages[spot.page].icons.push({id:newId(),col:spot.col,row:spot.row,w:1,h:1,bg:it.bg,emoji:it.emoji,name:it.name,badge:0});
+  }
+  mergeSelection=[]; renderPages(); applyBadgesVisibility(); saveAll();
+  toast('✂️ Папка разделена');
+}
+function findFreeSpot(pi){
+  const pg=pages[pi]; if(!pg) return null;
+  const occ=emptyMatrix();
+  pg.icons.forEach(ic=>{ for(let r=ic.row;r<ic.row+(ic.h||1);r++) for(let c=ic.col;c<ic.col+(ic.w||1);c++) if(occ[r]&&occ[r][c]!==undefined) occ[r][c]=1; });
+  for(let r=0;r<GRID_ROWS;r++) for(let c=0;c<GRID_COLS;c++) if(!occ[r][c]) return {page:pi,col:c,row:r};
+  return null;
+}
+
+$('ebMerge').onclick=mergeSelected;
+$('ebSplit').onclick=splitSelected;
+$('ebAddPage').onclick=addPage;
+$('ebDelPage').onclick=()=>delPage(currentPage);
+$('ebDone').onclick=exitEditMode;
+
+function addPage(){ pages.push({icons:[]}); renderPages(); goToPage(pages.length-1); renderDots(); saveAll(); toast('➕ Экран добавлен'); }
+async function delPage(i){
+  if(pages.length<=1){ toast('Нельзя удалить последний экран'); return; }
+  if(pages[i].icons.length>0){ const ok=await dialogConfirm('Удалить экран со всеми иконками?',true); if(!ok) return; }
+  pages.splice(i,1); currentPage=Math.max(0,Math.min(currentPage,pages.length-1));
+  renderPages(); renderDots(); saveAll(); toast('🗑 Экран удалён');
+}
+
+/* ===== УДАЛЕНИЕ ИКОНКИ ===== */
+function deleteIconData(id){
+  if(iconImages[id]){ ImageStore.del(iconImages[id]); delete iconImages[id]; }
+  Object.keys(iconImages).forEach(k=>{ if(k.startsWith(id+'_')){ ImageStore.del(iconImages[k]); delete iconImages[k]; } });
+  for(const pg of pages){ const idx=pg.icons.findIndex(i=>i.id===id); if(idx>=0){ pg.icons.splice(idx,1); return; } }
+  const di=dock.findIndex(i=>i.id===id); if(di>=0) dock.splice(di,1);
+}
+async function deleteIcon(id){
+  const ic=findIcon(id); if(!ic) return;
+  const ok=await dialogConfirm('Удалить «'+(ic.name||'иконку')+'»?',true); if(!ok) return;
+  if(settings.triggerIconId===id) settings.triggerIconId=null;
+  if(settings.lockIconId===id) settings.lockIconId=null;
+  deleteIconData(id);
+  renderPages(); renderDock(); applyBadgesVisibility(); saveAll();
+  toast('🗑 Удалено');
+}
+
+/* ===== ПАПКА ===== */
+let openFolderId=null;
+function openFolder(ic){
+  openFolderId=ic.id;
+  $('folderTitle').textContent=ic.name||'Папка';
+  const box=$('folderBox'); box.innerHTML='';
+  (ic.items||[]).forEach((it,idx)=>{
+    const cell=document.createElement('div'); cell.className='cell';
+    const icon=document.createElement('div'); icon.className='icon'; icon.style.background=it.bg||'#333';
+    const key=ic.id+'_'+idx;
+    if(iconImages[key]){ const img=document.createElement('img'); ImageStore.url(iconImages[key]).then(u=>{ if(u) img.src=u; }); icon.appendChild(img); }
+    else icon.textContent=it.emoji||'';
+    cell.appendChild(icon);
+    const label=document.createElement('div'); label.className='label'; label.textContent=it.name||''; cell.appendChild(label);
+    box.appendChild(cell);
   });
-  if(!changed){ alert('Среди выбранных нет объединённых блоков.'); return; }
-  mergeSelection=[];
-  saveData(); renderHome();
+  $('folderView').classList.add('open');
 }
+function closeFolder(){ $('folderView').classList.remove('open'); openFolderId=null; }
+$('folderView').addEventListener('click',(e)=>{ if(e.target===$('folderView')) closeFolder(); });
 
-/* ===== РЕЖИМ РЕДАКТИРОВАНИЯ ===== */
-function enterEditMode(){
-  phone.classList.add('edit');
-  document.getElementById('tgEdit')?.classList.add('on');
-  mergeSelection=[];
-  renderHome();
-  updateEditInfo();
+/* ===== МЕНЮ ИКОНКИ ===== */
+let imCurrentId=null;
+function openIconMenu(id){
+  const ic=findIcon(id); if(!ic) return; imCurrentId=id;
+  const prev=$('imPrev'); prev.innerHTML='';
+  if(ic.folder){ prev.textContent='📁'; }
+  else if(iconImages[id]){ const img=document.createElement('img'); ImageStore.url(iconImages[id]).then(u=>{ if(u) img.src=u; }); prev.appendChild(img); prev.style.background=ic.bg||'#333'; }
+  else { prev.textContent=ic.emoji||'📱'; prev.style.background=ic.bg||'#333'; }
+  $('imTitle').textContent=ic.name||'Без названия';
+  $('imName').value=ic.name||'';
+  $('imBadge').value=clampInt(ic.badge,0,99999,0)||'';
+  $('imMakeFolder').querySelector('span:last-child')?.remove();
+  $('imMakeFolder').lastChild && ($('imMakeFolder').childNodes[1].textContent=ic.folder?' Открыть папку':' Сделать папкой');
+  $('iconMenu').classList.add('open');
 }
-function exitEditMode(){
-  phone.classList.remove('edit');
-  document.getElementById('tgEdit')?.classList.remove('on');
-  mergeSelection=[];
-  renderHome();
-}
-document.getElementById('ebMerge').onclick=mergeSelected;
-document.getElementById('ebSplit').onclick=splitSelected;
-document.getElementById('ebAddPage').onclick=()=>addPage();
-document.getElementById('ebDelPage').onclick=()=>delPage();
-document.getElementById('ebDone').onclick=()=>exitEditMode();
+function closeIconMenu(){ $('iconMenu').classList.remove('open'); imCurrentId=null; }
+$('imClose').onclick=closeIconMenu;
+$('iconMenu').addEventListener('click',(e)=>{ if(e.target===$('iconMenu')) closeIconMenu(); });
+$('imNameOk').onclick=()=>{ const ic=findIcon(imCurrentId); if(!ic) return; ic.name=$('imName').value.trim()||'App'; renderPages(); renderDock(); saveAll(); toast('✏️ Имя изменено'); };
+$('imBadgeOk').onclick=()=>{ const ic=findIcon(imCurrentId); if(!ic) return; ic.badge=clampInt($('imBadge').value,0,99999,0); renderPages(); renderDock(); applyBadgesVisibility(); saveAll(); toast('🔴 Уведомление обновлено'); };
+$('imPhoto').onclick=()=>{ const inp=$('hsIconInput'); inp.dataset.target='icon'; inp.click(); };
+$('imMakeFolder').onclick=()=>{ const ic=findIcon(imCurrentId); if(!ic) return; if(ic.folder){ closeIconMenu(); openFolder(ic); } else { ic.folder=true; ic.items=[{bg:ic.bg,emoji:ic.emoji,name:ic.name}]; ic.name=ic.name||'Папка'; delete ic.bg; delete ic.emoji; renderPages(); renderDock(); saveAll(); toast('📁 Стало папкой'); closeIconMenu(); } };
+$('imDelete').onclick=async ()=>{ const id=imCurrentId; closeIconMenu(); await deleteIcon(id); };
 
-/* ===== ПАПКИ ===== */
-function openFolder(pos){
-  openFolderPos=pos; const folder=getCell(pos); if(!folder) return;
-  document.getElementById('folderTitle').textContent=folder.name||'Папка';
-  const box=document.getElementById('folderBox'); box.innerHTML='';
-  const pid = pos.id;
-  (folder.items||[]).forEach((it,idx)=>box.appendChild(buildCell(it,{type:'folder',pid:pid,idx})));
-  document.getElementById('folderView').classList.add('open');
-}
-function closeFolder(){ document.getElementById('folderView').classList.remove('open'); openFolderPos=null; }
-document.getElementById('folderView').addEventListener('click',(e)=>{ if(e.target.id==='folderView') closeFolder(); });
-
-/* ===== МИНИ-МЕНЮ ИКОНКИ ===== */
-let iconMenuPos=null;
-const iconMenu=document.getElementById('iconMenu');
-function openIconMenu(pos){
-  iconMenuPos=pos; const item=getCell(pos); if(!item) return;
-  const prev=document.getElementById('imPrev');
-  if(item.folder) prev.innerHTML='📁';
-  else if(item.img) prev.innerHTML=`<img src="${item.img}">`;
-  else { prev.innerHTML=item.emoji||'📱'; }
-  prev.style.background=item.bg||'#333';
-  document.getElementById('imTitle').textContent=item.name||'Без имени';
-  document.getElementById('imName').value=item.name||'';
-  document.getElementById('imBadge').value=item.badge||0;
-  iconMenu.classList.add('open');
-}
-function closeIconMenu(){ iconMenu.classList.remove('open'); iconMenuPos=null; }
-function refreshAfterEdit(){ const fp=openFolderPos; saveData(); renderHome(); if(fp) openFolder(fp); }
-iconMenu.addEventListener('click',(e)=>{ if(e.target.id==='iconMenu') closeIconMenu(); });
-document.getElementById('imClose').onclick=closeIconMenu;
-document.getElementById('imNameOk').onclick=()=>{
-  const item=getCell(iconMenuPos); if(!item) return;
-  item.name=document.getElementById('imName').value;
-  document.getElementById('imTitle').textContent=item.name||'Без имени';
-  refreshAfterEdit();
-};
-document.getElementById('imBadgeOk').onclick=()=>{
-  const item=getCell(iconMenuPos); if(!item) return;
-  let v=parseInt(document.getElementById('imBadge').value);
-  if(isNaN(v)||v<0) v=0; if(v>99999) v=99999;
-  item.badge=v; refreshAfterEdit();
-};
-document.getElementById('imPhoto').onclick=()=>{ photoTargetPos=iconMenuPos; hsIconInput.click(); };
-document.getElementById('imMakeFolder').onclick=()=>{
-  const item=getCell(iconMenuPos); if(!item) return;
-  if(item.folder){ const p=iconMenuPos; closeIconMenu(); openFolder(p); return; }
-  item.folder=true; if(!item.items) item.items=[{bg:item.bg||'#333',emoji:item.emoji||'📱',name:item.name||'App'}];
-  refreshAfterEdit(); const p=iconMenuPos; setTimeout(()=>openIconMenu(p),0);
-};
-document.getElementById('imDelete').onclick=()=>{ const pos=iconMenuPos; closeIconMenu(); deleteIcon(pos); };
-
-/* ===== РЕДАКТИРОВАНИЕ ИКОНОК ===== */
-let photoTargetPos=null;
-const hsIconInput=document.getElementById('hsIconInput');
-hsIconInput.addEventListener('change',(e)=>{
-  const file=e.target.files[0]; if(!file||!photoTargetPos) return;
-  const reader=new FileReader();
-  reader.onload=(ev)=>{
-    const item=getCell(photoTargetPos); if(item) item.img=ev.target.result;
-    const wasMenu=iconMenu.classList.contains('open'); const p=photoTargetPos;
-    refreshAfterEdit();
-    if(wasMenu && p){ setTimeout(()=>openIconMenu(p),0); }
-    photoTargetPos=null;
-  };
-  reader.readAsDataURL(file); e.target.value='';
-});
-function deleteIcon(pos){
-  if(!confirm('Удалить иконку?')) return;
-  if(pos.type==='app'){ const pg=pages[pos.p]; if(pg) pg.icons=pg.icons.filter(ic=>ic.id!==pos.id); }
-  else if(pos.type==='dock'){ dock=dock.filter(d=>d.id!==pos.id); }
-  else if(pos.type==='folder'){ const parent=findIconById(pos.pid); if(parent&&parent.items) parent.items.splice(pos.idx,1); }
-    mergeSelection=[];
-  const fp=openFolderPos;
-  closeIconMenu();
-  saveData(); renderHome();
-  if(fp && getCell(fp)) openFolder(fp); else closeFolder();
-}
-function addIconAt(p,c,r){
-  const id=newId();
-  pages[p].icons.push({ id, col:c, row:r, w:1, h:1, name:'Новое', bg:'#3a3a3c', emoji:'📱', badge:0 });
-  saveData(); renderHome();
-}
-
-/* ===== НАСТРОЙКИ РАБОЧЕГО СТОЛА ===== */
-const hsSettings=document.getElementById('hsSettings');
-function openHsSettings(){
-  syncSettingsUI();
-  buildAttemptList();
-  hsSettings.classList.add('open');
-}
-function closeHsSettings(){ hsSettings.classList.remove('open'); }
-document.getElementById('closeSet').onclick=closeHsSettings;
+/* ===== HS SETTINGS ===== */
+function openHsSettings(){ exitEditMode(); $('hsSettings').classList.add('open'); syncSettingsUI(); }
+function closeHsSettings(){ $('hsSettings').classList.remove('open'); saveAll(); }
+$('closeSet').onclick=closeHsSettings;
 
 function syncSettingsUI(){
-  document.getElementById('colsSlider').value=GRID_COLS; document.getElementById('colsVal').textContent=GRID_COLS;
-  document.getElementById('rowHSlider').value=SLOT_H; document.getElementById('rowHVal').textContent=SLOT_H+' px';
-  document.getElementById('gapSlider').value=SLOT_GAP; document.getElementById('gapVal').textContent=SLOT_GAP+' px';
-  document.getElementById('iconXSlider').value=localStorage.getItem('iconOffX')||0; document.getElementById('iconXVal').textContent=(localStorage.getItem('iconOffX')||0)+' px';
-  document.getElementById('iconYSlider').value=localStorage.getItem('iconOffY')||0; document.getElementById('iconYVal').textContent=(localStorage.getItem('iconOffY')||0)+' px';
-  document.getElementById('tgEdit').classList.toggle('on', phone.classList.contains('edit'));
-  document.getElementById('tgBadges').classList.toggle('on', document.documentElement.style.getPropertyValue('--badge-disp')!=='none');
-
-  document.getElementById('tgHold').classList.toggle('on', triggerModes.has('hold'));
-  document.getElementById('tgDouble').classList.toggle('on', triggerModes.has('double'));
-  document.getElementById('tgCorner').classList.toggle('on', triggerModes.has('corner'));
-  document.getElementById('triggerGroup').classList.toggle('show-choose', triggerModes.has('corner'));
-  document.getElementById('holdDuration').textContent='Длительность: '+(HOLD_MS/1000)+' сек';
-  document.getElementById('tapCount').textContent='Количество: '+SCREEN_TAP_COUNT+' нажатия';
-  document.getElementById('iconTapCount').textContent='Количество: '+ICON_TAP_COUNT+' нажатия';
-  document.getElementById('inHold').value=HOLD_MS/1000;
-  document.getElementById('inDouble').value=SCREEN_TAP_COUNT;
-  document.getElementById('inCorner').value=ICON_TAP_COUNT;
-
-  document.getElementById('tgLockSwipe').classList.toggle('on', lockModes.has('swipe'));
-  document.getElementById('tgLockTaps').classList.toggle('on', lockModes.has('taps'));
-  document.getElementById('tgLockIcon').classList.toggle('on', lockModes.has('icon'));
-  document.getElementById('lockGroup').classList.toggle('show-choose', lockModes.has('icon'));
-  document.getElementById('lockTapCount').textContent='Количество: '+LOCK_TAP_COUNT+' нажатия';
-  document.getElementById('lockIconTapCount').textContent='Количество: '+LOCK_ICON_TAP_COUNT+' нажатия';
-  document.getElementById('inLockTaps').value=LOCK_TAP_COUNT;
-  document.getElementById('inLockIcon').value=LOCK_ICON_TAP_COUNT;
-  document.getElementById('inAttemptCount').value=ATTEMPT_COUNT;
+  $('tgHold').classList.toggle('on', settings.triggers.hold);
+  $('tgDouble').classList.toggle('on', settings.triggers.double);
+  $('tgCorner').classList.toggle('on', settings.triggers.corner);
+  $('tgLockSwipe').classList.toggle('on', settings.lock.swipe);
+  $('tgLockTaps').classList.toggle('on', settings.lock.taps);
+  $('tgLockIcon').classList.toggle('on', settings.lock.icon);
+  $('tgBadges').classList.toggle('on', settings.showBadges);
+  $('tgEdit').classList.toggle('on', phone.classList.contains('edit'));
+  $('holdDuration').textContent='Длительность: '+settings.holdDuration+' сек';
+  $('tapCount').textContent='Количество: '+settings.doubleCount+' нажатия';
+  $('iconTapCount').textContent='Количество: '+settings.cornerCount+' нажатия';
+  $('lockTapCount').textContent='Количество: '+settings.lockTapsCount+' нажатия';
+  $('lockIconTapCount').textContent='Количество: '+settings.lockIconCount+' нажатия';
+  $('inHold').value=settings.holdDuration; $('inDouble').value=settings.doubleCount; $('inCorner').value=settings.cornerCount;
+  $('inLockTaps').value=settings.lockTapsCount; $('inLockIcon').value=settings.lockIconCount;
+  $('inAttemptCount').value=settings.attemptShowCount;
+  $('colsVal').textContent=GRID_COLS; $('colsSlider').value=GRID_COLS;
+  $('rowHVal').textContent=SLOT_H+' px'; $('rowHSlider').value=SLOT_H;
+  $('gapVal').textContent=SLOT_GAP+' px'; $('gapSlider').value=SLOT_GAP;
+  $('iconXVal').textContent=iconOffsetX+' px'; $('iconXSlider').value=iconOffsetX;
+  $('iconYVal').textContent=iconOffsetY+' px'; $('iconYSlider').value=iconOffsetY;
+  $('cfgHold').classList.toggle('show', settings.triggers.hold);
+  $('cfgDouble').classList.toggle('show', settings.triggers.double);
+  $('cfgCorner').classList.toggle('show', settings.triggers.corner);
+  $('cfgLockTaps').classList.toggle('show', settings.lock.taps);
+  $('cfgLockIcon').classList.toggle('show', settings.lock.icon);
+  $('triggerGroup').classList.toggle('show-choose', settings.triggers.corner);
+  $('lockGroup').classList.toggle('show-choose', settings.lock.icon);
+  renderAttempts();
 }
 
-function changeCols(v){ GRID_COLS=parseInt(v); localStorage.setItem('gridCols',GRID_COLS); document.getElementById('colsVal').textContent=GRID_COLS; renderHome(); }
-function changeRowH(v){ SLOT_H=parseInt(v); localStorage.setItem('slotH',SLOT_H); document.getElementById('rowHVal').textContent=SLOT_H+' px'; renderHome(); }
-function changeGap(v){ SLOT_GAP=parseInt(v); localStorage.setItem('slotGap',SLOT_GAP); document.getElementById('gapVal').textContent=SLOT_GAP+' px'; renderHome(); }
-function changeIconOffset(axis,v){
-  v=parseInt(v);
-  if(axis==='x'){ localStorage.setItem('iconOffX',v); document.getElementById('iconXVal').textContent=v+' px'; document.getElementById('pagesTrack').style.setProperty('--icon-x',v+'px'); }
-  else { localStorage.setItem('iconOffY',v); document.getElementById('iconYVal').textContent=v+' px'; document.getElementById('pagesTrack').style.setProperty('--icon-y',v+'px'); }
-}
-
-document.getElementById('rowBg').onclick=()=>hsBgInput.click();
-document.getElementById('rowResetBg').onclick=()=>{ resetHomeBg(); };
-const hsBgInput=document.getElementById('hsBgInput');
-hsBgInput.addEventListener('change',(e)=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=(ev)=>changeHomeBg(ev.target.result); r.readAsDataURL(f); e.target.value=''; });
-
-document.getElementById('rowEdit').onclick=()=>{ if(phone.classList.contains('edit')) exitEditMode(); else { enterEditMode(); closeHsSettings(); } };
-document.getElementById('rowBadges').onclick=()=>{
-  const on=document.documentElement.style.getPropertyValue('--badge-disp')!=='none';
-  document.documentElement.style.setProperty('--badge-disp', on?'none':'flex');
-  document.getElementById('tgBadges').classList.toggle('on',!on);
-  localStorage.setItem('badgesOn', (!on)?'1':'0');
-};
-
-/* ===== ТРИГГЕРЫ: переключатели ===== */
 document.querySelectorAll('.trigger-opt').forEach(row=>{
-  row.addEventListener('click',(e)=>{
-    if(e.target.closest('.ci-save')||e.target.closest('input')) return;
-    const mode=row.dataset.mode;
-    if(triggerModes.has(mode)) triggerModes.delete(mode); else triggerModes.add(mode);
-    saveModes(); syncSettingsUI();
-    const cfg={hold:'cfgHold',double:'cfgDouble',corner:'cfgCorner'}[mode];
-    if(cfg) document.getElementById(cfg).classList.toggle('show', triggerModes.has(mode));
-  });
+  row.addEventListener('click',(e)=>{ if(e.target.closest('input,button')) return; const m=row.dataset.mode; settings.triggers[m]=!settings.triggers[m]; saveAll(); syncSettingsUI(); });
 });
-document.getElementById('chooseIconBtn').onclick=()=>{ closeHsSettings(); phone.classList.add('choosing-trigger'); };
-function assignTriggerIcon(pos){
-  if(pos.type==='folder'){ alert('Выберите иконку на экране или в доке.'); return; }
-  triggerIcon=pos; localStorage.setItem('triggerIcon',JSON.stringify(pos));
-  phone.classList.remove('choosing-trigger');
-  alert('Иконка-триггер назначена: '+(getCell(pos)?.name||'без имени'));
-}
-function handleTriggerIconTap(){
-  iconTaps++; clearTimeout(iconTimer);
-  iconTimer=setTimeout(()=>{ iconTaps=0; }, ICON_RESET);
-  if(iconTaps>=ICON_TAP_COUNT){ iconTaps=0; openHsSettings(); }
-}
-
-/* ===== БЛОКИРОВКА: переключатели ===== */
 document.querySelectorAll('.lock-opt').forEach(row=>{
-  row.addEventListener('click',(e)=>{
-    if(e.target.closest('.ci-save')||e.target.closest('input')) return;
-    const mode=row.dataset.mode;
-    if(lockModes.has(mode)) lockModes.delete(mode); else lockModes.add(mode);
-    saveLockModes(); syncSettingsUI();
-    const cfg={taps:'cfgLockTaps',icon:'cfgLockIcon'}[mode];
-    if(cfg) document.getElementById(cfg).classList.toggle('show', lockModes.has(mode));
+  row.addEventListener('click',(e)=>{ if(e.target.closest('input,button')) return; const m=row.dataset.mode; settings.lock[m]=!settings.lock[m]; saveAll(); syncSettingsUI(); });
+});
+$('rowBadges').addEventListener('click',(e)=>{ if(e.target.closest('.toggle')||true){ settings.showBadges=!settings.showBadges; applyBadgesVisibility(); saveAll(); syncSettingsUI(); } });
+$('rowEdit').addEventListener('click',()=>{ if(phone.classList.contains('edit')) exitEditMode(); else { closeHsSettings(); enterEditMode(); } });
+
+document.querySelectorAll('.ci-save').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const k=btn.dataset.save;
+    if(k==='hold'){ settings.holdDuration=Math.max(0.5,Math.min(5,parseFloat($('inHold').value)||2)); }
+    if(k==='double'){ settings.doubleCount=clampInt($('inDouble').value,2,5,2); }
+    if(k==='corner'){ settings.cornerCount=clampInt($('inCorner').value,2,5,3); }
+    if(k==='locktaps'){ settings.lockTapsCount=clampInt($('inLockTaps').value,2,6,3); }
+    if(k==='lockicon'){ settings.lockIconCount=clampInt($('inLockIcon').value,2,5,2); }
+    saveAll(); syncSettingsUI(); toast('✅ Сохранено');
   });
 });
-document.getElementById('chooseLockIconBtn').onclick=()=>{ closeHsSettings(); phone.classList.add('choosing-lock'); };
-function assignLockIcon(pos){
-  if(pos.type==='folder'){ alert('Выберите иконку на экране или в доке.'); return; }
-  lockIcon=pos; localStorage.setItem('lockIcon',JSON.stringify(pos));
-  phone.classList.remove('choosing-lock');
-  alert('Иконка блокировки назначена: '+(getCell(pos)?.name||'без имени'));
-}
-function handleLockIconTap(){
-  lockIconTaps++; clearTimeout(lockIconTimer);
-  lockIconTimer=setTimeout(()=>{ lockIconTaps=0; }, ICON_RESET);
-  if(lockIconTaps>=LOCK_ICON_TAP_COUNT){ lockIconTaps=0; closeHome(); }
+$('chooseIconBtn').onclick=()=>{ closeHsSettings(); phone.classList.add('choosing-trigger'); toast('Нажмите на иконку-триггер'); };
+$('chooseLockIconBtn').onclick=()=>{ closeHsSettings(); phone.classList.add('choosing-lock'); toast('Нажмите на иконку блокировки'); };
+
+$('rowBg').onclick=()=>{ const inp=$('hsBgInput'); inp.dataset.target='home'; inp.click(); };
+$('rowResetBg').onclick=()=>{ resetHomeBg(); toast('↺ Фон удалён'); };
+
+$('colsSlider').oninput=function(){ GRID_COLS=parseInt(this.value,10); $('colsVal').textContent=GRID_COLS; applyGridVars(); renderPages(); saveAll(); };
+$('rowHSlider').oninput=function(){ SLOT_H=parseInt(this.value,10); $('rowHVal').textContent=SLOT_H+' px'; applyGridVars(); saveAll(); };
+$('gapSlider').oninput=function(){ SLOT_GAP=parseInt(this.value,10); $('gapVal').textContent=SLOT_GAP+' px'; applyGridVars(); saveAll(); };
+$('iconXSlider').oninput=function(){ iconOffsetX=parseInt(this.value,10); $('iconXVal').textContent=iconOffsetX+' px'; localStorage.setItem('iconX',iconOffsetX); applyIconOffset(); };
+$('iconYSlider').oninput=function(){ iconOffsetY=parseInt(this.value,10); $('iconYVal').textContent=iconOffsetY+' px'; localStorage.setItem('iconY',iconOffsetY); applyIconOffset(); };
+
+$('saveAttemptCount').onclick=()=>{ settings.attemptShowCount=clampInt($('inAttemptCount').value,1,5,2); saveAll(); renderAttempts(); toast('✅ Сохранено'); };
+$('clearAttempts').onclick=async ()=>{ const ok=await dialogConfirm('Очистить историю попыток?',true); if(!ok) return; attempts=[]; saveJSON('passAttempts',attempts); renderAttempts(); toast('🗑 История очищена'); };
+
+function renderAttempts(){
+  const list=$('attemptList'); list.innerHTML='';
+  const show=attempts.slice(0, settings.attemptShowCount);
+  if(!show.length){ list.innerHTML='<div style="opacity:.5;font-size:13px;padding:6px;">Пока нет попыток</div>'; return; }
+  show.forEach((a,i)=>{
+    const row=document.createElement('div'); row.className='attempt-row';
+    const d=new Date(a.time);
+    const tm=d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+    row.innerHTML='<span class="at-num">#'+(i+1)+' · '+tm+'</span><span class="at-target">Код: <b>'+esc(a.code)+'</b></span>';
+    list.appendChild(row);
+  });
 }
 
-/* ===== СОХРАНЕНИЕ КОНФИГ. ЗНАЧЕНИЙ ===== */
-document.querySelectorAll('.ci-save').forEach(btn=>{
-  btn.onclick=()=>{
-    const w=btn.dataset.save;
-    if(w==='hold'){ let s=parseFloat(document.getElementById('inHold').value); if(isNaN(s)||s<0.5)s=0.5; if(s>5)s=5; HOLD_MS=Math.round(s*1000); localStorage.setItem('holdDuration',HOLD_MS); }
-    else if(w==='double'){ let n=parseInt(document.getElementById('inDouble').value); if(isNaN(n)||n<2)n=2; if(n>5)n=5; SCREEN_TAP_COUNT=n; localStorage.setItem('screenTapCount',n); }
-    else if(w==='corner'){ let n=parseInt(document.getElementById('inCorner').value); if(isNaN(n)||n<2)n=2; if(n>5)n=5; ICON_TAP_COUNT=n; localStorage.setItem('iconTapCount',n); }
-    else if(w==='locktaps'){ let n=parseInt(document.getElementById('inLockTaps').value); if(isNaN(n)||n<2)n=2; if(n>6)n=6; LOCK_TAP_COUNT=n; localStorage.setItem('lockTapCount',n); }
-    else if(w==='lockicon'){ let n=parseInt(document.getElementById('inLockIcon').value); if(isNaN(n)||n<2)n=2; if(n>5)n=5; LOCK_ICON_TAP_COUNT=n; localStorage.setItem('lockIconTapCount',n); }
-    syncSettingsUI();
-    btn.textContent='✓'; setTimeout(()=>btn.textContent='OK',900);
-  };
+/* ===== ЗАГРУЗКА ФАЙЛОВ HS ===== */
+$('hsBgInput').addEventListener('change', async function(){
+  const f=this.files[0]; if(!f) return;
+  if(this.dataset.target==='home'){ await setHomeBgFromFile(f); toast('🌄 Фон установлен'); }
+  this.value='';
 });
-document.getElementById('saveAttemptCount').onclick=()=>{
-  let n=parseInt(document.getElementById('inAttemptCount').value); if(isNaN(n)||n<1)n=1; if(n>5)n=5;
-  ATTEMPT_COUNT=n; localStorage.setItem('attemptCount',n);
-  buildAttemptList(); showAttemptBadges();
-  const b=document.getElementById('saveAttemptCount'); b.textContent='✓'; setTimeout(()=>b.textContent='OK',900);
-};
-document.getElementById('clearAttempts').onclick=()=>{
-  passwordAttempts=[]; localStorage.removeItem('passwordAttempts');
-  showAttemptBadges(); alert('История попыток очищена.');
-};
-
-/* ===== ГЛОБАЛЬНЫЕ ТРИГГЕРЫ (пустое место) ===== */
-function isBusy(){
-  return phone.classList.contains('choosing-trigger')||phone.classList.contains('choosing-attempt')||
-         phone.classList.contains('choosing-lock')||hsSettings.classList.contains('open')||
-         iconMenu.classList.contains('open')||document.getElementById('folderView').classList.contains('open');
-}
-function isEmptyArea(target){
-  return !target.closest('.cell') && !target.closest('#editBar') && !target.closest('#pageDots') &&
-         !target.closest('#search') && !target.closest('#hsSettings') && !target.closest('#iconMenu') &&
-         !target.closest('#folderView');
-}
-phone.addEventListener('pointerdown',(e)=>{
-  if(isBusy()||phone.classList.contains('edit')) return;
-  if(!isEmptyArea(e.target)) return;
-  if(triggerModes.has('hold')){
-    clearTimeout(pressTimer);
-    pressTimer=setTimeout(()=>{ openHsSettings(); }, HOLD_MS);
+$('hsIconInput').addEventListener('change', async function(){
+  const f=this.files[0]; if(!f){ return; }
+  if(this.dataset.target==='icon' && imCurrentId){
+    const old=iconImages[imCurrentId]; if(old) await ImageStore.del(old);
+    const id=await storeImageFile(f); iconImages[imCurrentId]=id;
+    renderPages(); renderDock(); saveAll(); toast('🖼 Фото установлено');
+    openIconMenu(imCurrentId);
   }
-  if(lockModes.has('swipe')){ swipeStartY=e.clientY; swipeStartX=e.clientX; swipeStartTime=Date.now(); }
+  this.value='';
 });
-phone.addEventListener('pointerup',(e)=>{
-  clearTimeout(pressTimer);
-  if(isBusy()||phone.classList.contains('edit')){ swipeStartY=null; return; }
-  if(!isEmptyArea(e.target)){ swipeStartY=null; return; }
 
-  if(triggerModes.has('double')){
-    screenTaps++; clearTimeout(screenTapTimer);
-    if(screenTaps>=SCREEN_TAP_COUNT){ screenTaps=0; openHsSettings(); }
-    else screenTapTimer=setTimeout(()=>screenTaps=0, FAST_TAP_WINDOW);
-  }
-  if(lockModes.has('taps')){
-    lockTaps++; clearTimeout(lockTapTimer);
-    if(lockTaps>=LOCK_TAP_COUNT){ lockTaps=0; closeHome(); }
-    else lockTapTimer=setTimeout(()=>lockTaps=0, FAST_TAP_WINDOW);
-  }
-  if(lockModes.has('swipe') && swipeStartY!==null){
-    const dy=e.clientY-swipeStartY, dx=e.clientX-swipeStartX, dt=Date.now()-swipeStartTime;
-    if(dy>90 && Math.abs(dy)>Math.abs(dx)*1.5 && dt<700){ closeHome(); }
-  }
-  swipeStartY=null;
-});
-phone.addEventListener('pointermove',(e)=>{ clearTimeout(pressTimer); });
-phone.addEventListener('pointercancel',()=>{ clearTimeout(pressTimer); swipeStartY=null; });
+/* ===== ЗАГРУЗКА ФАЙЛОВ LOCK ===== */
+$('pickLockBg').onclick=()=>$('bgInput').click();
+$('resetLockBg').onclick=()=>{ resetBg(); toast('↺ Фон сброшен'); };
+$('bgInput').addEventListener('change', async function(){ const f=this.files[0]; if(f){ await setLockBgFromFile(f); toast('🖼 Фон установлен'); } this.value=''; });
 
-/* ===== ВОССТАНОВЛЕНИЕ НАСТРОЕК ===== */
-window.addEventListener('DOMContentLoaded',()=>{
+$('sizeSlider').oninput=function(){ changeKeySize(this.value); };
+$('pinXSlider').oninput=function(){ changePinSpread('x',this.value); };
+$('pinYSlider').oninput=function(){ changePinSpread('y',this.value); };
+$('pinBlockSlider').oninput=function(){ changePinBlockY(this.value); };
+$('closeSettingsBtn').onclick=closeSettings;
+document.querySelectorAll('[data-screen]').forEach(b=>b.onclick=()=>setScreenPreset(b.dataset.screen,b));
+document.querySelectorAll('[data-method]').forEach(b=>b.onclick=()=>setUnlockMethod(b.dataset.method,b));
+document.querySelectorAll('[data-style]').forEach(b=>b.onclick=()=>setStyle(b.dataset.style,b));
+
+/* ===== ИНИЦИАЛИЗАЦИЯ ===== */
+(function init(){
   buildDots();
-  const savedSize=localStorage.getItem('keySize'); if(savedSize){ document.getElementById('sizeSlider').value=savedSize; changeKeySize(savedSize); }
-  const sx=localStorage.getItem('pinStepX'); if(sx!==null){ document.getElementById('pinXSlider').value=sx; changePinSpread('x',sx); }
-  const sy=localStorage.getItem('pinStepY'); if(sy!==null){ document.getElementById('pinYSlider').value=sy; changePinSpread('y',sy); }
-  const pb=localStorage.getItem('pinBlockY'); if(pb!==null){ document.getElementById('pinBlockSlider').value=pb; changePinBlockY(pb); }
-  const savedBg=localStorage.getItem('lockBg');
-  if(savedBg){ const wp=document.getElementById('wallpaper'); wp.style.backgroundImage=`url('${savedBg}')`; wp.style.backgroundSize='cover'; wp.style.backgroundPosition='center'; }
-  const savedHomeBg=localStorage.getItem('homeBg');
-  if(savedHomeBg){ const hw=document.getElementById('homeWallpaper'); hw.style.backgroundImage=`url('${savedHomeBg}')`; hw.style.backgroundSize='cover'; hw.style.backgroundPosition='center'; }
-  const savedStyle=localStorage.getItem('style'); if(savedStyle){ setStyle(savedStyle, document.querySelector(`[data-style="${savedStyle}"]`)); }
-  const savedScreen=localStorage.getItem('screenPreset'); if(savedScreen){ setScreenPreset(savedScreen, document.querySelector(`[data-screen="${savedScreen}"]`)); }
-  const badgesOn=localStorage.getItem('badgesOn');
-  if(badgesOn==='0'){ document.documentElement.style.setProperty('--badge-disp','none'); document.getElementById('tgBadges').classList.remove('on'); }
-});
+  const ks=localStorage.getItem('keySize'); if(ks) changeKeySize(ks); else changeKeySize(96);
+  pinStepX=parseInt(localStorage.getItem('pinStepX'),10)||0;
+  pinStepY=parseInt(localStorage.getItem('pinStepY'),10)||0;
+  $('pinXSlider').value=pinStepX; $('pinYSlider').value=pinStepY;
+  $('pinXVal').textContent=pinStepX+' px'; $('pinYVal').textContent=pinStepY+' px';
+  applyPinSpread();
+  const pby=parseInt(localStorage.getItem('pinBlockY'),10)||0;
+  $('pinBlockSlider').value=pby; changePinBlockY(pby);
+  const sp=localStorage.getItem('screenPreset')||'auto';
+  setScreenPreset(sp, document.querySelector(`[data-screen="${sp}"]`));
+  const um=localStorage.getItem('unlockMethod')||'sos';
+  setUnlockMethod(um, document.querySelector(`[data-method="${um}"]`));
+  const st=localStorage.getItem('style')||'ios';
+  setStyle(st, document.querySelector(`[data-style="${st}"]`));
+  applyLockBg();
+  applyIconOffset();
+})();
 </script>
 </body>
 </html>
