@@ -1,5 +1,5 @@
 // Точка входа: связывает lock <-> home <-> settings <-> папки <-> меню иконки.
-import { $, } from './utils/dom.js';
+import { $ } from './utils/dom.js';
 import { createLockScreen } from './lockscreen/lockscreen.js';
 import { createHomeScreen } from './homescreen/homescreen.js';
 import { createFolderView } from './homescreen/folder.js';
@@ -35,9 +35,8 @@ settings = createSettings({ home, onClose: () => home.render() });
 lockRoot.append(lock.root);
 homeRoot.append(home.root, folder.root, iconMenu.root, settings.root);
 
-// перерисовка при изменении состояния (точечно по причинам)
 subscribe((reason) => {
-  if (reason === 'attempt') return; // не дёргаем home при вводе на локскрине
+  if (reason === 'attempt') return;
   if (!homeRoot.hidden) home.render();
 });
 

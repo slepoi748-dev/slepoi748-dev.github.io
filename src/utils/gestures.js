@@ -1,10 +1,9 @@
-// Единый хелпер жестов: tap, longPress, swipe, multiTap. Без дублирования touch/mouse.
-
+// Единый хелпер жестов: tap, longPress, swipe, multiTap.
 export function pointer(node, { onTap, onLongPress, onMove, longMs = 1000, moveTol = 12 } = {}) {
-  let timer = null, sx = 0, sy = 0, moved = false, long = false;
+  let timer = null, sx = 0, sy = 0, moved = false, long = false, lastEv = null;
 
-  const start = (x, y) => {
-    moved = false; long = false; sx = x; sy = y;
+  const start = (x, y, ev) => {
+    moved = false; long = false; sx = x; sy = y; lastEv = ev || null;
     if (onLongPress) {
       timer = setTimeout(() => { if (!moved) { long = true; onLongPress(); } }, longMs);
     }
@@ -17,40 +16,34 @@ export function pointer(node, { onTap, onLongPress, onMove, longMs = 1000, moveT
   };
   const end = () => {
     clearTimeout(timer);
-    if (!moved && !long) onTap?.();
+    if (!moved && !long) onTap?.(lastEv);
   };
   const cancel = () => clearTimeout(timer);
 
-  node.addEventListener('touchstart', (e) => start(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+  node.addEventListener('touchstart', (e) => start(e.touches[0].clientX, e.touches[0].clientY, e), { passive: true });
   node.addEventListener('touchmove', (e) => move(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
   node.addEventListener('touchend', end);
   node.addEventListener('touchcancel', cancel);
+
   let mouseDown = false;
-  node.addEventListener('mousedown', (e) => { mouseDown = true; start(e.clientX, e.clientY); });
+  node.addEventListener('mousedown', (e) => { mouseDown = true; start(e.clientX, e.clientY, e); });
   node.addEventListener('mousemove', (e) => { if (mouseDown) move(e.clientX, e.clientY); });
   node.addEventListener('mouseup', () => { mouseDown = false; end(); });
   node.addEventListener('mouseleave', () => { if (mouseDown) { mouseDown = false; cancel(); } });
 }
 
-// gestures.js — исправленный multiTap
-// Возвращает функцию: вызывай её на каждый тап. Срабатывает cb ровно при N тапах
-// внутри окна timeoutMs между касаниями.
+// Срабатывает cb ровно при N тапах внутри окна timeoutMs.
 export function multiTap(count, cb, timeoutMs = 400) {
-  let n = 0;
-  let timer = null;
+  let n = 0, timer = null;
   return function () {
     n++;
     clearTimeout(timer);
-    if (n >= count) {
-      n = 0;
-      cb();
-      return;
-    }
+    if (n >= count) { n = 0; cb(); return; }
     timer = setTimeout(() => { n = 0; }, timeoutMs);
   };
 }
 
-/** Свайп по контейнеру. onSwipe('up'|'down'|'left'|'right', startY). */
+// Свайп по контейнеру. onSwipe('up'|'down'|'left'|'right', startY).
 export function swipe(node, onSwipe, threshold = 50) {
   let x0 = 0, y0 = 0, down = false;
   const s = (x, y) => { x0 = x; y0 = y; down = true; };

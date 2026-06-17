@@ -1,80 +1,75 @@
-// Рендер одной ячейки/иконки/папки. Без innerHTML с пользовательскими данными.
-import { el, setBgImage } from '../utils/dom.js';
-import { state } from '../state.js';
+// Отрисовка одной иконки: эмодзи / картинка / папка, бейдж, код попытки, подпись, удаление.
+import { el } from '../utils/dom.js';
 import { getImage } from '../storage.js';
 
-function badgeText(n) {
-  if (!n || n <= 0) return '';
-  return n > 9999 ? Math.floor(n / 1000) + 'k' : String(n);
-}
-
-/** Визуальная часть иконки (без подписи). */
-function iconVisual(ic) {
-  if (ic.folder) {
-    const grid = el('div', { class: 'folder' });
-    const items = (ic.items || []).slice(0, 9);
-    for (let i = 0; i < 9; i++) {
-      const it = items[i];
-      const mini = el('div', { class: 'folder__mini' });
-      if (it) {
-        if (it.imgId) loadImg(mini, it.imgId);
-        else { mini.style.background = it.bg || '#444'; mini.textContent = it.emoji || ''; }
-      } else mini.style.background = 'transparent';
-      grid.append(mini);
-    }
-    return grid;
+// helper: применить фон-картинку асинхронно
+function applyImg(node, ic, fallbackBg, emoji) {
+  if (ic.imgData) {
+    node.style.backgroundImage = `url(${ic.imgData})`;
+    node.style.backgroundSize = 'cover';
+    node.style.backgroundPosition = 'center';
+    return true;
   }
-  const icon = el('div', { class: 'icon' });
-  if (ic.imgId) loadImg(icon, ic.imgId);
-  else { icon.style.background = ic.bg || '#444'; icon.textContent = ic.emoji || ''; }
-  return icon;
+  if (ic.imgId) {
+    getImage(ic.imgId).then((src) => {
+      if (src) {
+        node.style.backgroundImage = `url(${src})`;
+        node.style.backgroundSize = 'cover';
+        node.style.backgroundPosition = 'center';
+        node.textContent = '';
+      }
+    });
+    // пока грузится — показываем фон/эмодзи как плейсхолдер
+    node.style.background = fallbackBg;
+    if (emoji) node.textContent = emoji;
+    return true;
+  }
+  return false;
 }
 
-async function loadImg(node, imgId) {
-  const url = await getImage(imgId);
-  if (url) { setBgImage(node, url); node.textContent = ''; }
-}
-
-/** Собрать ячейку. opts.attemptIndex — индекс для показа кода попытки. */
 export function buildCell(ic, opts = {}) {
-  const cell = el('div', { class: 'cell', dataset: { id: ic.id } });
-  if (ic.w > 1 || ic.h > 1) {
-    cell.classList.add('cell--big');
-    cell.style.gridColumn = `span ${ic.w || 1}`;
-    cell.style.gridRow = `span ${ic.h || 1}`;
-  }
-  cell.append(iconVisual(ic));
-  if (ic.name != null && !opts.hideLabel) cell.append(el('div', { class: 'label', text: ic.name }));
+  const { showBadges = true, attemptCode = null, hideLabel = false, onDelete = null } = opts;
 
-  const b = state.home.badge;
-  // обычный бейдж
-  const bt = badgeText(ic.badge);
-  if (bt && opts.showBadges) {
-    cell.append(makeBadge(bt, '#ff3b30', b));
+  const cell = el('div', { class: 'cell' });
+  const glyph = el('div', { class: 'cell__glyph' });
+  glyph.style.background = ic.bg || '#3a3a3c';
+
+  const hasImg = applyImg(glyph, ic, ic.bg || '#3a3a3c', ic.emoji);
+
+  if (!hasImg && ic.folder) {
+    glyph.classList.add('cell__glyph--folder');
+    const mini = el('div', { class: 'cell__mini' });
+    (ic.items || []).slice(0, 9).forEach((it) => {
+      const m = el('div', { class: 'cell__mini-i' });
+      if (!applyImg(m, it, it.bg || '#5a5a5e', it.emoji)) {
+        m.style.background = it.bg || '#5a5a5e';
+        m.textContent = it.emoji || '';
+      }
+      mini.append(m);
+    });
+    glyph.append(mini);
+  } else if (!hasImg) {
+    glyph.classList.add('cell__glyph--emoji');
+    glyph.textContent = ic.emoji || '';
   }
-  // бейдж с кодом попытки
-  if (opts.attemptCode != null) {
-    cell.append(makeBadge(opts.attemptCode, '#ff9f0a', b, true));
+  cell.append(glyph);
+
+  // обычный бейдж — только если нет кода попытки
+  if (showBadges && ic.badge && Number(ic.badge) > 0 && attemptCode == null) {
+    cell.append(el('div', { class: 'cell__badge', text: String(ic.badge) }));
   }
-  // крестик удаления в режиме edit
-  const del = el('div', { class: 'cell__del', text: '×' });
-  if (opts.onDelete) del.addEventListener('click', (e) => { e.stopPropagation(); opts.onDelete(); });
-  cell.append(del);
+  // код попытки перекрывает обычный бейдж (это и есть фокус)
+  if (attemptCode != null && attemptCode !== '') {
+    cell.append(el('div', { class: 'cell__badge cell__badge--attempt', text: String(attemptCode) }));
+  }
+
+  if (!hideLabel) cell.append(el('div', { class: 'cell__label', text: ic.name || '' }));
+
+  if (onDelete) {
+    const del = el('div', { class: 'cell__del', text: '−' });
+    del.addEventListener('click', (e) => { e.stopPropagation(); onDelete(); });
+    cell.append(del);
+  }
 
   return cell;
-}
-
-function makeBadge(text, bg, cfg, wide = false) {
-  return el('div', {
-    class: 'badge', text,
-    style: {
-      background: bg,
-      transform: `translate(calc(-50% + ${cfg.bx}px), calc(-50% + ${cfg.by}px))`,
-      minWidth: wide ? 'auto' : cfg.bw + 'px',
-      height: cfg.bh + 'px',
-      borderRadius: cfg.radius + 'px',
-      fontSize: cfg.fontSize + 'px',
-      padding: '0 5px',
-    },
-  });
 }

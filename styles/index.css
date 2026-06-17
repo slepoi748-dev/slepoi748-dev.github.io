@@ -151,6 +151,144 @@ button{font-family:inherit;cursor:pointer;border:none}
 .sec-unit { opacity: .6; font-size: 13px; }
 .srow--action { cursor: pointer; padding: 12px 0; color: #0a84ff; }
 
+/* ===== Icon menu (редактор иконки) ===== */
+.imenu {
+  position: absolute; inset: 0; z-index: 60;
+  display: flex; align-items: flex-end; justify-content: center;
+  background: rgba(0,0,0,.35);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.imenu__sheet {
+  width: 100%; max-height: 90%;
+  background: rgba(28,28,30,.92);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-radius: 22px 22px 0 0;
+  color: #fff; overflow-y: auto;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+}
+.imenu__bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px 8px; position: sticky; top: 0;
+  background: inherit;
+}
+.imenu__title { font-size: 18px; font-weight: 700; }
+.imenu__close {
+  background: rgba(255,255,255,.15); border: none; color: #fff;
+  width: 30px; height: 30px; border-radius: 50%; font-size: 15px; cursor: pointer;
+}
+.imenu__top { display: flex; justify-content: center; padding: 8px 0 14px; }
+.imenu__preview {
+  width: 72px; height: 72px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 38px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.3);
+}
+.imenu__row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 10px 18px;
+  border-top: 1px solid rgba(255,255,255,.07);
+}
+.imenu__lbl { font-size: 15px; opacity: .85; flex: none; }
+.imenu__inp {
+  flex: 1; background: rgba(255,255,255,.1); border: none; border-radius: 10px;
+  color: #fff; padding: 9px 12px; font-size: 15px; min-width: 0;
+}
+.imenu__inp--num { max-width: 90px; text-align: center; }
+.imenu__color {
+  width: 44px; height: 32px; border: none; border-radius: 8px;
+  background: none; cursor: pointer; padding: 0;
+}
+.imenu__btns { display: flex; gap: 8px; }
+.im__btn {
+  background: rgba(255,255,255,.14); border: none; color: #fff;
+  border-radius: 10px; padding: 8px 12px; font-size: 14px; cursor: pointer;
+}
+.im__btn:active { background: rgba(255,255,255,.28); }
+.imenu__swatches {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  padding: 12px 18px;
+}
+.imenu__swatch {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.2); cursor: pointer; padding: 0;
+}
+.imenu__del {
+  display: block; width: calc(100% - 36px); margin: 16px 18px 0;
+  background: rgba(255,59,48,.18); color: #ff453a;
+  border: none; border-radius: 12px; padding: 13px; font-size: 15px;
+  font-weight: 600; cursor: pointer;
+}
+.imenu__del:active { background: rgba(255,59,48,.32); }
+
+/* ===== Иконка рабочего стола ===== */
+.cell {
+  position: relative;
+  width: var(--icon-size);
+  display: flex; flex-direction: column; align-items: center;
+  gap: 5px;
+  user-select: none; -webkit-user-select: none;
+}
+.cell__glyph {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  border-radius: var(--icon-radius);
+  opacity: var(--icon-opacity, 1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: calc(var(--icon-size) * .5);
+  box-shadow: 0 2px 6px rgba(0,0,0,.25);
+  overflow: hidden;
+}
+.cell__glyph--emoji { line-height: 1; }
+
+/* мини-превью папки */
+.cell__glyph--folder { background: rgba(120,120,128,.35); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.cell__mini {
+  width: 80%; height: 80%;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 7%;
+}
+.cell__mini-i {
+  border-radius: 22%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; overflow: hidden;
+}
+
+/* подпись */
+.cell__label {
+  font-size: 12px; color: #fff; max-width: calc(var(--icon-size) + 16px);
+  text-align: center; line-height: 1.1;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0,0,0,.6);
+}
+
+/* бейдж */
+.cell__badge {
+  position: absolute; top: -5px; right: 2px;
+  min-width: 20px; height: 20px; padding: 0 5px;
+  background: #ff3b30; color: #fff;
+  border-radius: 10px; font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 2px rgba(0,0,0,.15);
+}
+/* бейдж с кодом попытки (фокус) — чуть заметнее */
+.cell__badge--attempt {
+  background: #ff3b30;
+  min-width: 22px; height: 22px; font-size: 12px;
+}
+
+/* кнопка удаления в edit-режиме */
+.cell__del {
+  position: absolute; top: -6px; left: -2px;
+  width: 22px; height: 22px;
+  background: rgba(60,60,67,.95); color: #fff;
+  border-radius: 50%; font-size: 18px; line-height: 20px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,.4);
+  z-index: 2;
+}
+
 /* визуальный выбор иконок */
 .iconpick {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;

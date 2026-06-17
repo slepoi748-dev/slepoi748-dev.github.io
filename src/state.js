@@ -23,9 +23,9 @@ const DEFAULTS = {
     offX: 0, offY: 0,
     gapX: 14, gapY: 18,
     dockOffsetY: 0,
+    editMode: false, // +NEW
     badge: { bx: 30, by: -2, bw: 22, bh: 22, radius: 11, fontSize: 12 },
-    // trigger: holdMs теперь задаётся в секундах через UI, но хранится в мс
-    trigger: { hold: true, multiTap: false, icon: false, holdMs: 1000, tapCount: 2, tapTimeoutMs: 400, iconTapCount: 3, iconId: null }, // +NEW tapTimeoutMs
+    trigger: { hold: true, multiTap: false, icon: false, holdMs: 1000, tapCount: 2, tapTimeoutMs: 400, iconTapCount: 3, iconId: null },
     attemptsView: { count: 2, iconIds: [] },
     pages: null,
     dock: null,
@@ -64,15 +64,15 @@ seed();
 
 export const state = loadState(DEFAULTS);
 
-// +NEW --- миграция: дополняем недостающие поля у старых сохранений ---
+// --- миграция: дополняем недостающие поля у старых сохранений ---
 if (!state.home.pages) state.home.pages = DEFAULTS.home.pages;
 if (!state.home.dock) state.home.dock = DEFAULTS.home.dock;
 if (!state.home.trigger) state.home.trigger = { ...DEFAULTS.home.trigger };
 if (state.home.trigger.tapTimeoutMs == null) state.home.trigger.tapTimeoutMs = 400;
 if (!state.home.attemptsView) state.home.attemptsView = { count: 2, iconIds: [] };
-// гарантируем поле bg у каждой страницы
+if (state.home.editMode == null) state.home.editMode = false; // +NEW
 state.home.pages.forEach((p) => { if (p.bg === undefined) p.bg = null; });
-// +NEW конец миграции
+// --- конец миграции ---
 
 uid = state._uid || 1;
 
@@ -103,7 +103,6 @@ export function findIcon(targetId) {
   return null;
 }
 
-// +NEW --- хелперы для страниц и иконок ---
 export function addPage() {
   state.home.pages.push({ bg: null, icons: [] });
   return state.home.pages.length - 1;
@@ -122,4 +121,3 @@ export function removeIcon(targetId) {
   if (i > -1) found.container.splice(i, 1);
   return true;
 }
-// +NEW конец

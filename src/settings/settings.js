@@ -4,7 +4,7 @@ import { state, commit } from '../state.js';
 
 export function createSettings({ home, onClose }) {
   const root = el('div', { class: 'settings', hidden: true });
-  const sheet = el('div', { class: 'settings__sheet' });   // +NEW контейнер с размытием
+  const sheet = el('div', { class: 'settings__sheet' });
   root.append(sheet);
 
   let activeTab = 'lock'; // 'lock' | 'home'
@@ -30,7 +30,6 @@ export function createSettings({ home, onClose }) {
     sec.append(head, el('div', { class: 'sec__body' }, [el('div', { class: 'sec__inner' }, body)]));
     return sec;
   };
-  // +NEW ввод секунд с клавиатуры (хранится в мс)
   function secRow(label, getMs, setMs) {
     const inp = el('input', {
       type: 'number', min: 0.2, step: 0.1, value: (getMs() / 1000).toFixed(1), class: 'numinp',
@@ -66,24 +65,24 @@ export function createSettings({ home, onClose }) {
     return out;
   }
 
-  // +NEW выбор ОДНОЙ иконки тапом по самой иконке
+  // выбор ОДНОЙ иконки тапом
   function pickIconVisual(label, get, set) {
     const grid = el('div', { class: 'iconpick' });
     const noneBtn = el('button', { class: 'iconpick__none' + (!get() ? ' on' : ''), text: 'нет' });
-    noneBtn.addEventListener('click', () => { set(null); commit('set'); rebuild(label, get, set, grid, noneBtn, false); });
+    noneBtn.addEventListener('click', () => { set(null); commit('set'); rebuild(get, set, grid, noneBtn, false); });
     grid.append(noneBtn);
     allIcons().forEach((i) => grid.append(iconTile(i, () => get() === i.id, () => {
-      set(i.id); commit('set'); rebuild(label, get, set, grid, noneBtn, false);
+      set(i.id); commit('set'); rebuild(get, set, grid, noneBtn, false);
     })));
     return el('div', { class: 'srow srow--col' }, [el('span', { class: 'srow__txt', text: label }), grid]);
   }
-  // +NEW выбор НЕСКОЛЬКИХ иконок тапом
+  // выбор НЕСКОЛЬКИХ иконок тапом
   function pickIconsVisual(label, get, set) {
     const grid = el('div', { class: 'iconpick' });
     allIcons().forEach((i) => grid.append(iconTile(i, () => get().includes(i.id), () => {
       const ids = get().slice(); const idx = ids.indexOf(i.id);
       if (idx > -1) ids.splice(idx, 1); else ids.push(i.id);
-      set(ids); commit('set'); rebuild(label, get, set, grid, null, true);
+      set(ids); commit('set'); rebuild(get, set, grid, null, true);
     })));
     return el('div', { class: 'srow srow--col' }, [el('span', { class: 'srow__txt', text: label }), grid]);
   }
@@ -96,11 +95,16 @@ export function createSettings({ home, onClose }) {
     tile.addEventListener('click', onTap);
     return tile;
   }
-  function rebuild(label, get, set, grid, noneBtn, multi) {
-    // перерисовать выделение без полной пересборки
-    [...grid.querySelectorAll('.iconpick__tile')].forEach((t, idx) => {/* визуал обновим ниже */});
-    // проще: полностью пересоберём панель
-    build();
+  // точечное обновление выделения — без полной пересборки (сохраняет скролл)
+  function rebuild(get, set, grid, noneBtn, multi) {
+    if (noneBtn) noneBtn.classList.toggle('on', !get());
+    const icons = allIcons();
+    [...grid.querySelectorAll('.iconpick__tile')].forEach((t, idx) => {
+      const ic = icons[idx];
+      if (!ic) return;
+      const on = multi ? get().includes(ic.id) : (get() === ic.id);
+      t.classList.toggle('on', on);
+    });
   }
 
   function wallpaperPick(label, get, set) {
@@ -109,7 +113,7 @@ export function createSettings({ home, onClose }) {
       const f = e.target.files[0]; if (!f) return;
       const { fileToDataURL } = await import('../storage.js');
       const data = await fileToDataURL(f);
-      await set(data); commit('wp'); home.render(); build();   // +NEW build() чтобы превью обновилось
+      await set(data); commit('wp'); home.render(); build();
     });
     const preview = el('div', { class: 'wp__preview' });
     if (get()) preview.style.backgroundImage = `url(${get()})`;
@@ -124,7 +128,7 @@ export function createSettings({ home, onClose }) {
 
   const h = state.home;
 
-  // --- содержимое раздела "Экран блокировки" ---
+  // --- раздел "Экран блокировки" ---
   function lockTab() {
     return [
       section('🔒 Код-пароль', [
@@ -151,7 +155,7 @@ export function createSettings({ home, onClose }) {
     ];
   }
 
-  // --- содержимое раздела "Рабочий стол" ---
+  // --- раздел "Рабочий стол" ---
   function homeTab() {
     return [
       section('🎨 Внешний вид', [
@@ -181,6 +185,7 @@ export function createSettings({ home, onClose }) {
         secRow('Длит. удержания', () => h.trigger.holdMs, (v) => (h.trigger.holdMs = v)),
         toggle('Мультитап по столу', () => h.trigger.multiTap, (v) => (h.trigger.multiTap = v)),
         slider('Кол-во тапов', 2, 6, () => h.trigger.tapCount, (v) => (h.trigger.tapCount = v), ''),
+        secRow('Окно между тапами', () => h.trigger.tapTimeoutMs, (v) => (h.trigger.tapTimeoutMs = v)),
         toggle('Тап по иконке', () => h.trigger.icon, (v) => (h.trigger.icon = v)),
         slider('Тапов по иконке', 2, 6, () => h.trigger.iconTapCount, (v) => (h.trigger.iconTapCount = v), ''),
         pickIconVisual('Иконка-триггер (тап по иконке)', () => h.trigger.iconId, (id) => (h.trigger.iconId = id)),
@@ -193,7 +198,6 @@ export function createSettings({ home, onClose }) {
 
   function build() {
     clear(sheet);
-    // вкладки
     const tabs = el('div', { class: 'settings__tabs' }, [
       el('button', { class: 'settings__tab' + (activeTab === 'lock' ? ' on' : ''), text: '🔒 Блокировка', on: { click: () => { activeTab = 'lock'; build(); } } }),
       el('button', { class: 'settings__tab' + (activeTab === 'home' ? ' on' : ''), text: '📱 Рабочий стол', on: { click: () => { activeTab = 'home'; build(); } } }),
