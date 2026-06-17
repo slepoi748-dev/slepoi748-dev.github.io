@@ -5,17 +5,15 @@ let uid = 1;
 const id = () => 'i' + (uid++) + Date.now().toString(36);
 
 const DEFAULTS = {
-  // --- Lock screen ---
   lock: {
-    bg: null,                 // dataURL или путь из img/
-    codeLength: 6,            // 4 | 6
-    longPressMs: 1000,        // длительность долгого нажатия
-    method: 'sos',            // 'sos' | 'attempts' | 'combo'
-    sosAttempt: 1,            // на какой попытке после SOS разблокировать
-    attemptsToUnlock: 3,      // для method='attempts'
-    combo: '1234',            // для method='combo'
+    bg: null,
+    codeLength: 6,
+    longPressMs: 1000,
+    method: 'sos',
+    sosAttempt: 1,
+    attemptsToUnlock: 3,
+    combo: '1234',
   },
-  // --- Home ---
   home: {
     commonBg: null,
     cols: 4,
@@ -26,14 +24,13 @@ const DEFAULTS = {
     gapX: 14, gapY: 18,
     dockOffsetY: 0,
     badge: { bx: 30, by: -2, bw: 22, bh: 22, radius: 11, fontSize: 12 },
-    // вызов настроек
-    trigger: { hold: true, multiTap: false, icon: false, holdMs: 1000, tapCount: 2, iconTapCount: 3, iconId: null },
-    // показ попыток пароля
+    // trigger: holdMs теперь задаётся в секундах через UI, но хранится в мс
+    trigger: { hold: true, multiTap: false, icon: false, holdMs: 1000, tapCount: 2, tapTimeoutMs: 400, iconTapCount: 3, iconId: null }, // +NEW tapTimeoutMs
     attemptsView: { count: 2, iconIds: [] },
-    pages: null,  // заполняется ниже
+    pages: null,
     dock: null,
   },
-  attempts: [],   // история ввода (последние коды)
+  attempts: [],
   _uid: 1,
 };
 
@@ -66,8 +63,17 @@ function seed() {
 seed();
 
 export const state = loadState(DEFAULTS);
+
+// +NEW --- миграция: дополняем недостающие поля у старых сохранений ---
 if (!state.home.pages) state.home.pages = DEFAULTS.home.pages;
 if (!state.home.dock) state.home.dock = DEFAULTS.home.dock;
+if (!state.home.trigger) state.home.trigger = { ...DEFAULTS.home.trigger };
+if (state.home.trigger.tapTimeoutMs == null) state.home.trigger.tapTimeoutMs = 400;
+if (!state.home.attemptsView) state.home.attemptsView = { count: 2, iconIds: [] };
+// гарантируем поле bg у каждой страницы
+state.home.pages.forEach((p) => { if (p.bg === undefined) p.bg = null; });
+// +NEW конец миграции
+
 uid = state._uid || 1;
 
 export function newId() { state._uid = ++uid; return 'i' + uid + Date.now().toString(36); }
@@ -80,7 +86,6 @@ export function commit(reason = '') {
   listeners.forEach((fn) => fn(reason));
 }
 
-/** Найти иконку по id в страницах/доке/папках. */
 export function findIcon(targetId) {
   const { pages, dock } = state.home;
   for (let p = 0; p < pages.length; p++) {
@@ -97,3 +102,24 @@ export function findIcon(targetId) {
   if (d) return { icon: d, container: dock, dock: true };
   return null;
 }
+
+// +NEW --- хелперы для страниц и иконок ---
+export function addPage() {
+  state.home.pages.push({ bg: null, icons: [] });
+  return state.home.pages.length - 1;
+}
+
+export function addIcon(pageIndex, iconData) {
+  const ic = { id: newId(), name: '', bg: '#3a3a3c', emoji: '📦', badge: 0, w: 1, h: 1, ...iconData };
+  state.home.pages[pageIndex].icons.push(ic);
+  return ic;
+}
+
+export function removeIcon(targetId) {
+  const found = findIcon(targetId);
+  if (!found) return false;
+  const i = found.container.indexOf(found.icon);
+  if (i > -1) found.container.splice(i, 1);
+  return true;
+}
+// +NEW конец
