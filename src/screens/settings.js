@@ -19,8 +19,10 @@ export async function openSettings(root, section = 'lock') {
 
   const body = el('div', { class: 'settings-body' });
 
-  if (section === 'lock') {
+    if (section === 'lock') {
     body.append(buildLockSection(manifest));
+  } else if (section === 'home') {
+    body.append(buildHomeSection(manifest));
   }
 
   overlayEl.append(head, body);
@@ -73,6 +75,71 @@ function buildLockSection(manifest) {
   ]));
 
   return frag;
+}
+
+// ---------- Раздел «Рабочий стол» ----------
+function buildHomeSection(manifest) {
+  const frag = document.createDocumentFragment();
+  const c = store.get('home');
+
+  const iconOptions = [
+    { value: '', label: 'Не выбрано' },
+    ...[...c.icons, ...c.dock].map((i) => ({ value: i.id, label: `${i.name} (${i.id})` })),
+  ];
+  const wpOptions = [{ value: '', label: 'Нет' }, ...(manifest.wallpapers || []).map((w) => ({ value: w, label: w }))];
+
+  // Открытие настроек
+  frag.append(group('Открытие настроек', [
+    rowSwitch('Долгое нажатие на экран', 'home.openLongPress'),
+    rowNumber('Длительность нажатия (мс)', 'home.longPressMs', { min: 300, max: 3000, step: 100 }),
+    rowSwitch('N тапов по экрану', 'home.openMultiTap'),
+    rowNumber('Количество тапов', 'home.multiTapCount', { min: 2, max: 10, step: 1 }),
+    rowNumber('Окно между тапами (мс)', 'home.multiTapWindowMs', { min: 200, max: 1500, step: 50 }),
+    rowSwitch('Назначенная иконка (приоритет)', 'home.openViaIcon'),
+    rowSelect('Иконка-триггер', 'home.triggerIconId', iconOptions, String),
+  ]));
+
+  // Фоны
+  frag.append(group('Фон', [
+    rowSwitch('Показывать фон', 'home.showWallpaper'),
+    rowSelect('Общий фон', 'home.wallpaperGlobal', wpOptions, String),
+    rowSelect('Фон этого экрана', 'home.wallpaperThis', wpOptions, String),
+  ]));
+
+  // Сетка
+  frag.append(group('Сетка и иконки', [
+    rowNumber('Колонок', 'home.cols', { min: 2, max: 8, step: 1 }),
+    rowNumber('Строк', 'home.rows', { min: 2, max: 10, step: 1 }),
+    rowRange('Отступ по горизонтали', 'home.gapX', { min: 0, max: 60, step: 1, unit: 'px' }),
+    rowRange('Отступ по вертикали', 'home.gapY', { min: 0, max: 60, step: 1, unit: 'px' }),
+    rowRange('Сдвиг по горизонтали', 'home.offsetX', { min: -100, max: 100, step: 1, unit: 'px' }),
+    rowRange('Сдвиг по вертикали', 'home.offsetY', { min: -100, max: 200, step: 1, unit: 'px' }),
+    rowRange('Размер иконки', 'home.iconSize', { min: 40, max: 90, step: 1, unit: 'px' }),
+    rowRange('Закругление', 'home.iconRadius', { min: 0, max: 45, step: 1, unit: 'px' }),
+    rowRange('Прозрачность иконок', 'home.iconOpacity', { min: 0, max: 1, step: 0.05 }),
+  ]));
+
+  // Dock
+  frag.append(group('Dock', [
+    rowRange('Смещение Dock по вертикали', 'home.dockOffsetY', { min: -120, max: 60, step: 1, unit: 'px' }),
+  ]));
+
+  return frag;
+}
+
+// Слайдер с живым обновлением
+function rowRange(label, path, { min, max, step, unit = '' } = {}) {
+  const valueLabel = el('span', { class: 's-row__sub' });
+  const input = el('input', { type: 'range', min, max, step, value: store.get(path) });
+  const fmt = (v) => `${Number.isInteger(+v) ? v : (+v).toFixed(2)}${unit}`;
+  valueLabel.textContent = fmt(input.value);
+  input.addEventListener('input', () => {
+    valueLabel.textContent = fmt(input.value);
+    store.set(path, Number(input.value));
+  });
+  const left = el('div', {}, [el('div', { class: 's-row__label' }, label), valueLabel]);
+  const right = el('div', { class: 's-control' }, input);
+  return el('div', { class: 's-row' }, [left, right]);
 }
 
 // ---------- Конструкторы UI-элементов ----------

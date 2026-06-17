@@ -1,0 +1,73 @@
+.home {
+  background: #000 center/cover no-repeat;
+}
+
+/* Слой сетки иконок */
+.home__grid-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+.home__grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  padding: 60px 22px 10px;
+  align-content: start;
+  justify-content: center;
+}
+
+/* Иконка приложения */
+.app-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  -webkit-user-drag: none;
+}
+.app-icon__img {
+  background-size: cover;
+  background-position: center;
+  background-color: rgba(120,120,128,0.4);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  transition: transform 0.12s ease, opacity 0.12s;
+}
+.app-icon.active .app-icon__img { transform: scale(0.9); }
+.app-icon__label {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  max-width: 76px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* Бейдж (уведомление) — базовая заготовка под Этап 4 */
+.app-icon__badge {
+  position: absolute;
+  top: -4px; right: 8px;
+  min-width: 18px; height: 18px;
+  padding: 0 5px;
+  background: var(--danger);
+  color: #fff;
+  border-radius: 9px;
+  font-size: 12px; line-height: 18px;
+  text-align: center;
+  display: none;
+}
+.app-icon { position: relative; }
+
+/* Dock — прозрачный фон по ТЗ */
+.home__dock {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 22px;
+  padding: 10px 16px calc(env(safe-area-inset-bottom, 12px) + 12px);
+  background: transparent;
+}
+.home__dock .app-icon__label { display: none; }
