@@ -1,11 +1,13 @@
 import { storage } from '../core/storage.js';
+import { resolveImage } from './media.js';
 
-// Без Vite: относительный путь к папке img рядом с index.html.
 const BASE = './';
 
 export function imgUrl(name) {
   if (!name) return '';
-  return `${BASE}img/${name}`;
+  const resolved = resolveImage(name);
+  if (resolved !== null) return resolved; // user: или data:
+  return `${BASE}img/${name}`;            // файл из img/
 }
 
 let _cache = null;
@@ -17,7 +19,7 @@ export async function loadImageManifest() {
     if (!res.ok) throw new Error(res.status);
     _cache = await res.json();
   } catch (e) {
-    console.warn('[images] manifest не загружен, использую кэш/запас', e);
+    console.warn('[images] manifest не загружен', e);
     _cache = storage.get('imageManifest', { wallpapers: [], icons: [] });
   }
   storage.set('imageManifest', _cache);

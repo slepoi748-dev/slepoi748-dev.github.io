@@ -2,28 +2,26 @@ import { el, clear } from '../utils/dom.js';
 import { store } from '../core/state.js';
 import { bus, EVENTS } from '../core/events.js';
 import { loadImageManifest } from '../utils/images.js';
+import { addUserImage, getUserImages } from '../utils/media.js';
 
 let overlayEl = null;
+let lastRoot = null;
+let lastSection = null;
 
 export async function openSettings(root, section = 'lock') {
-  if (overlayEl) return; // уже открыто
-
+  if (overlayEl) return;
+  lastRoot = root; lastSection = section;
   const manifest = await loadImageManifest();
 
   overlayEl = el('div', { class: 'settings-overlay' });
-
   const head = el('div', { class: 'settings-head' }, [
     el('h1', {}, 'Настройки'),
     el('button', { class: 'settings-close', onClick: closeSettings }, '✕'),
   ]);
-
   const body = el('div', { class: 'settings-body' });
 
-    if (section === 'lock') {
-    body.append(buildLockSection(manifest));
-  } else if (section === 'home') {
-    body.append(buildHomeSection(manifest));
-  }
+  if (section === 'lock') body.append(buildLockSection(manifest));
+  else if (section === 'home') body.append(buildHomeSection(manifest));
 
   overlayEl.append(head, body);
   root.append(overlayEl);
@@ -80,15 +78,9 @@ function buildLockSection(manifest) {
 // ---------- Раздел «Рабочий стол» ----------
 function buildHomeSection(manifest) {
   const frag = document.createDocumentFragment();
-  const c = store.get('home');
 
-  const iconOptions = [
-    { value: '', label: 'Не выбрано' },
-    ...[...c.icons, ...c.dock].map((i) => ({ value: i.id, label: `${i.name} (${i.id})` })),
-  ];
-  const wpOptions = [{ value: '', label: 'Нет' }, ...(manifest.wallpapers || []).map((w) => ({ value: w, label: w }))];
+  const wpOptions = buildImageOptions(manifest.wallpapers || []);
 
-  // Открытие настроек
   frag.append(group('Открытие настроек', [
     rowSwitch('Долгое нажатие на экран', 'home.openLongPress'),
     rowNumber('Длительность нажатия (мс)', 'home.longPressMs', { min: 300, max: 3000, step: 100 }),
@@ -96,17 +88,15 @@ function buildHomeSection(manifest) {
     rowNumber('Количество тапов', 'home.multiTapCount', { min: 2, max: 10, step: 1 }),
     rowNumber('Окно между тапами (мс)', 'home.multiTapWindowMs', { min: 200, max: 1500, step: 50 }),
     rowSwitch('Назначенная иконка (приоритет)', 'home.openViaIcon'),
-    rowSelect('Иконка-триггер', 'home.triggerIconId', iconOptions, String),
+    rowPickIcon('Иконка-триггер', 'home.triggerIconId'),
   ]));
 
-  // Фоны
   frag.append(group('Фон', [
     rowSwitch('Показывать фон', 'home.showWallpaper'),
-    rowSelect('Общий фон', 'home.wallpaperGlobal', wpOptions, String),
-    rowSelect('Фон этого экрана', 'home.wallpaperThis', wpOptions, String),
+    rowImage('Общий фон', 'home.wallpaperGlobal', wpOptions),
+    rowImage('Фон этого экрана', 'home.wallpaperThis', wpOptions),
   ]));
 
-  // Сетка
   frag.append(group('Сетка и иконки', [
     rowNumber('Колонок', 'home.cols', { min: 2, max: 8, step: 1 }),
     rowNumber('Строк', 'home.rows', { min: 2, max: 10, step: 1 }),
@@ -119,7 +109,6 @@ function buildHomeSection(manifest) {
     rowRange('Прозрачность иконок', 'home.iconOpacity', { min: 0, max: 1, step: 0.05 }),
   ]));
 
-  // Dock
   frag.append(group('Dock', [
     rowRange('Смещение Dock по вертикали', 'home.dockOffsetY', { min: -120, max: 60, step: 1, unit: 'px' }),
   ]));
@@ -152,7 +141,7 @@ function group(title, rows) {
 }
 
 function rowBase(label, controlNode, sub) {
-  const left = el('div', {}, [
+  const left = el('div', { class: 's-row__left' }, [
     el('div', { class: 's-row__label' }, label),
     sub ? el('div', { class: 's-row__sub' }, sub) : null,
   ]);
@@ -202,4 +191,69 @@ function rowSwitch(label, path) {
   checkbox.addEventListener('change', () => store.set(path, checkbox.checked));
   const sw = el('label', { class: 'switch' }, [checkbox, el('span', { class: 'track' })]);
   return rowBase(label, sw);
+}
+
+// Список опций картинок: из img/ + пользовательские
+function buildImageOptions(manifestList) {
+  const opts = [{ value: '', label: 'Нет' }];
+  manifestList.forEach((w) => opts.push({ value: w, label: w }));
+  getUserImages().forEach((u) => opts.push({ value: `user:${u.id}`, label: `${u.name} (загружено)` }));
+  return opts;
+}
+
+// Выбор картинки: select + кнопка загрузки с устройства (правка 5)
+function rowImage(label, path, options) {
+  const select = el('select');
+  const fill = () => {
+    clear(select);
+    options.forEach((o) => {
+      const opt = el('option', { value: o.value }, o.label);
+      if (String(o.value) === String(store.get(path))) opt.selected = true;
+      select.append(opt);
+    });
+  };
+  fill();
+  select.addEventListener('change', () => store.set(path, select.value));
+
+  const fileInput = el('input', { type: 'file', accept: 'image/*', style: { display: 'none' } });
+  const uploadBtn = el('button', { class: 's-btn' }, 'Загрузить');
+  uploadBtn.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    const item = await addUserImage(file);
+    options.push({ value: `user:${item.id}`, label: `${item.name} (загружено)` });
+    store.set(path, `user:${item.id}`);
+    fill();
+  });
+
+  const control = el('div', { class: 's-control', style: { gap: '8px' } }, [select, uploadBtn, fileInput]);
+  const left = el('div', { class: 's-row__left' }, el('div', { class: 's-row__label' }, label));
+  return el('div', { class: 's-row' }, [left, control]);
+}
+// Выбор иконки тапом по рабочему столу (правка 4)
+function rowPickIcon(label, path) {
+  const sub = el('div', { class: 's-row__sub' });
+  const updateSub = () => {
+    const id = store.get(path);
+    sub.textContent = id ? `Выбрано: ${id}` : 'Не выбрано';
+  };
+  updateSub();
+
+  const btn = el('button', { class: 's-btn' }, 'Выбрать на экране');
+  btn.addEventListener('click', () => {
+    const root = lastRoot;
+    closeSettings(); // прячем настройки, чтобы видеть рабочий стол
+    bus.emit('home:pickIcon', {
+      onPick: (iconId) => {
+        store.set(path, iconId);
+        // снова открываем настройки
+        openSettings(root, 'home');
+      },
+    });
+  });
+
+  const left = el('div', { class: 's-row__left' }, [el('div', { class: 's-row__label' }, label), sub]);
+  const control = el('div', { class: 's-control' }, btn);
+  return el('div', { class: 's-row' }, [left, control]);
 }
