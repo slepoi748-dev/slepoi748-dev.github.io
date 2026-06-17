@@ -105,6 +105,15 @@ export function createLockScreen({ onUnlock, onOpenSettings }) {
 
   bottom.append(sosBtn, zeroKey, cancelBtn);
 
+  // +NEW --- маленькая матовая кнопка "Готово" по центру внизу ---
+  // По умолчанию скрыта; показывается только в режиме редактирования (home).
+  const doneBtn = el('button', { class: 'lock__done', text: 'Готово' });
+  doneBtn.hidden = true;
+  doneBtn.addEventListener('click', () => {
+    root.dispatchEvent(new CustomEvent('lock-done', { bubbles: true }));
+  });
+  // +NEW конец
+
   // keyboard support
   document.addEventListener('keydown', (e) => {
     if (root.parentElement?.hidden || root.closest('[hidden]')) return;
@@ -119,8 +128,14 @@ export function createLockScreen({ onUnlock, onOpenSettings }) {
   }
 
   buildPad();
-  root.append(bg, label, dots, el('div', { class: 'lock__section' }, [pad, bottom]));
+  // +NEW добавил doneBtn в секцию
+  root.append(bg, label, dots, el('div', { class: 'lock__section' }, [pad, bottom, doneBtn]));
   refresh();
 
-  return { root, refresh, reset };
+  // +NEW методы управления кнопкой "Готово"
+  return {
+    root, refresh, reset,
+    showDone: () => { doneBtn.hidden = false; },
+    hideDone: () => { doneBtn.hidden = true; },
+  };
 }
