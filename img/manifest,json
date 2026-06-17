@@ -1,0 +1,5 @@
+{
+  "wallpapers": ["moon.jpg"],
+  "icons": ["photos.png", "social.png", "video.png"],
+  "comment": "Имена файлов из папки img. Приложение читает этот список для выбора фонов и иконок."
+}
