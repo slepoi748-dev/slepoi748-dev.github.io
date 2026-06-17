@@ -91,6 +91,14 @@ function buildHomeSection(manifest) {
     rowPickIcon('Иконка-триггер', 'home.triggerIconId'),
   ]));
 
+  frag.append(group('Рабочий стол', [
+    rowButton('Редактировать иконки', 'Открыть', () => {
+      const root = lastRoot;
+      closeSettings();
+      bus.emit('home:enterEdit');
+    }),
+  ]));
+
   frag.append(group('Фон', [
     rowSwitch('Показывать фон', 'home.showWallpaper'),
     rowImage('Общий фон', 'home.wallpaperGlobal', wpOptions),
@@ -232,6 +240,14 @@ function rowImage(label, path, options) {
   return el('div', { class: 's-row' }, [left, control]);
 }
 // Выбор иконки тапом по рабочему столу (правка 4)
+function rowButton(label, btnText, onClick) {
+  const btn = el('button', { class: 's-btn' }, btnText);
+  btn.addEventListener('click', onClick);
+  const left = el('div', { class: 's-row__left' }, el('div', { class: 's-row__label' }, label));
+  const control = el('div', { class: 's-control' }, btn);
+  return el('div', { class: 's-row' }, [left, control]);
+}
+
 function rowPickIcon(label, path) {
   const sub = el('div', { class: 's-row__sub' });
   const updateSub = () => {

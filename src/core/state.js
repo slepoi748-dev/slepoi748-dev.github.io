@@ -19,6 +19,9 @@ const DEFAULT_CONFIG = {
     wallpaperGlobal: 'moon.jpg',   // общий фон
     wallpaperThis: '',             // фон именно этого экрана (приоритетнее общего)
 
+       // Редактор
+    editGesture: 'longpress', // 'longpress' = долгое нажатие на иконку открывает меню,
+                             // из меню можно войти в режим редактирования
     // Способы открытия настроек (можно несколько одновременно):
     openLongPress: true,           // долгое нажатие на экран
     openMultiTap: false,           // N тапов по экрану

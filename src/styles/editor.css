@@ -1,0 +1,131 @@
+/* Дрожание иконок в режиме редактирования */
+@keyframes jiggle {
+  0% { transform: rotate(-1.5deg); }
+  50% { transform: rotate(1.5deg); }
+  100% { transform: rotate(-1.5deg); }
+}
+.home.editing .app-icon {
+  animation: jiggle 0.25s infinite;
+}
+.home.editing .app-icon:nth-child(even) { animation-delay: 0.1s; }
+
+/* Кнопка удаления */
+.app-icon__remove {
+  position: absolute;
+  top: -6px; left: 2px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: rgba(60,60,67,0.9);
+  color: #fff; border: none;
+  font-size: 16px; line-height: 22px;
+  text-align: center; cursor: pointer;
+  display: none; z-index: 5;
+  padding: 0;
+}
+.home.editing .app-icon__remove { display: block; }
+
+/* Пустая ячейка (видна только в редакторе) */
+.cell-empty {
+  display: none;
+  align-items: center; justify-content: center;
+  border-radius: 14px;
+  border: 1.5px dashed rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.5);
+  font-size: 28px; font-weight: 300;
+  cursor: pointer;
+}
+.home.editing .cell-empty { display: flex; }
+
+/* Перетаскивание */
+.app-icon.dragging {
+  animation: none !important;
+  opacity: 0.85;
+  z-index: 10;
+  transition: none;
+}
+
+/* Панель режима редактирования */
+.edit-bar {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 12px) + 8px);
+  left: 0; right: 0;
+  display: flex; justify-content: center;
+  z-index: 50;
+  pointer-events: none;
+}
+.edit-bar button {
+  pointer-events: auto;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  color: var(--accent);
+  font-size: 16px; font-weight: 600;
+  padding: 8px 22px; border-radius: 20px;
+  cursor: pointer;
+}
+
+/* Контекстное меню иконки */
+.icon-menu-backdrop {
+  position: absolute; inset: 0;
+  z-index: 300;
+  background: rgba(0,0,0,0.35);
+  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+}
+.icon-menu {
+  position: absolute;
+  min-width: 200px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(30px); backdrop-filter: blur(30px);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+.icon-menu button {
+  display: flex; width: 100%;
+  justify-content: space-between; align-items: center;
+  background: none; border: none;
+  color: #fff; font-size: 16px;
+  padding: 13px 16px; cursor: pointer;
+  border-bottom: 0.5px solid var(--glass-border);
+  text-align: left;
+}
+.icon-menu button:last-child { border-bottom: none; }
+.icon-menu button:active { background: rgba(255,255,255,0.1); }
+.icon-menu button.danger { color: var(--danger); }
+
+/* Модалка добавления/редактирования иконки */
+.icon-dialog-backdrop {
+  position: absolute; inset: 0; z-index: 400;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+}
+.icon-dialog {
+  width: 280px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(30px); backdrop-filter: blur(30px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px; overflow: hidden;
+}
+.icon-dialog__head { padding: 16px; text-align: center; font-size: 17px; font-weight: 600; }
+.icon-dialog__body { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 12px; }
+.icon-dialog__preview {
+  align-self: center;
+  width: 64px; height: 64px; border-radius: 14px;
+  background: rgba(120,120,128,0.4) center/cover no-repeat;
+}
+.icon-dialog input[type="text"],
+.icon-dialog select {
+  background: rgba(120,120,128,0.24); border: none; color: #fff;
+  font-size: 15px; padding: 10px 12px; border-radius: 10px; width: 100%;
+}
+.icon-dialog__row { display: flex; gap: 8px; }
+.icon-dialog__row select { flex: 1; }
+.icon-dialog__actions { display: flex; border-top: 0.5px solid var(--glass-border); }
+.icon-dialog__actions button {
+  flex: 1; background: none; border: none;
+  color: var(--accent); font-size: 16px; padding: 13px; cursor: pointer;
+  border-right: 0.5px solid var(--glass-border);
+}
+.icon-dialog__actions button:last-child { border-right: none; }
+.icon-dialog__actions button.primary { font-weight: 600; }
