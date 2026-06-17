@@ -32,13 +32,21 @@ export function pointer(node, { onTap, onLongPress, onMove, longMs = 1000, moveT
   node.addEventListener('mouseleave', () => { if (mouseDown) { mouseDown = false; cancel(); } });
 }
 
-/** Счётчик быстрых нажатий. Возвращает функцию, дёргаемую на каждый tap. */
-export function multiTap(count, cb, windowMs = 500) {
-  let n = 0, t = null;
-  return () => {
-    n++; clearTimeout(t);
-    if (n >= count) { n = 0; cb(); return; }
-    t = setTimeout(() => { n = 0; }, windowMs);
+// gestures.js — исправленный multiTap
+// Возвращает функцию: вызывай её на каждый тап. Срабатывает cb ровно при N тапах
+// внутри окна timeoutMs между касаниями.
+export function multiTap(count, cb, timeoutMs = 400) {
+  let n = 0;
+  let timer = null;
+  return function () {
+    n++;
+    clearTimeout(timer);
+    if (n >= count) {
+      n = 0;
+      cb();
+      return;
+    }
+    timer = setTimeout(() => { n = 0; }, timeoutMs);
   };
 }
 

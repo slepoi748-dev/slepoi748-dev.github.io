@@ -1,4 +1,4 @@
-// Рабочий стол: страницы, dock, свайпы, edit-режим, меню иконки, папки,
+// Рабочий стол: страницы, dock, свайпы, edit-режим, слоты, меню иконки, папки,
 // триггеры открытия настроек, показ попыток пароля.
 import { el, clear, setBgImage } from '../utils/dom.js';
 import { swipe, pointer, multiTap } from '../utils/gestures.js';
@@ -18,20 +18,44 @@ export function createHomeScreen({ onLock, onOpenSettings, openIconMenu, openFol
   const dots = el('div', { class: 'home__dots' });
   const search = el('div', { class: 'home__search', text: '🔍 Поиск' });
   const dock = el('div', { class: 'home__dock' });
-  const editBar = el('div', { class: 'editbar' });
+
+  // +NEW маленькая матовая кнопка "Готово" вместо широкой плашки
+  const doneBtn = el('button', { class: 'home__done', text: 'Готово' });
+  doneBtn.hidden = true;
+  doneBtn.addEventListener('click', (e) => { e.stopPropagation(); exitEdit(); });
 
   viewport.append(track);
-  root.append(wallpaper, viewport, dots, search, dock, editBar);
+  root.append(wallpaper, viewport, dots, search, dock, doneBtn);
 
-  // ---- триггеры открытия настроек ----
-  const screenTap = multiTap(state.home.trigger.tapCount, () => onOpenSettings());
+  // +NEW триггеры храним в переменных, пересоздаём при каждом render
+  let screenTapFn = null;
+  let iconTapFn = null;
+  function rebuildTriggers() {
+    const t = state.home.trigger;
+    screenTapFn = multiTap(t.tapCount, () => onOpenSettings(), t.tapTimeoutMs || 400);
+    iconTapFn = multiTap(t.iconTapCount, () => onOpenSettings(), t.tapTimeoutMs || 400);
+  }
+  rebuildTriggers();
+
+  // ---- триггеры открытия настроек (стол) ----
+  // +NEW тап по пустому месту: выход из edit ИЛИ мультитап-триггер
   pointer(viewport, {
     longMs: state.home.trigger.holdMs,
-    onLongPress: () => { if (state.home.trigger.hold && !editMode) onOpenSettings(); },
-    onTap: () => { if (state.home.trigger.multiTap && !editMode) screenTap(); },
+    onLongPress: () => {
+      if (editMode) return;                                  // в edit долгий тап не открывает настройки
+      if (state.home.trigger.hold) onOpenSettings();
+    },
+    onTap: (e) => {
+      if (editMode) {
+        // выход только если тап НЕ по иконке/слоту
+        if (!e || !e.target.closest('.cell, .slot, .home__done')) exitEdit();
+        return;
+      }
+      if (state.home.trigger.multiTap) screenTapFn();
+    },
   });
 
-  // ---- свайпы: листание + блокировка свайпом вниз ----
+  // ---- свайпы ----
   swipe(viewport, (dir, startY) => {
     if (editMode) return;
     if (dir === 'left' && currentPage < state.home.pages.length - 1) goPage(currentPage + 1);
@@ -75,19 +99,29 @@ export function createHomeScreen({ onLock, onOpenSettings, openIconMenu, openFol
           toggleMerge(ic.id, cell);
           return;
         }
-        // триггер по иконке
         const t = state.home.trigger;
-        if (t.icon && t.iconId === ic.id) { iconTap(); return; }
+        if (t.icon && t.iconId === ic.id) { iconTapFn(); return; }
         if (ic.folder) openFolder(ic);
       },
     });
   }
-  const iconTap = multiTap(state.home.trigger.iconTapCount, () => onOpenSettings());
+
+  // +NEW пустой слот (только в edit) — тап = добавить иконку в эту позицию
+  function buildSlot(pageIndex, slotIndex) {
+    const slot = el('div', { class: 'slot' }, [el('span', { class: 'slot__plus', text: '+' })]);
+    slot.addEventListener('click', (e) => {
+      e.stopPropagation();
+      addIconAt(pageIndex, slotIndex);
+    });
+    return slot;
+  }
 
   function render() {
     applyVars();
+    rebuildTriggers();                 // +NEW всегда актуальные tapCount/timeout
     clear(track);
-    state.home.pages.forEach((pg) => {
+    const cols = state.home.cols;
+    state.home.pages.forEach((pg, pageIndex) => {
       const page = el('div', { class: 'page' });
       if (pg.bg) setBgImage(page, pg.bg);
       const grid = el('div', { class: 'grid' });
@@ -96,6 +130,13 @@ export function createHomeScreen({ onLock, onOpenSettings, openIconMenu, openFol
         attachTap(cell, ic, 'page');
         grid.append(cell);
       });
+      // +NEW в edit-режиме дорисовываем пустые слоты до кратности cols (минимум 1 ряд)
+      if (editMode) {
+        const filled = pg.icons.length;
+        const rows = Math.max(1, Math.ceil((filled + 1) / cols));
+        const total = rows * cols;
+        for (let s = filled; s < total; s++) grid.append(buildSlot(pageIndex, s));
+      }
       page.append(grid);
       track.append(page);
     });
@@ -110,7 +151,9 @@ export function createHomeScreen({ onLock, onOpenSettings, openIconMenu, openFol
     renderDots();
     renderWallpaper();
     goPage(currentPage, false);
-    editBar.hidden = !editMode;
+
+    // +NEW кнопка "Готово" вместо editbar
+    doneBtn.hidden = !editMode;
     root.classList.toggle('home--edit', editMode);
   }
 
@@ -141,10 +184,12 @@ export function createHomeScreen({ onLock, onOpenSettings, openIconMenu, openFol
   function toggleMerge(id, cell) {
     if (mergeSel.has(id)) { mergeSel.delete(id); cell.classList.remove('cell--sel'); }
     else { mergeSel.add(id); cell.classList.add('cell--sel'); }
-    editBar.querySelector('.editbar__info').textContent = mergeSel.size ? `Выбрано: ${mergeSel.size}` : 'Режим редактирования';
+    // +NEW editbar убрали — кнопку "Объединить" покажем, если выбрано 2+
+    doneBtn.textContent = mergeSel.size >= 2 ? `Объединить (${mergeSel.size})` : 'Готово';
+    doneBtn.classList.toggle('home__done--merge', mergeSel.size >= 2);
   }
   function mergeSelected() {
-    if (mergeSel.size < 2) { alert('Выберите 2+ иконок'); return; }
+    if (mergeSel.size < 2) return;
     const items = [];
     let host = null;
     [...mergeSel].forEach((id, idx) => {
@@ -164,19 +209,33 @@ export function createHomeScreen({ onLock, onOpenSettings, openIconMenu, openFol
     commit('delete'); render();
   }
 
-  editBar.append(
-    el('div', { class: 'editbar__info', text: 'Режим редактирования' }),
-    el('button', { class: 'editbar__btn editbar__btn--primary', text: '🔗 Объединить', on: { click: mergeSelected } }),
-    el('button', { class: 'editbar__btn', text: '✓ Готово', on: { click: exitEdit } }),
-  );
+  // +NEW клик по "Готово" с учётом merge
+  doneBtn.addEventListener('click', () => {}, { once: false });
+  // (заменяем обработчик выше) — единый клик:
+  doneBtn.onclick = (e) => {
+    e.stopPropagation();
+    if (mergeSel.size >= 2) { mergeSelected(); return; }
+    exitEdit();
+  };
+
+  // +NEW добавление иконки в конкретный слот
+  function addIconAt(pageIndex, slotIndex) {
+    const icons = state.home.pages[pageIndex].icons;
+    const ic = { id: newId(), name: 'Новая', bg: '#3a3a3c', emoji: '✨', badge: 0, w: 1, h: 1 };
+    if (slotIndex >= icons.length) icons.push(ic);
+    else icons.splice(slotIndex, 0, ic);
+    commit('addIcon'); render();
+    // сразу открываем меню редактирования новой иконки
+    openIconMenu(ic, 'page');
+  }
 
   return {
     root, render,
     enterEdit, exitEdit,
     goPage: (i) => goPage(i),
-    addIcon() {
-      state.home.pages[currentPage].icons.push({ id: newId(), name: 'Новая', bg: '#3a3a3c', emoji: '✨', badge: 0, w: 1, h: 1 });
-      commit('addIcon'); enterEdit();
+    addIcon() {                                  // добавить на текущий экран (из настроек)
+      addIconAt(currentPage, state.home.pages[currentPage].icons.length);
+      enterEdit();
     },
     addPage() { state.home.pages.push({ bg: null, icons: [] }); commit('addPage'); render(); goPage(state.home.pages.length - 1); },
     delPage() {

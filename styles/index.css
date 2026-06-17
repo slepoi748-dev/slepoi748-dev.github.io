@@ -176,19 +176,45 @@ button{font-family:inherit;cursor:pointer;border:none}
   background: #000 center/cover; border: 1px solid rgba(255,255,255,.2);
 }
 
-/* +NEW матовая кнопка "Готово" */
-.lock__done {
-  display: block;
-  margin: 14px auto 0;
-  padding: 7px 22px;
-  border: none; border-radius: 18px;
-  color: #fff; font-size: 15px; font-weight: 500;
-  background: rgba(255,255,255,.16);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+/* +NEW маленькая матовая кнопка "Готово" на рабочем столе */
+.home__done {
+  position: absolute;
+  left: 50%; transform: translateX(-50%);
+  bottom: calc(96px + env(safe-area-inset-bottom)); /* над доком */
+  z-index: 40;
+  padding: 8px 24px;
+  border: none; border-radius: 20px;
+  color: #fff; font-size: 15px; font-weight: 600;
+  background: rgba(255,255,255,.18);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 16px rgba(0,0,0,.3);
   cursor: pointer;
 }
-.lock__done:active { background: rgba(255,255,255,.3); }
+.home__done:active { background: rgba(255,255,255,.32); }
+.home__done--merge { background: #0a84ff; }
+
+/* +NEW пустые слоты в режиме редактирования */
+.slot {
+  width: var(--icon-size); height: var(--icon-size);
+  border-radius: var(--icon-radius);
+  border: 2px dashed rgba(255,255,255,.35);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background .15s;
+}
+.slot:active { background: rgba(255,255,255,.12); }
+.slot__plus { font-size: 28px; color: rgba(255,255,255,.6); font-weight: 300; }
+
+/* выбранная иконка при объединении */
+.cell--sel { outline: 3px solid #0a84ff; outline-offset: 2px; border-radius: var(--icon-radius); }
+
+/* лёгкое покачивание иконок в edit-режиме (как iOS) */
+.home--edit .cell { animation: wobble .3s infinite alternate ease-in-out; }
+@keyframes wobble {
+  from { transform: rotate(-1.2deg); }
+  to   { transform: rotate(1.2deg); }
+}
 
 /* ===== HOME ===== */
 .home{position:absolute;inset:0;display:flex;flex-direction:column}
