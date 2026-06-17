@@ -117,13 +117,19 @@ export function renderHomescreen(root) {
     tapTimer = setTimeout(() => { tapCount = 0; tapSource = null; }, c.multiTapWindowMs);
   }
 
-  // --- Жесты экрана ---
-  // Долгое нажатие на экран открывает настройки ВСЕГДА (правка 1)
+    // --- Жесты экрана ---
+  // Долгое нажатие открывает настройки ТОЛЬКО если включён соответствующий тумблер
   onLongPress(gridWrap, () => {
     if (pickMode) return;
+    if (!store.get('home.openLongPress')) return;   // ← проверка флага
+
+    // Если иконка-триггер в приоритете и её режим — долгое нажатие,
+    // то долгое нажатие на пустой экран НЕ открывает настройки (открывает только зажатие иконки)
+    const c = store.get('home');
+    if (c.openViaIcon && c.triggerIconId) return;    // приоритет у иконки
+
     openSettings(root, 'home');
   }, () => store.get('home.longPressMs'));
-
   // N тапов по пустому экрану (правка 2)
   gridWrap.addEventListener('click', () => {
     if (pickMode) return;
