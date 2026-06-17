@@ -2,130 +2,101 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#000000">
-<title>Lock Screen</title>
-<link rel="stylesheet" href="styles.css">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Phone</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:-apple-system,system-ui,sans-serif; background:#000; height:100vh;
+         display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .screen { width:100%; max-width:420px; height:100vh; background:#111;
+            color:#fff; position:relative; overflow:hidden; }
+
+  .lock { position:absolute; inset:0; z-index:10;
+          background:linear-gradient(160deg,#1e293b,#0f172a);
+          display:flex; flex-direction:column; align-items:center;
+          transition:transform .4s ease, opacity .4s ease; }
+  .lock.hidden { transform:translateY(-100%); opacity:0; pointer-events:none; }
+  .clock { margin-top:80px; font-size:72px; font-weight:300; }
+  .date  { font-size:18px; opacity:.8; margin-top:4px; }
+
+  .pin { margin-top:auto; margin-bottom:60px; text-align:center; }
+  .dots { display:flex; gap:18px; justify-content:center; margin:18px 0; }
+  .dot  { width:14px; height:14px; border-radius:50%; border:2px solid #fff; }
+  .dot.on { background:#fff; }
+  .pad  { display:grid; grid-template-columns:repeat(3,72px); gap:18px; }
+  .key  { width:72px; height:72px; border-radius:50%; border:none;
+          background:rgba(255,255,255,.15); color:#fff; font-size:28px; }
+  .key:active { background:rgba(255,255,255,.35); }
+
+  .home { padding:60px 20px; }
+  .home h1 { font-weight:400; }
+</style>
 </head>
-<body class="style-ios">
-<div id="device">
-<div class="wallpaper" id="wallpaper"></div>
-<input type="file" id="bgInput" accept="image/*" onchange="changeBg(event)">
-<div class="lock-screen" id="lockScreen">
-<div class="top-label" id="topLabel">Смахните вверх для Face ID<br>или введите код-пароль</div>
-<div class="dots-container" id="dotsContainer"></div>
-<div class="passcode-section">
-<div class="keyboard" id="keyboard">
-<div class="key" data-digit="1" onclick="pressKey('1',this)"><span class="key-number">1</span><span class="key-letters">&nbsp;</span></div>
-<div class="key" data-digit="2" onclick="pressKey('2',this)"><span class="key-number">2</span><span class="key-letters">АБВГ<br>ABC</span></div>
-<div class="key" data-digit="3" onclick="pressKey('3',this)"><span class="key-number">3</span><span class="key-letters">ДЕЖЗ<br>DEF</span></div>
-<div class="key" data-digit="4" onclick="pressKey('4',this)"><span class="key-number">4</span><span class="key-letters">ИЙКЛ<br>GHI</span></div>
-<div class="key" data-digit="5" onclick="pressKey('5',this)"><span class="key-number">5</span><span class="key-letters">МНОП<br>JKL</span></div>
-<div class="key" data-digit="6" onclick="pressKey('6',this)"><span class="key-number">6</span><span class="key-letters">РСТУ<br>MNO</span></div>
-<div class="key" data-digit="7" onclick="pressKey('7',this)"><span class="key-number">7</span><span class="key-letters">ФХЦЧ<br>PQRS</span></div>
-<div class="key" data-digit="8" onclick="pressKey('8',this)"><span class="key-number">8</span><span class="key-letters">ШЩЪЫ<br>TUV</span></div>
-<div class="key" data-digit="9" onclick="pressKey('9',this)"><span class="key-number">9</span><span class="key-letters">ЬЭЮЯ<br>WXYZ</span></div>
-</div>
-<div class="bottom-row">
-<button class="btn-sos" id="sosKey">SOS</button>
-<div class="key-zero" data-digit="0" onclick="pressKey('0',this)"><span class="key-number">0</span></div>
-<button class="btn-cancel" id="cancelKey">Отменить</button>
-</div>
-</div>
-</div>
-<div class="settings-overlay" id="settingsOverlay">
-<div class="settings-header"><div class="settings-title">⚙️ Настройки блокировки</div><button class="settings-close" onclick="closeSettings()">Готово</button></div>
-<div class="settings-block"><div class="settings-block-title">Размер кнопок ввода</div><input type="range" class="size-slider" id="sizeSlider" min="60" max="120" value="96" oninput="changeKeySize(this.value)"><div class="size-value" id="sizeValue">96 px</div></div>
-<div class="settings-block"><div class="settings-block-title">Смещение цифр (относительно «5»)</div>
-<div class="slider-row"><div class="sl-label"><span>По горизонтали</span><span id="pinXVal">0 px</span></div><input type="range" class="size-slider" id="pinXSlider" min="-40" max="40" value="0" oninput="changePinSpread('x',this.value)"></div>
-<div class="slider-row"><div class="sl-label"><span>По вертикали</span><span id="pinYVal">0 px</span></div><input type="range" class="size-slider" id="pinYSlider" min="-40" max="40" value="0" oninput="changePinSpread('y',this.value)"></div></div>
-<div class="settings-block"><div class="settings-block-title">Сдвиг блока цифр</div><div class="slider-row"><div class="sl-label"><span>Сдвиг</span><span id="pinBlockVal">0 px</span></div><input type="range" class="size-slider" id="pinBlockSlider" min="-200" max="100" value="0" oninput="changePinBlockY(this.value)"></div></div>
-<div class="settings-block"><div class="settings-block-title">Реальный код-пароль (для «Сразу»)</div><div class="slider-row" style="display:flex;gap:8px;align-items:center;"><input type="text" id="realPinInput" inputmode="numeric" maxlength="6" placeholder="1234" style="flex:1;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:#fff;border-radius:10px;padding:11px 12px;font-size:15px;outline:none;"><button class="settings-close" onclick="saveRealPin()">OK</button></div></div>
-<div class="settings-block"><div class="settings-block-title">Фон блокировки</div><button class="bg-pick-btn" onclick="document.getElementById('bgInput').click()">🖼 Выбрать с устройства</button><button class="bg-pick-btn" style="margin-top:10px;" onclick="openGallery('lockBg')">🗂 Из папки img</button><button class="bg-pick-btn" style="margin-top:10px;" onclick="resetBg()">↺ Сбросить</button></div>
-<div class="settings-block"><div class="settings-block-title">Метод разблокировки</div><div class="option-row"><button class="option-btn active" data-method="sos" onclick="setUnlockMethod('sos',this)">SOS</button><button class="option-btn" data-method="attempts" onclick="setUnlockMethod('attempts',this)">3 попытки</button><button class="option-btn" data-method="instant" onclick="setUnlockMethod('instant',this)">Сразу</button></div><div class="settings-hint" id="methodHint">Нажмите SOS, затем код</div></div>
-<div class="settings-block"><div class="settings-block-title">Стиль</div><div class="option-row"><button class="option-btn active" data-style="ios" onclick="setStyle('ios',this)">🍎 iOS</button><button class="option-btn" data-style="android" onclick="setStyle('android',this)">🤖 Android</button></div></div>
-<div class="settings-hint">Меню: удержание «Отменить» (2 сек)</div>
-</div>
-<div class="unlock-screen" id="unlockScreen">
-<div id="phone">
-<div id="homeWallpaper"></div>
-<div id="pagesViewport"><div id="pagesTrack"></div></div>
-<div id="pageDots"></div>
-<div id="search">🔍 Поиск</div>
-<div id="dock"></div>
-<div id="editBar"><div class="eb-info" id="ebInfo">Режим редактирования</div><button class="primary" id="ebMerge">🔗 Объединить</button><button id="ebDone">✓ Готово</button></div>
-<div id="folderView"><div id="folderTitle"></div><div id="folderBox"></div></div>
-<div id="iconMenu"><div class="im-card" onclick="event.stopPropagation()">
-<div class="im-head"><div class="im-prev" id="imPrev">📱</div><div class="im-title" id="imTitle">Иконка</div></div>
-<div class="im-sub">Название</div><div class="im-row"><input type="text" id="imName" placeholder="Название"><button class="im-ok" id="imNameOk">OK</button></div>
-<div class="im-sub">Эмодзи / символ</div><div class="im-row"><input type="text" id="imEmoji" maxlength="4" placeholder="📷 или T"><button class="im-ok" id="imEmojiOk">OK</button></div>
-<div class="im-sub">Цвет фона</div><div class="im-row"><input type="color" id="imColor" value="#444444"><input type="text" id="imColorText" placeholder="#444444"><button class="im-ok" id="imColorOk">OK</button></div>
-<div class="im-sub">Размер блока</div><div class="im-seg" id="imSizeSeg"><button data-w="1" data-h="1">1×1</button><button data-w="2" data-h="1">2×1</button><button data-w="2" data-h="2">2×2</button></div>
-<div class="im-sub">Уведомление (0 = убрать)</div><div class="im-row"><input type="number" id="imBadge" min="0" max="99999" placeholder="0"><button class="im-ok" id="imBadgeOk">OK</button></div>
-<button class="im-btn" id="imPhoto"><span class="imi">🖼</span> Фото с устройства</button><button class="im-btn" id="imPhotoGallery"><span class="imi">🗂</span> Фото из папки img</button><button class="im-btn" id="imResetPhoto"><span class="imi">🚫</span> Убрать фото</button><button class="im-btn" id="imMakeFolder"><span class="imi">📁</span> Папка / открыть</button><button class="im-btn danger" id="imDelete"><span class="imi">🗑</span> Удалить</button><button class="im-close" id="imClose">Закрыть</button>
-</div></div>
-<div id="hsSettings">
-<h2>⚙️ Настройки рабочего стола</h2><div class="subtitle">Нажмите на заголовок группы</div>
-<div class="set-section" data-sec="appear"><div class="set-section-head"><span><span class="sec-ic">🎨</span>Внешний вид</span><span class="sec-chevron">›</span></div><div class="set-section-body"><div class="set-section-body-inner">
-<div class="set-group"><div class="set-row" data-act="homeBg"><span class="ic">🌄</span><span class="txt">Общий фон (устройство)</span><span class="arrow">›</span></div><div class="set-row" data-act="homeBgGallery"><span class="ic">🗂</span><span class="txt">Общий фон (папка img)</span><span class="arrow">›</span></div><div class="set-row" data-act="homeBgReset"><span class="ic">↺</span><span class="txt">Удалить общий фон</span><span class="arrow">›</span></div><div class="set-row" data-act="pageBg"><span class="ic">🖼</span><span class="txt">Фон экрана (устройство)</span><span class="arrow">›</span></div><div class="set-row" data-act="pageBgGallery"><span class="ic">🗂</span><span class="txt">Фон экрана (папка img)</span><span class="arrow">›</span></div><div class="set-row" data-act="pageBgReset"><span class="ic">↺</span><span class="txt">Сбросить фон экрана</span><span class="arrow">›</span></div><div class="set-row" data-act="openGalleryManage"><span class="ic">🗂</span><span class="txt">Папка img (загрузить картинки)</span><span class="arrow">›</span></div></div>
-<div class="divider-label">Сетка</div><div class="set-group group-inner-block">
-<div class="slider-row"><div class="sl-label"><span>Колонок</span><span id="colsVal">4</span></div><input type="range" class="size-slider" id="colsSlider" min="3" max="6" value="4" oninput="changeCols(this.value)"></div>
-<div class="slider-row"><div class="sl-label"><span>Отступ X</span><span id="gapXVal">10px</span></div><input type="range" class="size-slider" id="gapXSlider" min="0" max="40" value="10" oninput="changeGapX(this.value)"></div>
-<div class="slider-row"><div class="sl-label"><span>Отступ Y</span><span id="gapYVal">14px</span></div><input type="range" class="size-slider" id="gapYSlider" min="0" max="50" value="14" oninput="changeGapY(this.value)"></div>
-<button class="tweak-launch" data-tweak="grid">👁 Поверх стола</button></div>
-<div class="divider-label">Размер иконок</div><div class="set-group group-inner-block">
-<div class="slider-row"><div class="sl-label"><span>Размер</span><span id="iconSizeVal">60px</span></div><input type="range" class="size-slider" id="iconSizeSlider" min="36" max="100" value="60" oninput="changeIconSize(this.value)"></div>
-<div class="slider-row"><div class="sl-label"><span>Скругление</span><span id="iconRadiusVal">15px</span></div><input type="range" class="size-slider" id="iconRadiusSlider" min="0" max="50" value="15" oninput="changeIconRadius(this.value)"></div>
-<button class="tweak-launch" data-tweak="iconsize">👁 Поверх стола</button></div>
-<div class="divider-label">Положение иконок</div><div class="set-group group-inner-block">
-<div class="slider-row"><div class="sl-label"><span>По X</span><span id="iconXVal">0 px</span></div><input type="range" class="size-slider" id="iconXSlider" min="-60" max="60" value="0" oninput="changeIconOffset('x',this.value)"></div>
-<div class="slider-row"><div class="sl-label"><span>По Y</span><span id="iconYVal">0 px</span></div><input type="range" class="size-slider" id="iconYSlider" min="-60" max="120" value="0" oninput="changeIconOffset('y',this.value)"></div>
-<button class="tweak-launch" data-tweak="iconpos">👁 Поверх стола</button></div>
-<div class="divider-label">Прозрачность</div><div class="set-group group-inner-block">
-<div class="slider-row"><div class="sl-label"><span>Прозрачность</span><span id="iconOpVal">100%</span></div><input type="range" class="size-slider" id="iconOpSlider" min="0" max="100" value="100" oninput="changeIconOpacity(this.value)"></div>
-<button class="tweak-launch" data-tweak="iconop">👁 Поверх стола</button></div>
-</div></div></div>
-<div class="set-section" data-sec="labels"><div class="set-section-head"><span><span class="sec-ic">🔤</span>Подписи иконок</span><span class="sec-chevron">›</span></div><div class="set-section-body"><div class="set-section-body-inner">
-<div class="set-group group-inner-block">
-<div class="set-row"><span class="ic">👁</span><span class="txt">Показывать подписи</span><label class="switch"><input type="checkbox" id="labelToggle" checked onchange="toggleLabels(this.checked)"><span class="sw-track"></span></label></div>
-<div class="slider-row"><div class="sl-label"><span>Размер шрифта</span><span id="labelSizeVal">11px</span></div><input type="range" class="size-slider" id="labelSizeSlider" min="7" max="18" value="11" oninput="changeLabelSize(this.value)"></div>
-<div class="slider-row"><div class="sl-label"><span>Отступ от иконки</span><span id="labelGapVal">4px</span></div><input type="range" class="size-slider" id="labelGapSlider" min="0" max="16" value="4" oninput="changeLabelGap(this.value)"></div>
-<div class="set-row"><span class="ic">🎨</span><span class="txt">Цвет подписей</span><input type="color" id="labelColor" value="#ffffff" onchange="changeLabelColor(this.value)"></div>
-<div class="set-row"><span class="ic">🌑</span><span class="txt">Тень текста</span><label class="switch"><input type="checkbox" id="labelShadow" checked onchange="toggleLabelShadow(this.checked)"><span class="sw-track"></span></label></div>
-<button class="tweak-launch" data-tweak="labels">👁 Поверх стола</button></div>
-</div></div></div>
+<body>
+  <div class="screen">
+    <div class="lock" id="lock">
+      <div class="clock" id="clock">00:00</div>
+      <div class="date"  id="date">—</div>
+      <div class="pin">
+        <div class="dots" id="dots"></div>
+        <div class="pad" id="pad"></div>
+      </div>
+    </div>
 
-<div class="set-section" data-sec="dock"><div class="set-section-head"><span><span class="sec-ic">⚓</span>Док</span><span class="sec-chevron">›</span></div><div class="set-section-body"><div class="set-section-body-inner">
-<div class="set-group group-inner-block">
-<div class="set-row"><span class="ic">👁</span><span class="txt">Показывать док</span><label class="switch"><input type="checkbox" id="dockToggle" checked onchange="toggleDock(this.checked)"><span class="sw-track"></span></label></div>
-<div class="slider-row"><div class="sl-label"><span>Прозрачность фона</span><span id="dockOpVal">35%</span></div><input type="range" class="size-slider" id="dockOpSlider" min="0" max="100" value="35" oninput="changeDockOpacity(this.value)"></div>
-<div class="slider-row"><div class="sl-label"><span>Высота</span><span id="dockHVal">90px</span></div><input type="range" class="size-slider" id="dockHSlider" min="60" max="130" value="90" oninput="changeDockHeight(this.value)"></div>
-<div class="slider-row"><div class="sl-label"><span>Скругление</span><span id="dockRadVal">34px</span></div><input type="range" class="size-slider" id="dockRadSlider" min="0" max="50" value="34" oninput="changeDockRadius(this.value)"></div>
-<button class="tweak-launch" data-tweak="dock">👁 Поверх стола</button></div>
-</div></div></div>
+    <div class="home">
+      <h1>Готово ✅</h1>
+      <p>Телефон разблокирован.</p>
+    </div>
+  </div>
 
-<div class="set-section" data-sec="behavior"><div class="set-section-head"><span><span class="sec-ic">⚙️</span>Поведение</span><span class="sec-chevron">›</span></div><div class="set-section-body"><div class="set-section-body-inner">
-<div class="set-group group-inner-block">
-<div class="set-row"><span class="ic">🔍</span><span class="txt">Строка поиска</span><label class="switch"><input type="checkbox" id="searchToggle" checked onchange="toggleSearch(this.checked)"><span class="sw-track"></span></label></div>
-<div class="set-row"><span class="ic">⚫</span><span class="txt">Точки страниц</span><label class="switch"><input type="checkbox" id="dotsToggle" checked onchange="togglePageDots(this.checked)"><span class="sw-track"></span></label></div>
-<div class="set-row" data-act="addPage"><span class="ic">➕</span><span class="txt">Добавить страницу</span><span class="arrow">›</span></div>
-<div class="set-row" data-act="addIcon"><span class="ic">🆕</span><span class="txt">Добавить иконку</span><span class="arrow">›</span></div>
-<div class="set-row danger-row" data-act="resetAll"><span class="ic">♻️</span><span class="txt">Сбросить всё</span><span class="arrow">›</span></div>
-</div></div></div>
-<button class="hs-close-btn" onclick="closeHsSettings()">Готово</button>
-</div>
+<script>
+  const PIN = "1234";              // ← правильный код
+  let entered = "";
 
-<div id="gallery"><div class="gal-head"><div class="gal-title">🗂 Папка img</div><button class="gal-close" onclick="closeGallery()">✕</button></div>
-<div class="gal-upload"><button onclick="document.getElementById('galInput').click()">⬆ Загрузить</button><input type="file" id="galInput" accept="image/*" multiple onchange="uploadToGallery(event)"></div>
-<div class="gal-grid" id="galGrid"></div></div>
+  const lock = document.getElementById('lock');
+  const dots = document.getElementById('dots');
+  const pad  = document.getElementById('pad');
 
-<div id="hotzone"></div>
-</div></div>
-</div>
+  // часы
+  function paint(){
+    const n = new Date();
+    document.getElementById('clock').textContent =
+      String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+    document.getElementById('date').textContent =
+      n.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+  }
+  paint(); setInterval(paint, 10000);
 
-<script src="app.js"></script>
+  // точки
+  function drawDots(){
+    dots.innerHTML = '';
+    for(let i=0;i<4;i++){
+      const d = document.createElement('div');
+      d.className = 'dot' + (i < entered.length ? ' on' : '');
+      dots.appendChild(d);
+    }
+  }
+  drawDots();
+
+  // клавиши
+  ['1','2','3','4','5','6','7','8','9','','0','⌫'].forEach(k=>{
+    const b = document.createElement('button');
+    b.className = 'key';
+    b.textContent = k;
+    if(k === '') { b.style.visibility='hidden'; }
+    b.onclick = () => {
+      if(k === '⌫') entered = entered.slice(0,-1);
+      else if(k && entered.length < 4) entered += k;
+      drawDots();
+      if(entered.length === 4){
+        setTimeout(()=>{
+          if(entered === PIN) lock.classList.add('hidden');
+          else { entered = ''; drawDots(); }   // неверно — сброс
+        }, 150);
+      }
+    };
+    pad.appendChild(b);
+  });
+</script>
 </body>
 </html>
