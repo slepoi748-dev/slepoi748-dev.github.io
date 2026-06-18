@@ -3,13 +3,21 @@ import { el, clear, $$ } from '../utils/dom.js';
 import { onLongPress } from '../utils/gestures.js';
 import { store } from '../core/state.js';
 import { bus, EVENTS } from '../core/events.js';
-import { imgUrl } from '../utils/images.js';
 import { openSettings } from './settings.js';
 
 const LETTERS = {
   1: '', 2: 'ABC', 3: 'DEF', 4: 'GHI', 5: 'JKL',
   6: 'MNO', 7: 'PQRS', 8: 'TUV', 9: 'WXYZ', 0: '',
 };
+
+// Строим URL картинки без внешних зависимостей.
+// Поддержка пользовательских картинок user:... — это dataURL/имя как есть.
+function wallpaperUrl(name) {
+  if (!name) return '';
+  if (name.startsWith('user:')) return ''; // на локскрине пользовательские не используем
+  if (name.startsWith('data:') || name.startsWith('http') || name.startsWith('/')) return name;
+  return `img/${name}`;
+}
 
 export function renderLockscreen(root) {
   clear(root);
@@ -92,7 +100,7 @@ export function renderLockscreen(root) {
     renderDots();
     refreshCancel();
     pulse(sosBtn);
-  }, () => store.get('lock.longPressMs'));
+  }, () => store.get('lock.longPressMs') || 1000);
 
   sosBtn.addEventListener('click', () => {
     sosPressed = true;
@@ -102,7 +110,7 @@ export function renderLockscreen(root) {
 
   onLongPress(cancelBtn, () => {
     openSettings(root, 'lock');
-  }, () => store.get('lock.longPressMs'));
+  }, () => store.get('lock.longPressMs') || 1000);
 
   cancelBtn.addEventListener('click', () => {
     if (!entered.length) return;
@@ -130,11 +138,11 @@ export function renderLockscreen(root) {
     if (mode === 'afterSos') {
       if (sosPressed) {
         sosAttempts++;
-        const need = Math.max(1, store.get('lock.sosUnlockAttempt'));
+        const need = Math.max(1, store.get('lock.sosUnlockAttempt') || 1);
         if (sosAttempts >= need) success = true;
       }
     } else if (mode === 'afterAttempts') {
-      const need = Math.max(1, store.get('lock.attemptsToUnlock'));
+      const need = Math.max(1, store.get('lock.attemptsToUnlock') || 1);
       if (attempts >= need) success = true;
     } else if (mode === 'secret') {
       if (code === String(store.get('lock.secretCode'))) success = true;
@@ -205,5 +213,6 @@ export function renderLockscreen(root) {
 function applyWallpaper(screen) {
   const show = store.get('lock.showWallpaper');
   const wp = store.get('lock.wallpaper');
-  screen.style.backgroundImage = show && wp ? `url("${imgUrl(wp)}")` : 'none';
+  const url = show ? wallpaperUrl(wp) : '';
+  screen.style.backgroundImage = url ? `url("${url}")` : 'none';
 }
