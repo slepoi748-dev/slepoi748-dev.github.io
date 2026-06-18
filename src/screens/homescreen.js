@@ -600,10 +600,9 @@ function applyWallpaper(screen) {
   const wp = store.get('home.wallpaperThis') || store.get('home.wallpaperGlobal');
   const url = show && wp ? `url("${imgUrl(wp)}")` : 'none';
 
-  // фон самого экрана
-  screen.style.backgroundImage = url;
+  // экран прозрачный — фон рисует глобальный слой #app-bg
+  screen.style.backgroundImage = 'none';
 
-  // дублируем обои на body — чтобы зона статус-бара в PWA
-  // заполнялась той же картинкой и на «холодном» старте
-  document.body.style.backgroundImage = url;
+  const bg = document.getElementById('app-bg');
+  if (bg) bg.style.backgroundImage = url;
 }
