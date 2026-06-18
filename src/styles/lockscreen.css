@@ -1,70 +1,170 @@
-.lock {
-  background: #000 center/cover no-repeat;
-  align-items: center;
-  justify-content: flex-end;
-  padding-bottom: 6vh;
+/* фон-обои */
+.wallpaper {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: #000 center / cover no-repeat;
 }
 
-.lock__top {
-  position: absolute;
-  top: 8vh; left: 0; right: 0;
+/* экран блокировки */
+.lock-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #fff;
+  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 54px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+}
+
+/* подсказка сверху */
+.lock-screen .top-label {
+  text-align: center;
+  font-size: 17px;
+  line-height: 1.35;
+  font-weight: 400;
+  margin-top: 4px;
+  padding: 0 24px;
+  flex: 0 0 auto;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .45);
+}
+
+/* точки кода */
+.lock-screen .dots-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 22px;
+  margin: 24px 0 8px;
+  flex: 0 0 auto;
+}
+
+.lock-screen .dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1.5px solid #fff;
+  background: transparent;
+  transition: background .15s ease, border-color .15s ease;
+}
+
+.lock-screen .dot.filled {
+  background: #fff;
+}
+
+.lock-screen .dots-container.wrong-animation {
+  animation: ls-shake .5s ease;
+}
+
+@keyframes ls-shake {
+  0%, 100% { transform: translateX(0); }
+  15%      { transform: translateX(-12px); }
+  30%      { transform: translateX(12px); }
+  45%      { transform: translateX(-9px); }
+  60%      { transform: translateX(9px); }
+  75%      { transform: translateX(-5px); }
+}
+
+/* нижний блок (клавиатура + ряд кнопок) прижат к низу */
+.lock-screen .passcode-section {
+  margin-top: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* сдвиг всего блока цифр из настроек */
+  transform: translate(var(--pin-block-x, 0px), var(--pin-block-y, 0px));
+}
+
+/* клавиатура — сетка 3 колонки */
+.lock-screen .keyboard {
+  display: grid;
+  grid-template-columns: repeat(3, var(--key-size, 96px));
+  justify-content: center;
+  column-gap: 26px;
+  row-gap: 14px;
+}
+
+/* клавиша (общий вид для .key и .key-zero) */
+.lock-screen .key,
+.lock-screen .key-zero {
+  width: var(--key-size, 96px);
+  height: var(--key-size, 96px);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .14);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lock-screen .key.pressed,
+.lock-screen .key-zero.pressed {
+  background: rgba(255, 255, 255, .4);
+}
+
+.lock-screen .key-number {
+  font-size: var(--key-font-size, 32px);
+  font-weight: 400;
+}
+
+.lock-screen .key-letters {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  margin-top: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  line-height: 1.1;
   text-align: center;
 }
-.lock__title { font-size: 17px; color: var(--text); margin: 0 0 28px; font-weight: 500; }
 
-.lock__dots {
-  display: flex; gap: 22px; justify-content: center;
-  margin-bottom: 38px;
-}
-.dot {
-  width: 13px; height: 13px; border-radius: 50%;
-  border: 1.5px solid rgba(255,255,255,0.85);
-  background: transparent;
-  transition: background 0.15s, border-color 0.15s;
-}
-.dot.filled { background: #fff; }
-.dot.error { background: var(--danger); border-color: var(--danger); }
-
-.lock__dots.shake { animation: shake 0.5s; }
-@keyframes shake {
-  0%,100% { transform: translateX(0); }
-  15% { transform: translateX(-12px); }
-  30% { transform: translateX(11px); }
-  45% { transform: translateX(-8px); }
-  60% { transform: translateX(7px); }
-  75% { transform: translateX(-4px); }
-}
-
-.keypad {
+/* нижний ряд: SOS / 0 / Отменить */
+.lock-screen .bottom-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px 26px;
-  width: 280px;
-  margin-bottom: 26px;
+  grid-template-columns: repeat(3, var(--key-size, 96px));
+  justify-content: center;
+  column-gap: 26px;
+  align-items: center;
+  margin-top: 14px;
 }
-.key {
-  width: 75px; height: 75px; border-radius: 50%;
-  background: rgba(255,255,255,0.12);
-  border: none; color: #fff; cursor: pointer;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  transition: background 0.12s;
-  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-}
-.key.active { background: rgba(255,255,255,0.45); }
-.key__num { font-size: 31px; font-weight: 400; line-height: 1; }
-.key__letters {
-  font-size: 10px; letter-spacing: 2px; margin-top: 3px;
-  color: rgba(255,255,255,0.85);
-}
-.key--empty { background: transparent; pointer-events: none; }
 
-.lock__bottom {
-  display: flex; justify-content: space-between;
-  width: 280px;
+/* SOS и Отменить как текстовые кнопки, центрированы под своими колонками */
+.lock-screen .btn-sos,
+.lock-screen .btn-cancel {
+  justify-self: center;
+  background: transparent;
+  border: none;
+  color: #fff;
   font-size: 17px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 8px 6px;
+  -webkit-tap-highlight-color: transparent;
 }
-.lock__btn {
-  background: none; border: none; color: #fff; cursor: pointer;
-  padding: 8px 4px; transition: opacity 0.12s;
+
+.lock-screen .btn-sos {
+  border: 1px solid rgba(255, 255, 255, .55);
+  border-radius: 18px;
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  justify-self: start;
 }
-.lock__btn.active { opacity: 0.4; }
+
+.lock-screen .btn-sos:active,
+.lock-screen .btn-cancel:active {
+  opacity: .55;
+}
