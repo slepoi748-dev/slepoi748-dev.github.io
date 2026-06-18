@@ -36,11 +36,10 @@
 .app-icon.active .app-icon__img { transform: scale(0.9); transition: transform 0.1s; }
 
 /* Бейдж (уведомление) — базовая заготовка под Этап 4 */
-.app-icon__badge {
+.app-icon__badge.badge-dot {
   position: absolute;
   top: -4px; right: 8px;
-  min-width: 18px; height: 18px;
-  padding: 0 5px;
+  min-width: 12px; width: 12px; height: 12px; padding: 0;;
   background: var(--danger);
   color: #fff;
   border-radius: 9px;

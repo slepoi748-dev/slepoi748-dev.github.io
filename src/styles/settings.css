@@ -6,6 +6,39 @@
   z-index: 100;
   animation: fadeIn 0.2s ease;
 }
+/* Полупрозрачные настройки */
+.settings-overlay--see-through {
+  background: rgba(10, 10, 12, 0.78);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+/* Клавиатура локскрина */
+.keypad { --key-size: 75px; --key-font: 32px; }
+.key { width: var(--key-size); height: var(--key-size); border-radius: 50%; }
+.key__num { font-size: var(--key-font); }
+.key--empty { background: transparent; pointer-events: none; }
+.lock__title { white-space: pre-line; text-align: center; }
+
+/* Бейджи на иконках */
+.app-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: #ff3b30;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+  text-align: center;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.25);
+  pointer-events: none;
+  white-space: nowrap;
+}
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 .settings-head {

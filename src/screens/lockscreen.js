@@ -1,3 +1,4 @@
+// src/screens/lockscreen.js
 import { el, clear, $$ } from '../utils/dom.js';
 import { onLongPress } from '../utils/gestures.js';
 import { store } from '../core/state.js';
@@ -13,20 +14,26 @@ const LETTERS = {
 export function renderLockscreen(root) {
   clear(root);
 
-  let entered = '';            // введённые цифры
-  let attempts = 0;            // счётчик попыток
-  let sosPressed = false;      // нажата ли SOS
-  let sosAttempts = 0;         // попытки после SOS
+  let entered = '';
+  let attempts = 0;
+  let sosPressed = false;
+  let sosAttempts = 0;
 
   const screen = el('div', { class: 'screen lock' });
-
-  // Фон
   applyWallpaper(screen);
 
-  // Верх: заголовок + точки
-  const title = el('p', { class: 'lock__title' }, 'Введите код-пароль');
+  const title = el('p', { class: 'lock__title' });
   const dots = el('div', { class: 'lock__dots' });
   const top = el('div', { class: 'lock__top' }, [title, dots]);
+
+  function renderTitle() {
+    clear(title);
+    const text = store.get('lock.hintTitle') || 'Введите код-пароль';
+    String(text).split('\n').forEach((line, i) => {
+      if (i > 0) title.append(el('br'));
+      title.append(document.createTextNode(line));
+    });
+  }
 
   function renderDots() {
     clear(dots);
@@ -36,195 +43,167 @@ export function renderLockscreen(root) {
     }
   }
 
-  // Клавиатура
   const keypad = el('div', { class: 'keypad' });
-  const layout = [1, 2, 3, 4, 5, 6, 7, 8, 9, null, 0, 'del'];
+
+  function applyPadStyle() {
+    const ox = store.get('lock.padOffsetX') || 0;
+    const oy = store.get('lock.padOffsetY') || 0;
+    keypad.style.transform = `translate(${ox}px, ${oy}px)`;
+    keypad.style.setProperty('--key-size', `${store.get('lock.keySize') || 75}px`);
+    keypad.style.setProperty('--key-font', `${store.get('lock.keyFontSize') || 32}px`);
+  }
+
+  const layout = [1, 2, 3, 4, 5, 6, 7, 8, 9, null, 0, null];
 
   layout.forEach((val) => {
-    if (val === null) { keypad.append(el('button', { class: 'key key--empty' })); return; }
-
-        if (val === 'del') {
-      const delKey = el('button', {
-        class: 'key key--empty',
-        style: { color: '#fff', fontSize: '15px', pointerEvents: 'none' },
-      });
-      const refreshDel = () => {
-        delKey.textContent = entered.length ? 'Удалить' : '';
-        delKey.style.pointerEvents = entered.length ? 'auto' : 'none';
-      };
-      bus.on('lock:refreshDel', refreshDel);
-      delKey.addEventListener('click', () => {
-        if (!entered.length) return;
-        entered = entered.slice(0, -1);
-        renderDots();
-        refreshDel();
-      });
-      keypad.append(delKey);
+    if (val === null) {
+      keypad.append(el('button', { class: 'key key--empty' }));
       return;
     }
-
     const key = el('button', { class: 'key', dataset: { num: val } }, [
       el('span', { class: 'key__num' }, String(val)),
       LETTERS[val] ? el('span', { class: 'key__letters' }, LETTERS[val]) : null,
     ]);
-
-    const press = () => {
+    key.addEventListener('click', () => {
       flash(key);
       onDigit(String(val));
-    };
-    key.addEventListener('click', press);
+    });
     keypad.append(key);
   });
 
-  // Низ: SOS и Отмена
   const sosBtn = el('button', { class: 'lock__btn' }, 'SOS');
-  const cancelBtn = el('button', { class: 'lock__btn' }, 'Отмена');
+  const cancelBtn = el('button', { class: 'lock__btn' }, 'Отменить');
   const bottom = el('div', { class: 'lock__bottom' }, [sosBtn, cancelBtn]);
 
-  // Долгое нажатие на SOS — переключение 4↔6
+  function refreshCancel() {
+    if (entered.length) {
+      cancelBtn.textContent = 'Отменить';
+      cancelBtn.style.visibility = 'visible';
+    } else {
+      cancelBtn.textContent = '';
+      cancelBtn.style.visibility = 'hidden';
+    }
+  }
+
   onLongPress(sosBtn, () => {
     const cur = store.get('lock.digits');
     store.set('lock.digits', cur === 4 ? 6 : 4);
     entered = '';
     renderDots();
-    bus.emit('lock:refreshDel');
+    refreshCancel();
     pulse(sosBtn);
   }, () => store.get('lock.longPressMs'));
 
-  // Короткое нажатие на SOS — активирует режим SOS
   sosBtn.addEventListener('click', () => {
     sosPressed = true;
     sosAttempts = 0;
     flashBtn(sosBtn);
   });
 
-  // Долгое нажатие на Отмена — скрытые настройки
   onLongPress(cancelBtn, () => {
     openSettings(root, 'lock');
   }, () => store.get('lock.longPressMs'));
 
   cancelBtn.addEventListener('click', () => {
+    if (!entered.length) return;
     flashBtn(cancelBtn);
-    entered = '';
+    entered = entered.slice(0, -1);
     renderDots();
-    bus.emit('lock:refreshDel');
+    refreshCancel();
   });
 
-  // Логика ввода цифры
   function onDigit(d) {
     const total = store.get('lock.digits');
     if (entered.length >= total) return;
     entered += d;
     renderDots();
-    bus.emit('lock:refreshDel');
-
-    if (entered.length === total) {
-      setTimeout(() => evaluate(), 180);
-    }
+    refreshCancel();
+    if (entered.length === total) setTimeout(() => evaluate(), 180);
   }
 
-  // Проверка пароля по выбранному режиму
   function evaluate() {
     const mode = store.get('lock.unlockMode');
     attempts++;
     const code = entered;
-
     let success = false;
 
     if (mode === 'afterSos') {
-      // Открывается только если был нажат SOS, начиная с N-й попытки после него
       if (sosPressed) {
         sosAttempts++;
         const need = Math.max(1, store.get('lock.sosUnlockAttempt'));
         if (sosAttempts >= need) success = true;
       }
     } else if (mode === 'afterAttempts') {
-      // Открывается после N попыток любым кодом
       const need = Math.max(1, store.get('lock.attemptsToUnlock'));
       if (attempts >= need) success = true;
     } else if (mode === 'secret') {
-      // Открывается только при точном совпадении с секретной комбинацией
       if (code === String(store.get('lock.secretCode'))) success = true;
     }
 
-    // Сообщаем системе о вводе (понадобится для уведомлений на рабочем столе, Этап 4)
     bus.emit(EVENTS.PASSCODE_ENTERED, { code, attempt: attempts, success });
 
-    if (success) {
-      unlock();
-    } else {
-      rejectAnimation();
-    }
+    if (success) unlock();
+    else rejectAnimation();
   }
 
-  // Успешная разблокировка
   function unlock() {
     entered = '';
     bus.emit(EVENTS.UNLOCK);
   }
 
-  // Анимация ошибки: точки краснеют + тряска, затем сброс
   function rejectAnimation() {
     $$('.dot', dots).forEach((d) => d.classList.add('error'));
     dots.classList.add('shake');
-
     setTimeout(() => {
       dots.classList.remove('shake');
       entered = '';
       renderDots();
-      bus.emit('lock:refreshDel');
+      refreshCancel();
     }, 600);
   }
 
-  // Подсветка клавиши при нажатии (загорается и гаснет)
   function flash(key) {
     key.classList.add('active');
     setTimeout(() => key.classList.remove('active'), 150);
   }
-
-  // Подсветка нижних кнопок SOS/Отмена
   function flashBtn(btn) {
     btn.classList.add('active');
     setTimeout(() => btn.classList.remove('active'), 150);
   }
-
-  // Короткий «пульс» (для подтверждения смены 4↔6)
   function pulse(btn) {
     btn.classList.add('active');
     setTimeout(() => btn.classList.remove('active'), 250);
   }
 
-  // Сборка экрана
   screen.append(top, keypad, bottom);
   root.append(screen);
 
-  // Первичная отрисовка
+  renderTitle();
   renderDots();
-  bus.emit('lock:refreshDel');
+  applyPadStyle();
+  refreshCancel();
 
-  // Перерисовка при изменении конфига (например, сменили digits/фон в настройках)
   const offConfig = bus.on(EVENTS.CONFIG_CHANGE, ({ path }) => {
     if (path === 'lock.digits' || path === '*') {
       entered = '';
       renderDots();
-      bus.emit('lock:refreshDel');
+      refreshCancel();
     }
+    if (path === 'lock.hintTitle' || path === '*') renderTitle();
+    if (
+      path === 'lock.padOffsetX' || path === 'lock.padOffsetY' ||
+      path === 'lock.keySize' || path === 'lock.keyFontSize' || path === '*'
+    ) applyPadStyle();
     if (path === 'lock.wallpaper' || path === 'lock.showWallpaper' || path === '*') {
       applyWallpaper(screen);
     }
   });
 
-  // Вернём функцию очистки (на будущее, когда будем переключать экраны)
   return () => { offConfig(); };
 }
 
-// Применение обоев экрана блокировки
 function applyWallpaper(screen) {
   const show = store.get('lock.showWallpaper');
   const wp = store.get('lock.wallpaper');
-  if (show && wp) {
-    screen.style.backgroundImage = `url("${imgUrl(wp)}")`;
-  } else {
-    screen.style.backgroundImage = 'none';
-  }
+  screen.style.backgroundImage = show && wp ? `url("${imgUrl(wp)}")` : 'none';
 }

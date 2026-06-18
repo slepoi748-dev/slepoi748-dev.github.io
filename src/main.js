@@ -4,6 +4,9 @@ import { loadImageManifest } from './utils/images.js';
 import { $, clear } from './utils/dom.js';
 import { renderLockscreen } from './screens/lockscreen.js';
 import { renderHomescreen } from './screens/homescreen.js';
+import { initBadges } from './core/badges.js';
+
+initBadges();
 
 let root;
 let cleanup = null;

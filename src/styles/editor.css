@@ -129,3 +129,25 @@
 }
 .icon-dialog__actions button:last-child { border-right: none; }
 .icon-dialog__actions button.primary { font-weight: 600; }
+.folder-preview {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 2px; padding: 4px; box-sizing: border-box;
+  background: rgba(120,120,128,0.35) !important;
+}
+.folder-mini { border-radius: 3px; background: center/cover no-repeat rgba(255,255,255,0.15); }
+
+.folder-backdrop {
+  position: absolute; inset: 0; z-index: 350;
+  background: rgba(0,0,0,0.4);
+  -webkit-backdrop-filter: blur(25px); backdrop-filter: blur(25px);
+  display: flex; align-items: center; justify-content: center;
+}
+.folder-sheet { width: 86%; max-width: 360px; }
+.folder-title {
+  text-align: center; color: #fff; font-size: 18px; font-weight: 600;
+  margin-bottom: 18px; outline: none;
+}
+.folder-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 16px; justify-items: center;
+}

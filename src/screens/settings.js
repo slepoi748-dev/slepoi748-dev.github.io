@@ -1,8 +1,10 @@
+// src/screens/settings.js
 import { el, clear } from '../utils/dom.js';
 import { store } from '../core/state.js';
 import { bus, EVENTS } from '../core/events.js';
 import { loadImageManifest } from '../utils/images.js';
 import { addUserImage, getUserImages } from '../utils/media.js';
+import { downloadConfig, copyConfig, importConfig, importConfigFromFile } from '../utils/config-io.js';
 
 let overlayEl = null;
 let lastRoot = null;
@@ -13,7 +15,7 @@ export async function openSettings(root, section = 'lock') {
   lastRoot = root; lastSection = section;
   const manifest = await loadImageManifest();
 
-  overlayEl = el('div', { class: 'settings-overlay' });
+  overlayEl = el('div', { class: 'settings-overlay settings-overlay--see-through' });
   const head = el('div', { class: 'settings-head' }, [
     el('h1', {}, 'Настройки'),
     el('button', { class: 'settings-close', onClick: closeSettings }, '✕'),
@@ -39,17 +41,22 @@ export function closeSettings() {
 function buildLockSection(manifest) {
   const frag = document.createDocumentFragment();
 
-  // Группа: основное
   frag.append(group('Экран блокировки', [
+    rowTextarea('Текст подсказки', 'lock.hintTitle'),
     rowSelect('Количество знаков', 'lock.digits', [
       { value: 4, label: '4 знака' },
       { value: 6, label: '6 знаков' },
     ], Number),
-
     rowNumber('Длительность долгого нажатия (мс)', 'lock.longPressMs', { min: 300, max: 3000, step: 100 }),
   ]));
 
-  // Группа: режим разблокировки
+  frag.append(group('Клавиатура', [
+    rowRange('Сдвиг по горизонтали', 'lock.padOffsetX', { min: -100, max: 100, step: 1, unit: 'px' }),
+    rowRange('Сдвиг по вертикали', 'lock.padOffsetY', { min: -150, max: 150, step: 1, unit: 'px' }),
+    rowRange('Размер кнопок', 'lock.keySize', { min: 50, max: 100, step: 1, unit: 'px' }),
+    rowRange('Размер цифр', 'lock.keyFontSize', { min: 20, max: 48, step: 1, unit: 'px' }),
+  ]));
+
   const modeRows = [
     rowSelect('Способ разблокировки', 'lock.unlockMode', [
       { value: 'afterSos', label: 'После SOS' },
@@ -57,15 +64,11 @@ function buildLockSection(manifest) {
       { value: 'secret', label: 'Секретный код' },
     ], String),
   ];
-
-  // Зависимые поля (показываем все, чтобы фокуснику было удобно настроить заранее)
   modeRows.push(rowNumber('SOS: с какой попытки открыть', 'lock.sosUnlockAttempt', { min: 1, max: 10, step: 1 }));
   modeRows.push(rowNumber('Открыть после N попыток', 'lock.attemptsToUnlock', { min: 1, max: 20, step: 1 }));
   modeRows.push(rowText('Секретный код', 'lock.secretCode'));
-
   frag.append(group('Разблокировка', modeRows));
 
-  // Группа: фон
   const wpOptions = [{ value: '', label: 'Нет' }, ...(manifest.wallpapers || []).map((w) => ({ value: w, label: w }))];
   frag.append(group('Фон', [
     rowSwitch('Показывать фон', 'lock.showWallpaper'),
@@ -78,8 +81,24 @@ function buildLockSection(manifest) {
 // ---------- Раздел «Рабочий стол» ----------
 function buildHomeSection(manifest) {
   const frag = document.createDocumentFragment();
-
   const wpOptions = buildImageOptions(manifest.wallpapers || []);
+
+  frag.append(group('Конфигурация', [
+    rowButton('Сохранить в файл', 'Экспорт', () => downloadConfig()),
+    rowButton('Скопировать', 'Копировать', async () => {
+      const ok = await copyConfig();
+      toast(ok ? 'Скопировано' : 'Не удалось');
+    }),
+    rowButton('Загрузить из файла', 'Импорт', () => importFilePicker()),
+    rowButton('Вставить из буфера', 'Вставить', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        const res = importConfig(text);
+        toast(res.ok ? 'Импортировано' : `Ошибка: ${res.error}`);
+        if (res.ok) closeSettings();
+      } catch { toast('Буфер недоступен'); }
+    }),
+  ]));
 
   frag.append(group('Открытие настроек', [
     rowSwitch('Долгое нажатие на экран', 'home.openLongPress'),
@@ -93,9 +112,24 @@ function buildHomeSection(manifest) {
 
   frag.append(group('Рабочий стол', [
     rowButton('Редактировать иконки', 'Открыть', () => {
-      const root = lastRoot;
       closeSettings();
       bus.emit('home:enterEdit');
+    }),
+  ]));
+
+  // --- Бейджи (последние пароли) ---
+  frag.append(group('Бейджи (последние пароли)', [
+    rowSwitch('Включить бейджи', 'home.badges.enabled'),
+    rowSelect('Режим', 'home.badges.mode', [
+      { value: 'whole',  label: 'Код целиком' },
+      { value: 'digits', label: 'По одной цифре' },
+    ], String),
+    rowNumber('Сколько кодов хранить', 'home.badges.keepCount', { min: 1, max: 12, step: 1 }),
+    rowSwitch('Только успешные вводы', 'home.badges.onlySuccess'),
+    rowPickReceivers('Иконки-приёмники', 'home.badges.receivers'),
+    rowButton('Очистить историю', 'Очистить', () => {
+      store.set('home.badges.history', []);
+      toast('История очищена');
     }),
   ]));
 
@@ -137,6 +171,33 @@ function rowRange(label, path, { min, max, step, unit = '' } = {}) {
   const left = el('div', {}, [el('div', { class: 's-row__label' }, label), valueLabel]);
   const right = el('div', { class: 's-control' }, input);
   return el('div', { class: 's-row' }, [left, right]);
+}
+
+function importFilePicker() {
+  const input = el('input', { type: 'file', accept: '.json,application/json', style: { display: 'none' } });
+  input.addEventListener('change', async () => {
+    const f = input.files[0];
+    if (!f) return;
+    const res = await importConfigFromFile(f);
+    toast(res.ok ? 'Импортировано' : `Ошибка: ${res.error}`);
+    if (res.ok) closeSettings();
+  });
+  document.body.append(input);
+  input.click();
+  setTimeout(() => input.remove(), 1000);
+}
+
+let toastTimer = null;
+function toast(text) {
+  let t = document.querySelector('.app-toast');
+  if (!t) {
+    t = el('div', { class: 'app-toast' });
+    document.querySelector('.screen')?.append(t) || document.body.append(t);
+  }
+  t.textContent = text;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1600);
 }
 
 // ---------- Конструкторы UI-элементов ----------
@@ -193,6 +254,16 @@ function rowText(label, path) {
   return rowBase(label, input);
 }
 
+// Многострочный текст (для подсказки локскрина с переносом \n)
+function rowTextarea(label, path) {
+  const input = el('textarea', { rows: 2, style: { resize: 'vertical', width: '100%' } });
+  input.value = store.get(path) ?? '';
+  input.addEventListener('change', () => store.set(path, input.value));
+  const left = el('div', { class: 's-row__left' }, el('div', { class: 's-row__label' }, label));
+  const control = el('div', { class: 's-control' }, input);
+  return el('div', { class: 's-row' }, [left, control]);
+}
+
 function rowSwitch(label, path) {
   const checkbox = el('input', { type: 'checkbox' });
   checkbox.checked = !!store.get(path);
@@ -209,7 +280,7 @@ function buildImageOptions(manifestList) {
   return opts;
 }
 
-// Выбор картинки: select + кнопка загрузки с устройства (правка 5)
+// Выбор картинки: select + кнопка загрузки с устройства
 function rowImage(label, path, options) {
   const select = el('select');
   const fill = () => {
@@ -239,7 +310,7 @@ function rowImage(label, path, options) {
   const left = el('div', { class: 's-row__left' }, el('div', { class: 's-row__label' }, label));
   return el('div', { class: 's-row' }, [left, control]);
 }
-// Выбор иконки тапом по рабочему столу (правка 4)
+
 function rowButton(label, btnText, onClick) {
   const btn = el('button', { class: 's-btn' }, btnText);
   btn.addEventListener('click', onClick);
@@ -248,6 +319,7 @@ function rowButton(label, btnText, onClick) {
   return el('div', { class: 's-row' }, [left, control]);
 }
 
+// Выбор одной иконки тапом по рабочему столу
 function rowPickIcon(label, path) {
   const sub = el('div', { class: 's-row__sub' });
   const updateSub = () => {
@@ -259,11 +331,10 @@ function rowPickIcon(label, path) {
   const btn = el('button', { class: 's-btn' }, 'Выбрать на экране');
   btn.addEventListener('click', () => {
     const root = lastRoot;
-    closeSettings(); // прячем настройки, чтобы видеть рабочий стол
+    closeSettings();
     bus.emit('home:pickIcon', {
       onPick: (iconId) => {
         store.set(path, iconId);
-        // снова открываем настройки
         openSettings(root, 'home');
       },
     });
@@ -271,5 +342,39 @@ function rowPickIcon(label, path) {
 
   const left = el('div', { class: 's-row__left' }, [el('div', { class: 's-row__label' }, label), sub]);
   const control = el('div', { class: 's-control' }, btn);
+  return el('div', { class: 's-row' }, [left, control]);
+}
+
+// Выбор НЕСКОЛЬКИХ иконок-приёмников по порядку (тапами на экране)
+function rowPickReceivers(label, path) {
+  const sub = el('div', { class: 's-row__sub' });
+  const render = () => {
+    const arr = store.get(path) || [];
+    sub.textContent = arr.length ? `Выбрано (${arr.length}): ${arr.join(', ')}` : 'Не выбрано';
+  };
+  render();
+
+  const addBtn = el('button', { class: 's-btn' }, 'Добавить иконку');
+  addBtn.addEventListener('click', () => {
+    const root = lastRoot;
+    closeSettings();
+    bus.emit('home:pickIcon', {
+      onPick: (iconId) => {
+        const arr = (store.get(path) || []).slice();
+        arr.push(iconId);
+        store.set(path, arr);
+        openSettings(root, 'home');
+      },
+    });
+  });
+
+  const clearBtn = el('button', { class: 's-btn' }, 'Сброс');
+  clearBtn.addEventListener('click', () => {
+    store.set(path, []);
+    render();
+  });
+
+  const left = el('div', { class: 's-row__left' }, [el('div', { class: 's-row__label' }, label), sub]);
+  const control = el('div', { class: 's-control', style: { gap: '8px' } }, [addBtn, clearBtn]);
   return el('div', { class: 's-row' }, [left, control]);
 }
