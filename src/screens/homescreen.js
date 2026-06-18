@@ -598,5 +598,12 @@ export function renderHomescreen(root) {
 function applyWallpaper(screen) {
   const show = store.get('home.showWallpaper');
   const wp = store.get('home.wallpaperThis') || store.get('home.wallpaperGlobal');
-  screen.style.backgroundImage = show && wp ? `url("${imgUrl(wp)}")` : 'none';
+  const url = show && wp ? `url("${imgUrl(wp)}")` : 'none';
+
+  // фон самого экрана
+  screen.style.backgroundImage = url;
+
+  // дублируем обои на body — чтобы зона статус-бара в PWA
+  // заполнялась той же картинкой и на «холодном» старте
+  document.body.style.backgroundImage = url;
 }
