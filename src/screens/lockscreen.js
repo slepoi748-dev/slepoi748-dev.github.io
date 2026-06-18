@@ -1,218 +1,226 @@
 // src/screens/lockscreen.js
-import { el, clear, $$ } from '../utils/dom.js';
+import { el, clear } from '../utils/dom.js';
 import { onLongPress } from '../utils/gestures.js';
 import { store } from '../core/state.js';
 import { bus, EVENTS } from '../core/events.js';
 import { openSettings } from './settings.js';
+import { imgUrl } from '../utils/images.js';
 
 const LETTERS = {
-  1: '', 2: 'ABC', 3: 'DEF', 4: 'GHI', 5: 'JKL',
-  6: 'MNO', 7: 'PQRS', 8: 'TUV', 9: 'WXYZ', 0: '',
+  '1': '\u00A0',
+  '2': 'АБВГ<br>ABC', '3': 'ДЕЖЗ<br>DEF', '4': 'ИЙКЛ<br>GHI',
+  '5': 'МНОП<br>JKL', '6': 'РСТУ<br>MNO', '7': 'ФХЦЧ<br>PQRS',
+  '8': 'ШЩЪЫ<br>TUV', '9': 'ЬЭЮЯ<br>WXYZ',
 };
-
-// Строим URL картинки без внешних зависимостей.
-// Поддержка пользовательских картинок user:... — это dataURL/имя как есть.
-function wallpaperUrl(name) {
-  if (!name) return '';
-  if (name.startsWith('user:')) return ''; // на локскрине пользовательские не используем
-  if (name.startsWith('data:') || name.startsWith('http') || name.startsWith('/')) return name;
-  return `img/${name}`;
-}
 
 export function renderLockscreen(root) {
   clear(root);
 
-  let entered = '';
-  let attempts = 0;
-  let sosPressed = false;
-  let sosAttempts = 0;
+  // ---- состояние ----
+  let currentInput = '';
+  let attemptCount = 0;
+  let sosArmed = false;
 
-  const screen = el('div', { class: 'screen lock' });
-  applyWallpaper(screen);
+  // ---- DOM ----
+  const wallpaper = el('div', { class: 'wallpaper' });
+  const screen = el('div', { class: 'lock-screen' });
 
-  const title = el('p', { class: 'lock__title' });
-  const dots = el('div', { class: 'lock__dots' });
-  const top = el('div', { class: 'lock__top' }, [title, dots]);
+  const topLabel = el('div', { class: 'top-label' });
+  const dotsContainer = el('div', { class: 'dots-container' });
 
-  function renderTitle() {
-    clear(title);
-    const text = store.get('lock.hintTitle') || 'Введите код-пароль';
-    String(text).split('\n').forEach((line, i) => {
-      if (i > 0) title.append(el('br'));
-      title.append(document.createTextNode(line));
-    });
-  }
-
-  function renderDots() {
-    clear(dots);
-    const total = store.get('lock.digits');
-    for (let i = 0; i < total; i++) {
-      dots.append(el('div', { class: 'dot' + (i < entered.length ? ' filled' : '') }));
-    }
-  }
-
-  const keypad = el('div', { class: 'keypad' });
-
-  function applyPadStyle() {
-    const ox = store.get('lock.padOffsetX') || 0;
-    const oy = store.get('lock.padOffsetY') || 0;
-    keypad.style.transform = `translate(${ox}px, ${oy}px)`;
-    keypad.style.setProperty('--key-size', `${store.get('lock.keySize') || 75}px`);
-    keypad.style.setProperty('--key-font', `${store.get('lock.keyFontSize') || 32}px`);
-  }
-
-  const layout = [1, 2, 3, 4, 5, 6, 7, 8, 9, null, 0, null];
-
-  layout.forEach((val) => {
-    if (val === null) {
-      keypad.append(el('button', { class: 'key key--empty' }));
-      return;
-    }
-    const key = el('button', { class: 'key', dataset: { num: val } }, [
-      el('span', { class: 'key__num' }, String(val)),
-      LETTERS[val] ? el('span', { class: 'key__letters' }, LETTERS[val]) : null,
+  const keyboard = el('div', { class: 'keyboard' });
+  ['1','2','3','4','5','6','7','8','9'].forEach((d) => {
+    const key = el('div', { class: 'key', dataset: { digit: d } }, [
+      el('span', { class: 'key-number' }, d),
+      el('span', { class: 'key-letters', html: LETTERS[d] || '' }),
     ]);
-    key.addEventListener('click', () => {
-      flash(key);
-      onDigit(String(val));
-    });
-    keypad.append(key);
+    key.addEventListener('click', () => pressKey(d, key));
+    keyboard.append(key);
   });
 
-  const sosBtn = el('button', { class: 'lock__btn' }, 'SOS');
-  const cancelBtn = el('button', { class: 'lock__btn' }, 'Отменить');
-  const bottom = el('div', { class: 'lock__bottom' }, [sosBtn, cancelBtn]);
+  const sosKey = el('button', { class: 'btn-sos' }, 'SOS');
+  const zeroKey = el('div', { class: 'key-zero', dataset: { digit: '0' } }, [
+    el('span', { class: 'key-number' }, '0'),
+  ]);
+  zeroKey.addEventListener('click', () => pressKey('0', zeroKey));
+  const cancelKey = el('button', { class: 'btn-cancel' }, 'Отменить');
 
-  function refreshCancel() {
-    if (entered.length) {
-      cancelBtn.textContent = 'Отменить';
-      cancelBtn.style.visibility = 'visible';
+  const bottomRow = el('div', { class: 'bottom-row' }, [sosKey, zeroKey, cancelKey]);
+  const passcodeSection = el('div', { class: 'passcode-section' }, [keyboard, bottomRow]);
+
+  screen.append(topLabel, dotsContainer, passcodeSection);
+  root.append(wallpaper, screen);
+
+  // ---- применить визуальные настройки ----
+  applyAll();
+  buildDots();
+  updateDots();
+
+  // =================== функции ===================
+
+  function applyAll() {
+    applyHint();
+    applyKeySize();
+    applyFontSize();
+    applyPadOffset();
+    applyWallpaper();
+  }
+
+  function applyHint() {
+    const txt = store.get('lock.hintTitle') || 'Смахните вверх для Face ID\nили введите код-пароль';
+    topLabel.innerHTML = String(txt).replace(/\n/g, '<br>');
+  }
+
+  function applyKeySize() {
+    const v = Number(store.get('lock.keySize')) || 96;
+    document.documentElement.style.setProperty('--key-size', v + 'px');
+  }
+
+  function applyFontSize() {
+    const v = Number(store.get('lock.keyFontSize')) || 32;
+    document.documentElement.style.setProperty('--key-font-size', v + 'px');
+  }
+
+  // padOffsetX/Y из конфига = сдвиг всего блока цифр
+  function applyPadOffset() {
+    const x = Number(store.get('lock.padOffsetX')) || 0;
+    const y = Number(store.get('lock.padOffsetY')) || 0;
+    document.documentElement.style.setProperty('--pin-block-x', x + 'px');
+    document.documentElement.style.setProperty('--pin-block-y', y + 'px');
+  }
+
+  function applyWallpaper() {
+    const show = store.get('lock.showWallpaper');
+    const bg = store.get('lock.wallpaper');
+    const url = show && bg ? imgUrl(bg) : '';
+    if (url) {
+      wallpaper.style.backgroundImage = `url('${url}')`;
+      wallpaper.style.backgroundSize = 'cover';
+      wallpaper.style.backgroundPosition = 'center';
     } else {
-      cancelBtn.textContent = '';
-      cancelBtn.style.visibility = 'hidden';
+      wallpaper.style.backgroundImage = 'none';
+      wallpaper.style.background = '#000';
     }
   }
 
-  onLongPress(sosBtn, () => {
-    const cur = store.get('lock.digits');
-    store.set('lock.digits', cur === 4 ? 6 : 4);
-    entered = '';
-    renderDots();
-    refreshCancel();
-    pulse(sosBtn);
-  }, () => store.get('lock.longPressMs') || 1000);
-
-  sosBtn.addEventListener('click', () => {
-    sosPressed = true;
-    sosAttempts = 0;
-    flashBtn(sosBtn);
-  });
-
-  onLongPress(cancelBtn, () => {
-    openSettings(root, 'lock');
-  }, () => store.get('lock.longPressMs') || 1000);
-
-  cancelBtn.addEventListener('click', () => {
-    if (!entered.length) return;
-    flashBtn(cancelBtn);
-    entered = entered.slice(0, -1);
-    renderDots();
-    refreshCancel();
-  });
-
-  function onDigit(d) {
-    const total = store.get('lock.digits');
-    if (entered.length >= total) return;
-    entered += d;
-    renderDots();
-    refreshCancel();
-    if (entered.length === total) setTimeout(() => evaluate(), 180);
+  function buildDots() {
+    clear(dotsContainer);
+    const len = Number(store.get('lock.digits')) || 4;
+    for (let i = 0; i < len; i++) dotsContainer.append(el('div', { class: 'dot' }));
   }
 
-  function evaluate() {
-    const mode = store.get('lock.unlockMode');
-    attempts++;
-    const code = entered;
+  function updateDots() {
+    dotsContainer.querySelectorAll('.dot').forEach((d, i) =>
+      d.classList.toggle('filled', i < currentInput.length));
+  }
+
+  function pressKey(num, node) {
+    if (node) {
+      node.classList.remove('pressed');
+      void node.offsetWidth;
+      node.classList.add('pressed');
+      setTimeout(() => node.classList.remove('pressed'), 220);
+    }
+    const len = Number(store.get('lock.digits')) || 4;
+    if (currentInput.length >= len) return;
+    currentInput += num;
+    updateDots();
+    if (currentInput.length === len) setTimeout(checkCode, 300);
+  }
+
+  function deleteKey() {
+    if (!currentInput.length) return;
+    currentInput = currentInput.slice(0, -1);
+    updateDots();
+  }
+
+  function checkCode() {
+    attemptCount++;
+    const mode = store.get('lock.unlockMode') || 'afterSos';
+    const code = currentInput;
     let success = false;
 
-    if (mode === 'afterSos') {
-      if (sosPressed) {
-        sosAttempts++;
-        const need = Math.max(1, store.get('lock.sosUnlockAttempt') || 1);
-        if (sosAttempts >= need) success = true;
-      }
+    if (mode === 'secret') {
+      success = code === String(store.get('lock.secretCode'));
+    } else if (mode === 'afterSos') {
+      const need = Number(store.get('lock.sosUnlockAttempt')) || 1;
+      if (sosArmed && attemptCount >= need) success = true;
     } else if (mode === 'afterAttempts') {
-      const need = Math.max(1, store.get('lock.attemptsToUnlock') || 1);
-      if (attempts >= need) success = true;
-    } else if (mode === 'secret') {
-      if (code === String(store.get('lock.secretCode'))) success = true;
+      const need = Number(store.get('lock.attemptsToUnlock')) || 3;
+      if (attemptCount >= need) success = true;
     }
 
-    bus.emit(EVENTS.PASSCODE_ENTERED, { code, attempt: attempts, success });
+    bus.emit(EVENTS.PASSCODE_ENTERED, { code, attempt: attemptCount, success });
 
-    if (success) unlock();
-    else rejectAnimation();
+    if (success) doUnlock();
+    else wrongPasswordAnimation();
   }
 
-  function unlock() {
-    entered = '';
-    bus.emit(EVENTS.UNLOCK);
-  }
-
-  function rejectAnimation() {
-    $$('.dot', dots).forEach((d) => d.classList.add('error'));
-    dots.classList.add('shake');
+  function wrongPasswordAnimation() {
+    dotsContainer.classList.add('wrong-animation');
+    dotsContainer.querySelectorAll('.dot').forEach((d) => {
+      d.style.background = '#ff3b30';
+      d.style.borderColor = '#ff3b30';
+    });
     setTimeout(() => {
-      dots.classList.remove('shake');
-      entered = '';
-      renderDots();
-      refreshCancel();
+      dotsContainer.classList.remove('wrong-animation');
+      dotsContainer.querySelectorAll('.dot').forEach((d) => {
+        d.style.background = '';
+        d.style.borderColor = '';
+        d.classList.remove('filled');
+      });
+      currentInput = '';
     }, 600);
   }
 
-  function flash(key) {
-    key.classList.add('active');
-    setTimeout(() => key.classList.remove('active'), 150);
-  }
-  function flashBtn(btn) {
-    btn.classList.add('active');
-    setTimeout(() => btn.classList.remove('active'), 150);
-  }
-  function pulse(btn) {
-    btn.classList.add('active');
-    setTimeout(() => btn.classList.remove('active'), 250);
+  function doUnlock() {
+    currentInput = '';
+    updateDots();
+    bus.emit(EVENTS.UNLOCK);
   }
 
-  screen.append(top, keypad, bottom);
-  root.append(screen);
+  function resetScreen() {
+    currentInput = '';
+    attemptCount = 0;
+    sosArmed = false;
+    updateDots();
+  }
 
-  renderTitle();
-  renderDots();
-  applyPadStyle();
-  refreshCancel();
-
-  const offConfig = bus.on(EVENTS.CONFIG_CHANGE, ({ path }) => {
-    if (path === 'lock.digits' || path === '*') {
-      entered = '';
-      renderDots();
-      refreshCancel();
-    }
-    if (path === 'lock.hintTitle' || path === '*') renderTitle();
-    if (
-      path === 'lock.padOffsetX' || path === 'lock.padOffsetY' ||
-      path === 'lock.keySize' || path === 'lock.keyFontSize' || path === '*'
-    ) applyPadStyle();
-    if (path === 'lock.wallpaper' || path === 'lock.showWallpaper' || path === '*') {
-      applyWallpaper(screen);
+  // ---- SOS ----
+  sosKey.addEventListener('click', () => {
+    if ((store.get('lock.unlockMode') || 'afterSos') === 'afterSos') {
+      sosArmed = true;
+      currentInput = '';
+      updateDots();
     }
   });
 
-  return () => { offConfig(); };
-}
+  // ---- Отменить (тап) ----
+  // gestures.js сам глушит click после долгого нажатия, костыли не нужны
+  cancelKey.addEventListener('click', () => {
+    if (currentInput.length) deleteKey();
+    else resetScreen();
+  });
 
-function applyWallpaper(screen) {
-  const show = store.get('lock.showWallpaper');
-  const wp = store.get('lock.wallpaper');
-  const url = show ? wallpaperUrl(wp) : '';
-  screen.style.backgroundImage = url ? `url("${url}")` : 'none';
+  // ---- Долгое нажатие "Отменить" -> настройки экрана блокировки ----
+  onLongPress(
+    cancelKey,
+    () => {
+      resetScreen();
+      openSettings(root, 'lock');
+    },
+    () => Number(store.get('lock.longPressMs')) || 1000
+  );
+
+  // ---- реакция на изменения конфига из настроек ----
+  const off = bus.on(EVENTS.CONFIG_CHANGE, ({ path } = {}) => {
+    if (path === '*' || path === 'lock.digits') { buildDots(); updateDots(); resetScreen(); }
+    if (path === '*' || path === 'lock.hintTitle') applyHint();
+    if (path === '*' || path === 'lock.keySize') applyKeySize();
+    if (path === '*' || path === 'lock.keyFontSize') applyFontSize();
+    if (path === '*' || path === 'lock.padOffsetX' || path === 'lock.padOffsetY') applyPadOffset();
+    if (path === '*' || path === 'lock.showWallpaper' || path === 'lock.wallpaper') applyWallpaper();
+  });
+
+  return () => { off && off(); };
 }
