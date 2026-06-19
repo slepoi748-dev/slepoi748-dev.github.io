@@ -1,0 +1,152 @@
+.settings-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.4);
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  display: flex; flex-direction: column;
+  z-index: 100;
+  animation: fadeIn 0.2s ease;
+}
+/* Полупрозрачные настройки */
+.settings-overlay--see-through {
+  background: rgba(10, 10, 12, 0.78);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+/* Клавиатура локскрина */
+.keypad { --key-size: 75px; --key-font: 32px; }
+.key { width: var(--key-size); height: var(--key-size); border-radius: 50%; }
+.key__num { font-size: var(--key-font); }
+.key--empty { background: transparent; pointer-events: none; }
+.lock__title { white-space: pre-line; text-align: center; }
+
+/* Бейджи на иконках */
+.app-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: #ff3b30;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+  text-align: center;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.25);
+  pointer-events: none;
+  white-space: nowrap;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.settings-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 16px 10px;
+}
+.settings-head h1 { font-size: 22px; font-weight: 600; margin: 0; }
+.settings-close {
+  background: rgba(120,120,128,0.32); border: none; color: #fff;
+  width: 30px; height: 30px; border-radius: 50%; font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.settings-body { flex: 1; overflow-y: auto; padding: 0 16px 40px; }
+
+.s-group {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  margin-bottom: 22px;
+  overflow: hidden;
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+}
+.s-group__title {
+  font-size: 13px; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 0.4px;
+  margin: 0 0 8px 6px;
+}
+
+.s-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+  padding: 13px 15px; min-height: 44px;
+  border-bottom: 0.5px solid var(--glass-border);
+}
+.s-row:last-child { border-bottom: none; }
+.s-row__left { flex: 1; min-width: 0; }
+.s-row__label { font-size: 16px; }
+.s-row__sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+.s-control {
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: flex-end;
+}
+
+.s-control select,
+.s-control input[type="text"],
+.s-control input[type="number"] {
+  background: rgba(120,120,128,0.24);
+  border: none; color: #fff; font-size: 15px;
+  padding: 7px 10px; border-radius: 8px; text-align: right;
+  max-width: 130px;
+}
+.s-control input[type="range"] { width: 120px; }
+
+/* Тумблер — полноценный, не вылезает */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 51px; height: 31px;
+  flex-shrink: 0;
+}
+.switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 2; }
+.switch .track {
+  position: absolute; inset: 0;
+  border-radius: 31px;
+  background: rgba(120,120,128,0.5);
+  transition: background 0.2s;
+}
+.switch .track::before {
+  content: ""; position: absolute;
+  height: 27px; width: 27px;
+  left: 2px; top: 2px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  transition: transform 0.2s;
+}
+.switch input:checked + .track { background: #34c759; }
+.switch input:checked + .track::before { transform: translateX(20px); }
+
+/* Кнопка действия в строке (выбрать иконку / загрузить) */
+.s-btn {
+  background: rgba(120,120,128,0.24);
+  border: none; color: var(--accent); font-size: 15px;
+  padding: 7px 12px; border-radius: 8px; cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Режим выбора иконки на рабочем столе */
+.pick-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 200;
+  display: flex; align-items: flex-start; justify-content: center;
+  pointer-events: none;
+}
+.pick-hint {
+  margin-top: 60px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  padding: 12px 18px; border-radius: 12px;
+  font-size: 15px; pointer-events: auto;
+}
+.app-icon.pickable .app-icon__img {
+  outline: 2px dashed rgba(255,255,255,0.8);
+  outline-offset: 3px;
+  animation: pickPulse 1s infinite;
+}
+@keyframes pickPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }

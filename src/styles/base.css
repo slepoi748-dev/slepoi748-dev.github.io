@@ -1,0 +1,53 @@
+/* src/styles/base.css */
+
+/* ===== Сброс и базовые правила ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  background: #000;
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ===== ГЛОБАЛЬНЫЙ ФОН — покрывает ВЕСЬ экран до краёв ===== */
+/* Существует в DOM с самого старта → iOS считает размеры сразу,
+   фон стабильно заходит под статус-бар (iPhone 11)
+   и под нижнюю полосу (iPhone 15 Pro), без «рамки» после загрузки. */
+#app-bg {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  z-index: 0;
+
+  background-color: #000;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+
+  /* мягкое появление фона, чтобы не было резкой вспышки */
+  transition: background-image .25s ease;
+}
+
+/* ===== КОНТЕЙНЕР ПРИЛОЖЕНИЯ — поверх фона ===== */
+#app {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  z-index: 1;
+}
