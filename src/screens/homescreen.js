@@ -6,7 +6,6 @@ import { imgUrl } from '../utils/images.js';
 import { openSettings } from './settings.js';
 import { openIconDialog } from './icon-dialog.js';
 import { openBadgeDialog } from './badge-dialog.js';
-import { computeBadgeMap } from '../core/badges.js';
 
 let pickMode = null;
 
@@ -359,11 +358,7 @@ export function renderHomescreen(root) {
       list = list.filter((x) => x.id !== folderId);
     }
 
-    if (isDock) {
-      list.push(newIcon);
-    } else {
-      list.push(newIcon);
-    }
+    list.push(newIcon);
 
     store.set(key, list);
   }
@@ -514,6 +509,43 @@ export function renderHomescreen(root) {
   });
 
   // ============================================================
+  //  СВАЙП СВЕРХУ ВНИЗ → ВОЗВРАТ НА ЭКРАН БЛОКИРОВКИ
+  // ============================================================
+  let swStartX = 0, swStartY = 0, swStartT = 0, swTracking = false;
+  const SW_MIN_DIST = 90;   // минимальный путь вниз, px
+  const SW_MAX_OFF = 80;    // макс. горизонтальное отклонение, px
+  const SW_START_ZONE = 130; // жест должен начаться в верхних N px
+  const SW_MAX_TIME = 900;  // макс. длительность, мс
+
+  function swStart(e) {
+    if (pickMode || editing) { swTracking = false; return; }
+    const t = e.touches ? e.touches[0] : e;
+    if (t.clientY > SW_START_ZONE) { swTracking = false; return; }
+    swStartX = t.clientX;
+    swStartY = t.clientY;
+    swStartT = Date.now();
+    swTracking = true;
+  }
+
+  function swEnd(e) {
+    if (!swTracking) return;
+    swTracking = false;
+    if (pickMode || editing) return;
+    const t = (e.changedTouches ? e.changedTouches[0] : e) || {};
+    const dx = (t.clientX ?? swStartX) - swStartX;
+    const dy = (t.clientY ?? swStartY) - swStartY;
+    const dt = Date.now() - swStartT;
+    if (dt <= SW_MAX_TIME && dy >= SW_MIN_DIST && Math.abs(dx) <= SW_MAX_OFF) {
+      bus.emit(EVENTS.LOCK);
+    }
+  }
+
+  screen.addEventListener('touchstart', swStart, { passive: true });
+  screen.addEventListener('touchend', swEnd, { passive: true });
+  screen.addEventListener('mousedown', swStart);
+  screen.addEventListener('mouseup', swEnd);
+
+    // ============================================================
   //  РЕЖИМ ВЫБОРА ИКОНКИ (из настроек)
   // ============================================================
   function enterPickMode(onPick) {
@@ -589,6 +621,10 @@ export function renderHomescreen(root) {
     offConfig();
     offPick();
     offEdit();
+    screen.removeEventListener('touchstart', swStart);
+    screen.removeEventListener('touchend', swEnd);
+    screen.removeEventListener('mousedown', swStart);
+    screen.removeEventListener('mouseup', swEnd);
   };
 }
 
