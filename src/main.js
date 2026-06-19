@@ -1,3 +1,8 @@
+const isPWA = window.matchMedia('(display-mode: standalone)').matches
+  || window.navigator.standalone === true;
+console.log('PWA standalone:', isPWA);
+document.documentElement.dataset.pwa = isPWA ? '1' : '0';
+
 import { store } from './core/state.js';
 import { bus, EVENTS } from './core/events.js';
 import { loadImageManifest } from './utils/images.js';
