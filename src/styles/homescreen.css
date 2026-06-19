@@ -1,62 +1,357 @@
-.home {
-  background: transparent;
-}
+/* ============================================================
+   РАБОЧИЙ СТОЛ
+   ============================================================ */
 
-/* Слой сетки иконок */
-.home__grid-wrap {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-}
-.home__grid {
+.screen.home {
   position: absolute;
   inset: 0;
-  display: grid;
-  padding: 60px 22px 10px;
-  align-content: start;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+/* Область иконок — растягивается и толкает Dock вниз */
+.home__grid-wrap {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: flex-start;
   justify-content: center;
+  padding: 28px 18px 0;
+  overflow: hidden;
 }
 
-/* Иконка приложения */
-.app-icon { position: relative; display: flex; flex-direction: column; align-items: center; }
-.app-icon__img { background: center/cover no-repeat rgba(120,120,128,0.3); }
-.app-icon__label {
-  margin-top: 4px; font-size: 11px; color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-  max-width: 72px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+.home__grid {
+  display: grid;
+  width: 100%;
+  max-width: 520px;
+  justify-items: center;
+  align-content: start;
 }
-.app-icon__badge {
-  position: absolute; top: -4px; right: 8px;
-  min-width: 18px; height: 18px; padding: 0 5px;
-  border-radius: 9px; background: var(--danger, #ff3b30);
-  color: #fff; font-size: 12px; font-weight: 600;
-  display: none; align-items: center; justify-content: center;
-  z-index: 4;
-}
-.app-icon.active .app-icon__img { transform: scale(0.9); transition: transform 0.1s; }
 
-/* Бейдж (уведомление) — базовая заготовка под Этап 4 */
-.app-icon__badge.badge-dot {
-  position: absolute;
-  top: -4px; right: 8px;
-  min-width: 12px; width: 12px; height: 12px; padding: 0;;
-  background: var(--danger);
-  color: #fff;
-  border-radius: 9px;
-  font-size: 12px; line-height: 18px;
-  text-align: center;
-  display: none;
-}
-.app-icon { position: relative; }
-
-/* Dock — прозрачный фон по ТЗ */
+/* ============================================================
+   DOCK — всегда внизу
+   ============================================================ */
 .home__dock {
-  position: relative;
+  flex: 0 0 auto;
   display: flex;
   justify-content: center;
-  align-items: flex-end;
-  gap: 22px;
-  padding: 10px 16px calc(env(safe-area-inset-bottom, 12px) + 12px);
+  align-items: center;
+  gap: 18px;
+  margin: 0 12px 12px;
+  padding: 12px 16px;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* ============================================================
+   ИКОНКА
+   ============================================================ */
+.app-icon {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: transform 0.12s ease, opacity 0.12s ease;
+}
+
+.app-icon.active {
+  transform: scale(0.9);
+  opacity: 0.85;
+}
+
+.app-icon__img {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+.app-icon__label {
+  font-size: 12px;
+  line-height: 1.1;
+  color: #fff;
+  text-align: center;
+  max-width: 74px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Dock без подписей */
+.home__dock .app-icon__label {
+  display: none;
+}
+
+/* ============================================================
+   БЕЙДЖ
+   ============================================================ */
+.app-icon__badge {
+  position: absolute;
+  top: -4px;
+  right: 6px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: #ff3b30;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  border-radius: 10px;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+}
+
+.app-icon__badge.badge-dot {
+  min-width: 12px;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+/* ============================================================
+   УДАЛЕНИЕ / РЕДАКТИРОВАНИЕ
+   ============================================================ */
+.app-icon__remove {
+  position: absolute;
+  top: -6px;
+  left: -2px;
+  width: 22px;
+  height: 22px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(40, 40, 40, 0.9);
+  color: #fff;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 3;
+}
+
+.screen.home.editing .app-icon__remove {
+  display: flex;
+}
+
+.screen.home.editing .app-icon {
+  animation: jiggle 0.3s infinite alternate ease-in-out;
+}
+
+@keyframes jiggle {
+  from { transform: rotate(-1.2deg); }
+  to   { transform: rotate(1.2deg); }
+}
+
+.app-icon.dragging {
+  z-index: 999;
+  opacity: 0.85;
+  transform: scale(1.08);
+}
+
+/* Пустая ячейка в редакторе */
+.cell-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* Панель «Готово» */
+.edit-bar {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  right: 16px;
+  z-index: 50;
+}
+
+.edit-bar button {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #000;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ============================================================
+   ПРЕВЬЮ ПАПКИ
+   ============================================================ */
+.folder-preview {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 3px;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.22) !important;
+  backdrop-filter: blur(10px);
+}
+
+.folder-mini {
+  border-radius: 5px;
+  background-size: cover;
+  background-position: center;
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ============================================================
+   ОКНО ПАПКИ
+   ============================================================ */
+.folder-backdrop {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(18px);
+  z-index: 100;
+}
+
+.folder-sheet {
+  width: min(90%, 460px);
+  padding: 22px;
+  border-radius: 28px;
+  background: rgba(40, 40, 40, 0.55);
+}
+
+.folder-title {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 18px;
+  outline: none;
+}
+
+.folder-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  justify-items: center;
+}
+
+/* ============================================================
+   КОНТЕКСТНОЕ МЕНЮ ИКОНКИ
+   ============================================================ */
+.icon-menu-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 200;
+}
+
+.icon-menu {
+  position: absolute;
+  min-width: 190px;
+  padding: 6px;
+  border-radius: 16px;
+  background: rgba(50, 50, 50, 0.92);
+  backdrop-filter: blur(22px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+}
+
+.icon-menu button {
+  padding: 11px 14px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 15px;
+  text-align: left;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.icon-menu button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.icon-menu button.danger {
+  color: #ff453a;
+}
+
+/* ============================================================
+   РЕЖИМ ВЫБОРА ИКОНКИ
+   ============================================================ */
+.pick-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
   background: transparent;
 }
-.home__dock .app-icon__label { display: none; }
+
+.pick-hint {
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 18px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 13px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.app-icon.pickable .app-icon__img {
+  outline: 2px solid #0a84ff;
+  outline-offset: 3px;
+  animation: pickPulse 1.2s infinite;
+}
+
+@keyframes pickPulse {
+  0%, 100% { outline-color: rgba(10, 132, 255, 0.4); }
+  50%      { outline-color: rgba(10, 132, 255, 1); }
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.app-toast {
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  padding: 10px 18px;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  font-size: 14px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  z-index: 300;
+}
+
+.app-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

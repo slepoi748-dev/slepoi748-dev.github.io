@@ -28,7 +28,7 @@ export function renderHomescreen(root) {
   const dock = el('div', { class: 'home__dock' });
 
   // ============================================================
-  //  ПОСТРОЕНИЕ СЕТКИ
+  //  СЕТКА
   // ============================================================
   function buildGrid() {
     clear(grid);
@@ -39,7 +39,7 @@ export function renderHomescreen(root) {
     grid.style.rowGap = `${c.gapY}px`;
     grid.style.transform = `translate(${c.offsetX}px, ${c.offsetY}px)`;
 
-    const occupied = new Map(); // "col,row" -> icon
+    const occupied = new Map();
     c.icons.forEach((ic) => occupied.set(`${ic.col},${ic.row}`, ic));
 
     for (let row = 1; row <= c.rows; row++) {
@@ -61,11 +61,11 @@ export function renderHomescreen(root) {
     clear(dock);
     const c = store.get('home');
     dock.style.transform = `translateY(${c.dockOffsetY}px)`;
-    c.dock.forEach((icon) => dock.append(buildIcon(icon, c, true)));
+    (c.dock || []).forEach((icon) => dock.append(buildIcon(icon, c, true)));
   }
 
   // ============================================================
-  //  ПУСТАЯ ЯЧЕЙКА (только в редакторе)
+  //  ПУСТАЯ ЯЧЕЙКА (в редакторе)
   // ============================================================
   function buildEmptyCell(col, row) {
     const cell = el('div', { class: 'cell-empty', dataset: { col, row } }, '+');
@@ -97,7 +97,6 @@ export function renderHomescreen(root) {
       },
     });
 
-    // Превью папки — мини-сетка
     if (icon.folder) {
       imgNode.classList.add('folder-preview');
       imgNode.style.backgroundImage = 'none';
@@ -119,20 +118,17 @@ export function renderHomescreen(root) {
 
     if (pickMode) node.classList.add('pickable');
 
-    // Удаление в режиме редактирования
     removeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       removeIcon(icon.id, isDock);
     });
 
-    // Лёгкая анимация нажатия
     node.addEventListener('pointerdown', () => { if (!editing) node.classList.add('active'); });
     const release = () => node.classList.remove('active');
     node.addEventListener('pointerup', release);
     node.addEventListener('pointerleave', release);
     node.addEventListener('pointercancel', release);
 
-    // Клик
     node.addEventListener('click', (e) => {
       if (pickMode) {
         e.stopPropagation();
@@ -146,11 +142,10 @@ export function renderHomescreen(root) {
       handleIconClick(icon);
     });
 
-    // Долгое нажатие на иконку → меню (вне редактора и pickMode)
+    // Долгое нажатие на иконку
     onLongPress(node, () => {
       if (pickMode || editing) return;
       const cfg = store.get('home');
-      // если это иконка-триггер с режимом долгого нажатия — открываем настройки
       if (cfg.openViaIcon && cfg.triggerIconId === icon.id && cfg.openLongPress) {
         openSettings(root, 'home');
         return;
@@ -158,7 +153,6 @@ export function renderHomescreen(root) {
       openIconMenu(icon, node, isDock);
     }, () => store.get('home.longPressMs'));
 
-    // Перетаскивание в режиме редактирования (только на основном экране)
     if (editing && !isDock) enableDrag(node, icon);
 
     return node;
@@ -207,7 +201,7 @@ export function renderHomescreen(root) {
         cellEl.dataset.id !== icon.id &&
         cellEl.dataset.dock === '0'
       ) {
-        mergeIntoFolder(icon.id, cellEl.dataset.id); // → в папку / своп с папкой
+        mergeIntoFolder(icon.id, cellEl.dataset.id);
       } else {
         const { col, row } = cellTargetCoords(cellEl);
         if (col && row) moveIcon(icon.id, col, row);
@@ -298,7 +292,6 @@ export function renderHomescreen(root) {
         }
       });
 
-      // Долгое нажатие внутри папки → вынести на экран
       onLongPress(item, () => {
         ejectFromFolder(folderIcon.id, sub.id, isDock);
         closeFolder();
@@ -322,7 +315,6 @@ export function renderHomescreen(root) {
     screen.append(backdrop);
   }
 
-  // Вынос иконки из папки на свободную ячейку; пустые/одиночные папки распускаются
   function ejectFromFolder(folderId, subId, isDock) {
     const key = isDock ? 'home.dock' : 'home.icons';
     let list = store.get(key).map((x) => ({ ...x }));
@@ -334,19 +326,11 @@ export function renderHomescreen(root) {
 
     folder.folder = folder.folder.filter((s) => s.id !== subId);
 
-    // Куда положить вынесенную иконку (только для основного экрана)
     let place = {};
     if (!isDock) place = findFreeCell();
 
-    const newIcon = {
-      id: uid(),
-      name: sub.name,
-      img: sub.img,
-      badge: sub.badge,
-      ...place,
-    };
+    const newIcon = { id: uid(), name: sub.name, img: sub.img, badge: sub.badge, ...place };
 
-    // Если в папке осталась 1 иконка — распускаем папку
     if (folder.folder.length === 1) {
       const last = folder.folder[0];
       folder.folder = undefined;
@@ -354,12 +338,10 @@ export function renderHomescreen(root) {
       folder.img = last.img;
       folder.badge = last.badge;
     } else if (folder.folder.length === 0) {
-      // пустую папку удаляем
       list = list.filter((x) => x.id !== folderId);
     }
 
     list.push(newIcon);
-
     store.set(key, list);
   }
 
@@ -380,7 +362,6 @@ export function renderHomescreen(root) {
   function openIconMenu(icon, node, isDock) {
     const rect = node.getBoundingClientRect();
     const screenRect = screen.getBoundingClientRect();
-
     const menu = el('div', { class: 'icon-menu' });
 
     const item = (label, handler, danger = false) => {
@@ -421,7 +402,6 @@ export function renderHomescreen(root) {
     backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeMenu(); });
     screen.append(backdrop);
 
-    // Позиционирование рядом с иконкой
     let top = rect.bottom - screenRect.top + 6;
     let left = rect.left - screenRect.left;
     menu.style.visibility = 'hidden';
@@ -489,10 +469,10 @@ export function renderHomescreen(root) {
   }
 
   // ============================================================
-  //  ЖЕСТЫ ЭКРАНА
+  //  ЖЕСТЫ ЭКРАНА  (вешаем на сам screen — надёжно)
   // ============================================================
-  // Долгое нажатие на пустой экран — ТОЛЬКО при включённом тумблере
-  onLongPress(gridWrap, () => {
+  // Долгое нажатие по пустому месту → настройки
+  onLongPress(screen, () => {
     if (pickMode || editing) return;
     if (!store.get('home.openLongPress')) return;
     const c = store.get('home');
@@ -500,53 +480,45 @@ export function renderHomescreen(root) {
     openSettings(root, 'home');
   }, () => store.get('home.longPressMs'));
 
-  // N тапов по пустому месту экрана
-  gridWrap.addEventListener('click', (e) => {
+  // N тапов по пустому месту
+  screen.addEventListener('click', (e) => {
     if (pickMode || editing) return;
     if (e.target.closest('.app-icon')) return;
+    if (e.target.closest('.home__dock')) return;
     const c = store.get('home');
     if (c.openMultiTap) registerTap('screen', () => openSettings(root, 'home'));
   });
 
   // ============================================================
-  //  СВАЙП СВЕРХУ ВНИЗ → ВОЗВРАТ НА ЭКРАН БЛОКИРОВКИ
+  //  СВАЙП СВЕРХУ ВНИЗ → ЭКРАН БЛОКИРОВКИ
   // ============================================================
-  let swStartX = 0, swStartY = 0, swStartT = 0, swTracking = false;
-  const SW_MIN_DIST = 90;   // минимальный путь вниз, px
-  const SW_MAX_OFF = 80;    // макс. горизонтальное отклонение, px
-  const SW_START_ZONE = 130; // жест должен начаться в верхних N px
-  const SW_MAX_TIME = 900;  // макс. длительность, мс
+  let swX = 0, swY = 0, swT = 0, swTrack = false;
+  const SW_MIN = 90, SW_OFF = 80, SW_ZONE = 130, SW_TIME = 900;
 
   function swStart(e) {
-    if (pickMode || editing) { swTracking = false; return; }
+    if (pickMode || editing) { swTrack = false; return; }
     const t = e.touches ? e.touches[0] : e;
-    if (t.clientY > SW_START_ZONE) { swTracking = false; return; }
-    swStartX = t.clientX;
-    swStartY = t.clientY;
-    swStartT = Date.now();
-    swTracking = true;
+    if (t.clientY > SW_ZONE) { swTrack = false; return; }
+    swX = t.clientX; swY = t.clientY; swT = Date.now(); swTrack = true;
   }
-
   function swEnd(e) {
-    if (!swTracking) return;
-    swTracking = false;
+    if (!swTrack) return;
+    swTrack = false;
     if (pickMode || editing) return;
     const t = (e.changedTouches ? e.changedTouches[0] : e) || {};
-    const dx = (t.clientX ?? swStartX) - swStartX;
-    const dy = (t.clientY ?? swStartY) - swStartY;
-    const dt = Date.now() - swStartT;
-    if (dt <= SW_MAX_TIME && dy >= SW_MIN_DIST && Math.abs(dx) <= SW_MAX_OFF) {
+    const dx = (t.clientX ?? swX) - swX;
+    const dy = (t.clientY ?? swY) - swY;
+    if (Date.now() - swT <= SW_TIME && dy >= SW_MIN && Math.abs(dx) <= SW_OFF) {
       bus.emit(EVENTS.LOCK);
     }
   }
-
   screen.addEventListener('touchstart', swStart, { passive: true });
   screen.addEventListener('touchend', swEnd, { passive: true });
   screen.addEventListener('mousedown', swStart);
   screen.addEventListener('mouseup', swEnd);
 
-    // ============================================================
-  //  РЕЖИМ ВЫБОРА ИКОНКИ (из настроек)
+  // ============================================================
+  //  РЕЖИМ ВЫБОРА ИКОНКИ
   // ============================================================
   function enterPickMode(onPick) {
     pickMode = { onPick };
@@ -569,7 +541,7 @@ export function renderHomescreen(root) {
     buildDock();
   }
 
-  // ============================================================
+    // ============================================================
   //  БЕЙДЖИ
   // ============================================================
   function applyBadges() {
@@ -636,7 +608,6 @@ function applyWallpaper(screen) {
   const wp = store.get('home.wallpaperThis') || store.get('home.wallpaperGlobal');
   const url = show && wp ? `url("${imgUrl(wp)}")` : 'none';
 
-  // экран прозрачный — фон рисует глобальный слой #app-bg
   screen.style.backgroundImage = 'none';
 
   const bg = document.getElementById('app-bg');
