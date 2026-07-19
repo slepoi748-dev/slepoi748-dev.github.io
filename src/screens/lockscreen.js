@@ -21,7 +21,10 @@ export function renderLockscreen(root) {
   let attemptCount = 0;
   let sosArmed = false;
 
-  // глобальный слой фона из index.html (стабильно покрывает весь экран)
+  // текущая длина ПИНа (базовая из настроек; длинный тап SOS -> 6)
+  let pinLength = Number(store.get('lock.digits')) || 4;
+
+  // глобальный слой фона из index.html
   const appBg = document.getElementById('app-bg');
 
   // ---- DOM ----
@@ -31,6 +34,7 @@ export function renderLockscreen(root) {
   const topLabel = el('div', { class: 'top-label' });
   const dotsContainer = el('div', { class: 'dots-container' });
 
+  // --- Клавиатура (только цифры) ---
   const keyboard = el('div', { class: 'keyboard' });
   ['1','2','3','4','5','6','7','8','9'].forEach((d) => {
     const key = el('div', { class: 'key', dataset: { digit: d } }, [
@@ -41,17 +45,27 @@ export function renderLockscreen(root) {
     keyboard.append(key);
   });
 
-  const sosKey = el('button', { class: 'btn-sos' }, 'SOS');
-  const zeroKey = el('div', { class: 'key-zero', dataset: { digit: '0' } }, [
+  // Ноль по центру нижнего ряда клавиатуры
+  const zeroKey = el('div', { class: 'key key-zero', dataset: { digit: '0' } }, [
     el('span', { class: 'key-number' }, '0'),
+    el('span', { class: 'key-letters', html: '\u00A0' }),
   ]);
   zeroKey.addEventListener('click', () => pressKey('0', zeroKey));
+
+  // Пустые ячейки, чтобы 0 встал строго под "8"
+  const spacerL = el('div', { class: 'key key-spacer' });
+  const spacerR = el('div', { class: 'key key-spacer' });
+  keyboard.append(spacerL, zeroKey, spacerR);
+
+  const passcodeSection = el('div', { class: 'passcode-section' }, [keyboard]);
+
+  // --- Нижняя панель: SOS / Отменить (независимы) ---
+  const sosKey = el('button', { class: 'btn-sos' }, 'SOS');
   const cancelKey = el('button', { class: 'btn-cancel' }, 'Отменить');
+  const bottomBar = el('div', { class: 'lock-bottom' }, [sosKey, cancelKey]);
 
-  const bottomRow = el('div', { class: 'bottom-row' }, [sosKey, zeroKey, cancelKey]);
-  const passcodeSection = el('div', { class: 'passcode-section' }, [keyboard, bottomRow]);
-
-  screen.append(topLabel, dotsContainer, passcodeSection);
+  // порядок в потоке: подсказка, точки, клавиатура (центр), нижняя панель
+  screen.append(topLabel, dotsContainer, passcodeSection, bottomBar);
   root.append(wallpaper, screen);
 
   // ---- применить визуальные настройки ----
@@ -75,7 +89,7 @@ export function renderLockscreen(root) {
   }
 
   function applyKeySize() {
-    const v = Number(store.get('lock.keySize')) || 96;
+    const v = Number(store.get('lock.keySize')) || 75;
     document.documentElement.style.setProperty('--key-size', v + 'px');
   }
 
@@ -84,7 +98,6 @@ export function renderLockscreen(root) {
     document.documentElement.style.setProperty('--key-font-size', v + 'px');
   }
 
-  // padOffsetX/Y из конфига = сдвиг всего блока цифр
   function applyPadOffset() {
     const x = Number(store.get('lock.padOffsetX')) || 0;
     const y = Number(store.get('lock.padOffsetY')) || 0;
@@ -92,8 +105,6 @@ export function renderLockscreen(root) {
     document.documentElement.style.setProperty('--pin-block-y', y + 'px');
   }
 
-  // Фон рисуем на глобальном #app-bg — он существует с самого старта,
-  // iOS сразу считает его размеры → нет «рамки» сверху/снизу на iPhone.
   function applyWallpaper() {
     const show = store.get('lock.showWallpaper');
     const bg = store.get('lock.wallpaper');
@@ -108,16 +119,14 @@ export function renderLockscreen(root) {
         appBg.style.backgroundColor = '#000';
       }
     }
-
-    // .wallpaper держим прозрачным — фон даёт #app-bg
     wallpaper.style.backgroundImage = 'none';
     wallpaper.style.background = 'transparent';
   }
 
+  // Точки строятся по актуальной pinLength
   function buildDots() {
     clear(dotsContainer);
-    const len = Number(store.get('lock.digits')) || 4;
-    for (let i = 0; i < len; i++) dotsContainer.append(el('div', { class: 'dot' }));
+    for (let i = 0; i < pinLength; i++) dotsContainer.append(el('div', { class: 'dot' }));
   }
 
   function updateDots() {
@@ -132,11 +141,10 @@ export function renderLockscreen(root) {
       node.classList.add('pressed');
       setTimeout(() => node.classList.remove('pressed'), 220);
     }
-    const len = Number(store.get('lock.digits')) || 4;
-    if (currentInput.length >= len) return;
+    if (currentInput.length >= pinLength) return;
     currentInput += num;
     updateDots();
-    if (currentInput.length === len) setTimeout(checkCode, 300);
+    if (currentInput.length === pinLength) setTimeout(checkCode, 300);
   }
 
   function deleteKey() {
@@ -194,25 +202,53 @@ export function renderLockscreen(root) {
     currentInput = '';
     attemptCount = 0;
     sosArmed = false;
+    // длину ПИНа возвращаем к базовой из настроек
+    pinLength = Number(store.get('lock.digits')) || 4;
+    buildDots();
     updateDots();
   }
 
-  // ---- SOS ----
+  // ========================================================
+  //  SOS
+  // ========================================================
+  // Короткий тап SOS — "вооружить" разблокировку (режим afterSos)
   sosKey.addEventListener('click', () => {
     if ((store.get('lock.unlockMode') || 'afterSos') === 'afterSos') {
       sosArmed = true;
-      currentInput = '';
-      updateDots();
     }
+    currentInput = '';
+    updateDots();
+
+    // визуальный отклик
+    sosKey.classList.add('active');
+    setTimeout(() => sosKey.classList.remove('active'), 200);
   });
 
-  // ---- Отменить (тап) ----
+  // Долгий тап SOS — переключить ПИН на 6 знаков
+  onLongPress(
+    sosKey,
+    () => {
+      pinLength = pinLength === 6 ? 4 : 6;
+      currentInput = '';
+      buildDots();
+      updateDots();
+      // отклик
+      sosKey.classList.add('active');
+      setTimeout(() => sosKey.classList.remove('active'), 250);
+    },
+    () => Number(store.get('lock.longPressMs')) || 1000
+  );
+
+  // ========================================================
+  //  Отменить
+  // ========================================================
+  // Короткий тап — удалить цифру / сбросить ввод
   cancelKey.addEventListener('click', () => {
     if (currentInput.length) deleteKey();
-    else resetScreen();
+    else { currentInput = ''; updateDots(); }
   });
 
-  // ---- Долгое нажатие "Отменить" -> настройки экрана блокировки ----
+  // Долгий тап — открыть настройки экрана блокировки
   onLongPress(
     cancelKey,
     () => {
@@ -222,9 +258,14 @@ export function renderLockscreen(root) {
     () => Number(store.get('lock.longPressMs')) || 1000
   );
 
-  // ---- реакция на изменения конфига из настроек ----
+  // ========================================================
+  //  Реакция на изменения конфига
+  // ========================================================
   const off = bus.on(EVENTS.CONFIG_CHANGE, ({ path } = {}) => {
-    if (path === '*' || path === 'lock.digits') { buildDots(); updateDots(); resetScreen(); }
+    if (path === '*' || path === 'lock.digits') {
+      pinLength = Number(store.get('lock.digits')) || 4;
+      buildDots(); updateDots(); resetScreen();
+    }
     if (path === '*' || path === 'lock.hintTitle') applyHint();
     if (path === '*' || path === 'lock.keySize') applyKeySize();
     if (path === '*' || path === 'lock.keyFontSize') applyFontSize();

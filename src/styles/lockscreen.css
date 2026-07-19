@@ -1,8 +1,8 @@
 /* ============================================================
-   ЭКРАН БЛОКИРОВКИ  (iOS keypad)
-   Классы соответствуют lockscreen.js
-   Переменные задаются из JS:
-     --key-size, --key-font-size, --pin-block-x, --pin-block-y
+   ЭКРАН БЛОКИРОВКИ  (iOS keypad, 1:1)
+   Клавиатура по центру, SOS/Отмена — отдельно внизу.
+   Переменные из JS: --key-size, --key-font-size,
+                     --pin-block-x, --pin-block-y
    ============================================================ */
 
 :root {
@@ -41,7 +41,7 @@
 
 /* ---------- Подсказка сверху ---------- */
 .top-label {
-  margin-top: 22%;
+  margin-top: 20%;
   font-size: 19px;
   font-weight: 400;
   line-height: 1.35;
@@ -70,7 +70,6 @@
   background: #fff;
 }
 
-/* Тряска при неверном коде */
 .dots-container.wrong-animation {
   animation: shake 0.5s ease;
 }
@@ -83,18 +82,16 @@
 }
 
 /* ============================================================
-   БЛОК КЛАВИАТУРЫ
-   --pin-block-x/y = сдвиг всего блока из настроек
+   КЛАВИАТУРА  — центр экрана
    ============================================================ */
 .passcode-section {
-  margin-top: auto;
+  flex: 1 1 auto;               /* занимает всё свободное место */
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  align-items: center;          /* центрируем клавиатуру по вертикали */
+  justify-content: center;
   transform: translate(var(--pin-block-x), var(--pin-block-y));
 }
 
-/* Сетка 3×3 цифр */
 .keyboard {
   display: grid;
   grid-template-columns: repeat(3, var(--key-size));
@@ -143,51 +140,35 @@
   text-transform: uppercase;
   text-align: center;
   margin-top: 3px;
+  min-height: 12px;
+}
+
+/* Пустые ячейки нижнего ряда (для выравнивания 0 под 8) */
+.key-spacer {
+  background: transparent !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  pointer-events: none;
+  cursor: default;
+}
+
+.key-zero {
+  /* стоит по центру автоматически (spacer-0-spacer) */
 }
 
 /* ============================================================
-   НИЖНИЙ РЯД: SOS | 0 | Отменить
+   НИЖНЯЯ ПАНЕЛЬ  — SOS / Отменить (независимы от клавиатуры)
    ============================================================ */
-.bottom-row {
-  display: grid;
-  grid-template-columns: repeat(3, var(--key-size));
-  column-gap: 25px;
-  align-items: center;
-  justify-content: center;
-  margin-top: 14px;
-  margin-bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
-}
-
-/* Кнопка 0 — по центру (2-я колонка) */
-.key-zero {
-  grid-column: 2;
-  width: var(--key-size);
-  height: var(--key-size);
-  border-radius: 50%;
+.lock-bottom {
+  flex: 0 0 auto;
+  width: 100%;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  background: rgba(255, 255, 255, 0.14);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
-  transition: background 0.12s ease, transform 0.08s ease;
-  -webkit-tap-highlight-color: transparent;
+  padding: 0 34px;
+  margin-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
 }
 
-.key-zero.pressed,
-.key-zero:active {
-  background: rgba(255, 255, 255, 0.45);
-  transform: scale(0.96);
-}
-
-.key-zero .key-number {
-  font-size: var(--key-font-size);
-  font-weight: 400;
-  line-height: 1;
-}
-
-/* SOS (левая колонка) / Отменить (правая колонка) */
 .btn-sos,
 .btn-cancel {
   background: transparent;
@@ -196,22 +177,14 @@
   font-size: 18px;
   font-weight: 400;
   cursor: pointer;
-  padding: 8px 4px;
+  padding: 10px 6px;
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
 }
 
-.btn-sos {
-  grid-column: 1;
-  justify-self: start;
-}
-
-.btn-cancel {
-  grid-column: 3;
-  justify-self: end;
-}
-
 .btn-sos:active,
-.btn-cancel:active {
+.btn-cancel:active,
+.btn-sos.active,
+.btn-cancel.active {
   opacity: 0.5;
 }
